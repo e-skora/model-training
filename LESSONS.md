@@ -19,3 +19,11 @@ Reinforcement learning (RL) only works when a program can score the model's answ
 ## 2026-10-21: Mistake: started a run before its file existed
 Claude Code started `modal run scripts/hello_gpu.py` while the file write was still blocked, so the run failed in 1 second before reaching Modal (no cost).
 **Lesson:** confirm the file is on disk before starting a run.
+
+## 2026-10-21: Lesson: where compatible_detail ends and merely_related begins
+Rereading batch 1 of the M1 test set caught a mislabel. "Works from home on Fridays" and "works from the office on Thursdays" had been marked `compatible_detail`, but they are two separate facts, so they are `merely_related`.
+**Lesson:** `compatible_detail` means the second memory adds detail to the same fact ("likes tea", then "drinks green tea in the morning"). `merely_related` means a different fact on the same topic ("hikes", then "owns hiking boots"). The rereads between batches are worth doing.
+
+## 2026-10-21: Mistake: a shuffle that could not finish
+The first shuffle of the test set kept reshuffling all 200 pairs until no label came more than 3 times in a row. Pure chance almost never gives that, so it ran until Claude Code stopped it (nothing was written, no harm done).
+**Lesson:** when the order has to follow a rule, build it one step at a time with the rule built in, rather than reshuffling and hoping. Also: macOS has no `timeout` command.

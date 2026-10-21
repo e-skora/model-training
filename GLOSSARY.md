@@ -38,3 +38,9 @@ Plain meanings. Add a term the first time it shows up.
 - **Modal secret:** a password or token stored safely inside Modal. Code running on Modal can read it, but it never sits in our files or in git.
 - **Timeout:** the most time a Modal function may run. When time is up, Modal stops it, so a stuck job cannot run up a big bill.
 - **Hugging Face token:** a long password that lets programs act as your Hugging Face account, for example to upload a model.
+- **Label:** the right answer attached to an example. Here it is `contradiction` or `non_contradiction`, plus a type for non-contradictions.
+- **Spot-check:** a person reads a small random handful of examples by hand, to catch mistakes in the whole set without reading all of it.
+- **Random seed:** a number that fixes how a "random" pick or shuffle comes out. The same seed always gives the same result, so anyone can repeat it.
+- **Near-miss:** a pair that looks like a contradiction on the surface (same words, a small difference) but is not one, for example an update or two details that fit together.
+- **Checker script:** a small program that reads a data file and stops with a clear message if anything breaks the rules, before the data is used.
+- **SHA-256 fingerprint:** a long code worked out from a file's exact contents. If even one letter in the file changes, the code changes, so it proves a frozen file was not edited.
