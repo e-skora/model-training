@@ -1,7 +1,9 @@
 """Check a memory-pair dataset file (JSONL) before it is used.
 
-Prints how many pairs there are per label and type, and how many different
-people appear. Stops with a clear message at the first problem it finds.
+Prints how many pairs there are per label and type, how many different
+people appear, and how many pairs per label and type contain a change word
+(a word like "now" or "moved" that often marks an update). Stops with a clear
+message at the first problem it finds.
 
 Run from the repo folder:
     uv run python scripts/check_dataset.py data/m1/test.jsonl
@@ -19,6 +21,10 @@ LABELS = ("contradiction", "non_contradiction")
 TYPES = ("update", "compatible_detail", "merely_related")
 # Names that must never appear (they belong to Aeverum's own data).
 BANNED = (re.compile(r"\bmara\b", re.IGNORECASE), re.compile(r"lindqvist", re.IGNORECASE))
+# Words that often mark a change. If only updates had them, a model could
+# score well by spotting the word instead of reading the memories.
+CHANGE_WORD_LIST = ("now", "moved", "switched", "since", "stopped", "later", "replaced")
+CHANGE_WORDS = re.compile(r"\b(" + "|".join(CHANGE_WORD_LIST) + r")\b", re.IGNORECASE)
 
 
 def fail(line_no, message):
@@ -57,12 +63,16 @@ def check_pair(pair, line_no):
 
     a_date = parse_date(pair["a"]["written_at"], line_no, "a")
     b_date = parse_date(pair["b"]["written_at"], line_no, "b")
+    if b_date < a_date:
+        fail(line_no, "memory b is dated earlier than memory a; a must never be the later one")
     if kind == "update" and b_date <= a_date:
         fail(line_no, "an update needs memory b written later than memory a (reading rule 2)")
 
+    # Whole-word match, so "Ana" inside "Anaïs" or "Banana" does not count.
     first_name = pair["person"].split()[0]
+    name_pattern = re.compile(rf"(?<!\w){re.escape(first_name)}(?!\w)")
     for which in ("a", "b"):
-        if first_name not in pair[which]["text"]:
+        if not name_pattern.search(pair[which]["text"]):
             fail(line_no, f"memory {which} does not name {first_name}")
 
     for text in (pair["person"], pair["a"]["text"], pair["b"]["text"], pair["reason"]):
@@ -82,6 +92,7 @@ def main():
 
     seen_ids, seen_texts = {}, {}
     labels, types, people = Counter(), Counter(), set()
+    changed = Counter()
     with open(path, encoding="utf-8") as f:
         for line_no, line in enumerate(f, start=1):
             if not line.strip():
@@ -106,6 +117,8 @@ def main():
             if pair["type"]:
                 types[pair["type"]] += 1
             people.add(pair["person"])
+            if any(CHANGE_WORDS.search(pair[which]["text"]) for which in ("a", "b")):
+                changed[pair["type"] or pair["label"]] += 1
 
     if not seen_ids:
         fail(None, f"{path} has no pairs")
@@ -116,6 +129,10 @@ def main():
     for kind in TYPES:
         print(f"    {kind}: {types[kind]}")
     print(f"Different people: {len(people)}")
+    print("Pairs with a change word (" + ", ".join(CHANGE_WORD_LIST) + "):")
+    print(f"  contradiction: {changed['contradiction']} of {labels['contradiction']}")
+    for kind in TYPES:
+        print(f"    {kind}: {changed[kind]} of {types[kind]}")
     print("PASS")
 
 
