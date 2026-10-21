@@ -75,6 +75,10 @@ def main():
     if len(sys.argv) != 2:
         sys.exit("Usage: python scripts/check_dataset.py <file.jsonl>")
     path = sys.argv[1]
+    try:
+        open(path, encoding="utf-8").close()
+    except OSError as e:
+        fail(None, f"cannot open {path} ({e.strerror})")
 
     seen_ids, seen_texts = {}, {}
     labels, types, people = Counter(), Counter(), set()
