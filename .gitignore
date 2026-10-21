@@ -1,0 +1,18 @@
+# secrets
+.env
+*.env
+.env.*
+# python
+.venv/
+__pycache__/
+*.pyc
+# model files and run outputs (these go to Hugging Face, not git)
+outputs/
+checkpoints/
+*.gguf
+*.safetensors
+*.bin
+*.pt
+# misc
+.DS_Store
+.handoffs/
