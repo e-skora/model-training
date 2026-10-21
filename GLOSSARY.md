@@ -32,3 +32,9 @@ Plain meanings. Add a term the first time it shows up.
 - **GRPO:** a popular RL method. The model writes several answers to the same question, and it learns from the ones that scored better than the group's average.
 - **Ollama / MLX:** two programs that run AI models on your own Mac.
 - **Branch:** a separate line of work in git, so changes can be tried without breaking `main`.
+- **uv:** a tool that sets up a Python project: it picks the Python version, installs the packages the project needs, and writes them down so every computer gets the same ones.
+- **pyproject.toml / uv.lock:** the two files uv writes. `pyproject.toml` lists what the project needs; `uv.lock` records the exact versions installed.
+- **Container image:** a ready-made package of an operating system, Python and installed software. Modal starts a fresh copy of it on the GPU machine for each run, so the code always finds the same setup.
+- **Modal secret:** a password or token stored safely inside Modal. Code running on Modal can read it, but it never sits in our files or in git.
+- **Timeout:** the most time a Modal function may run. When time is up, Modal stops it, so a stuck job cannot run up a big bill.
+- **Hugging Face token:** a long password that lets programs act as your Hugging Face account, for example to upload a model.
