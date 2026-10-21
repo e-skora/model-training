@@ -27,3 +27,6 @@ Rereading batch 1 of the M1 test set caught a mislabel. "Works from home on Frid
 ## 2026-10-21: Mistake: a shuffle that could not finish
 The first shuffle of the test set kept reshuffling all 200 pairs until no label came more than 3 times in a row. Pure chance almost never gives that, so it ran until Claude Code stopped it (nothing was written, no harm done).
 **Lesson:** when the order has to follow a rule, build it one step at a time with the rule built in, rather than reshuffling and hoping. Also: macOS has no `timeout` command.
+
+## 2026-10-21: Mistake: the first test set followed obvious templates and keyword patterns; an independent check caught it before freezing.
+**Lesson:** ask for hard cases by name, check for shortcut patterns, and have a second agent review before freezing.

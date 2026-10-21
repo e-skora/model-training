@@ -44,3 +44,7 @@ Plain meanings. Add a term the first time it shows up.
 - **Near-miss:** a pair that looks like a contradiction on the surface (same words, a small difference) but is not one, for example an update or two details that fit together.
 - **Checker script:** a small program that reads a data file and stops with a clear message if anything breaks the rules, before the data is used.
 - **SHA-256 fingerprint:** a long code worked out from a file's exact contents. If even one letter in the file changes, the code changes, so it proves a frozen file was not edited.
+- **Shortcut:** a surface pattern that gives the right answer on a test set without real understanding, for example "the word *now* means update". A good test set has none, so a model can only score well by reading properly.
+- **Change word:** a word that often signals a change, such as "now", "moved", "switched", "since", "stopped", "later" or "replaced". In the M1 test set these words appear in every label, so they cannot be used as a shortcut.
+- **Hard case:** a pair built to fool a shortcut, for example two "now" memories that still contradict, or an update that never uses a change word.
+- **Template:** a sentence pattern reused with only a word swapped, such as "X's only bike is red" and "X's only bike is blue". Too many of them make a test set easy to game.
