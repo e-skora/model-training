@@ -57,3 +57,6 @@ No terminal Claude Code for now. Revisit when long jobs need to run unattended.
 
 ### D-018 (2026-10-21, Default): Proof of work
 Each published model gets a Hugging Face model card, its dataset on Hugging Face, the code on GitHub, and one LinkedIn post that Claude drafts and Elias edits.
+
+### D-019 (2026-10-21, Elias): No Modal spending cap
+"skipping the modal part, forget about it dont worry about cap". No workspace budget is set in Modal. D-014 ($0 beyond the free credits) stays the goal; the per-run stop in each prompt (ask before anything over $1) stays.
