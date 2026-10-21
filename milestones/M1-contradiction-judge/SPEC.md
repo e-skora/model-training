@@ -38,7 +38,7 @@ Aeverum's night pass compares memories two at a time and flags contradictions fo
 | Step | What | Who |
 |---|---|---|
 | 1 | Create the repo and control files | Claude (Cowork). Done 2026-10-21 |
-| 2 | Connect `~/code/model-training` to the Cowork project; paste the project instructions into the project settings | Elias |
+| 2 | Connect `~/code/model-training` to the Cowork project; paste the project instructions into the project settings; set Modal budget to $30 at modal.com/settings/usage | Elias |
 | 3 | Install tools and prove a GPU job runs on Modal | Claude Code (prompt M1-03) |
 | 4 | Write the test set; Elias spot-checks 20 pairs; freeze it | Claude Code, then Elias |
 | 5 | Score 2 or 3 base models on the test set (the baseline); pick one | Claude Code; Codex reviews the scoring code |

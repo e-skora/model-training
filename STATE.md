@@ -10,7 +10,7 @@ Read this first in every session.
 - 2026-10-21: Step 1. Repo created with control files (Claude, from Cowork).
 
 ## Next single action
-Elias: do Step 2 in the M1 spec (connect this folder to the Cowork project, paste the project instructions). Then paste prompt `prompts/M1-03-tool-setup.md` into Claude Code.
+Elias: do Step 2 in the M1 spec (connect this folder to the Cowork project, paste the project instructions, set the Modal budget to $30 on the Usage and Billing page, modal.com/settings/usage). Then paste prompt `prompts/M1-03-tool-setup.md` into Claude Code.
 
 ## Frozen files
 (none yet; the M1 test set fingerprint goes here)
