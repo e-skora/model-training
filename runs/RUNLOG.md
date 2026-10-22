@@ -9,3 +9,5 @@ One line per GPU run.
 | 2026-10-22 | M1-05 | hello GPU rerun on new pins, Unsloth 2026.10.7 (scripts/hello_gpu.py) | L4 | 1.3 (whole run, incl. image build) | about $0.02 |
 | 2026-10-22 | M1-05 | Smoke test, 8 pairs x 3 models, new pins; all 3 loaded | L4 x3 | 4.7 (GPU minutes, all 3) | about $0.06 |
 | 2026-10-22 | M1-05 | Baseline, 200 pairs x 3 models (scripts/run_baseline.py) | L4 x3 | 9.0 (3.0 + 3.4 + 2.6) | about $0.12 |
+| 2026-10-22 | M1-06 | Smoke test, 8 pairs x 3 test versions x 2 models (scripts/run_baseline.py --limit 8). A first try stopped on the Mac before reaching Modal (no GPU) | L4 x2 | 3.3 (1.3 + 2.0) | about $0.04 |
+| 2026-10-22 | M1-06 | Baseline v2, new prompt, 200 pairs x 3 test versions x 2 models (scripts/run_baseline.py) | L4 x2 | 14.5 (6.6 + 7.9) | about $0.19 |
