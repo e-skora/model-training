@@ -1,0 +1,200 @@
+{"id": "t-001", "raw": "{\"label\": \"contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Jana's positions in hockey are mutually exclusive.\"}"}
+{"id": "t-002", "raw": "{\"label\": \"contradiction\", \"type\": \"update\", \"reason\": \"The arrival times at the concert differ.\"}"}
+{"id": "t-003", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories can be true together.\"}"}
+{"id": "t-004", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"The memories describe different locations of Ji-woo's flat at different times.\"}"}
+{"id": "t-005", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Prakash's mode of transportation has changed from a scooter to a Vespa and then to metro.\"}"}
+{"id": "t-006", "raw": "{\"label\": \"contradiction\", \"type\": \"null\", \"reason\": \"The two memories cannot both be true as they state different days for the pottery class.\"}"}
+{"id": "t-007", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Memory B updates the location of Thabo's residence since 2022.\"}"}
+{"id": "t-008", "raw": "{\"label\": \"contradiction\", \"type\": \"null\", \"reason\": \"Wanjiru's ability to swim is mutually exclusive.\"}"}
+{"id": "t-009", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"The two memories cannot both be true as they state different end times for the same Saturday shift.\"}"}
+{"id": "t-010", "raw": "{\"label\": \"contradiction\", \"type\": \"update\", \"reason\": \"The cat's behavior towards the vacuum cleaner has changed.\"}"}
+{"id": "t-011", "raw": "{\"label\": \"contradiction\", \"type\": \"update\", \"reason\": \"Renata's podcast preferences have changed over time.\"}"}
+{"id": "t-012", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"The memories describe a change in Cyrus's waking time.\"}"}
+{"id": "t-013", "raw": "{\"label\": \"contradiction\", \"type\": \"update\", \"reason\": \"Memories cannot both be true on the same date.\"}"}
+{"id": "t-014", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Both memories can be true as Yuto could have an office and a gym near Ebisu station.\"}"}
+{"id": "t-015", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories can be true together as potatoes and beans are vegetables.\"}"}
+{"id": "t-016", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Both memories can be true together as they describe different preferences for different times of the day.\"}"}
+{"id": "t-017", "raw": "{\"label\": \"contradiction\", \"type\": \"update\", \"reason\": \"Ilse's residence has changed.\"}"}
+{"id": "t-018", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories can be true together.\"}"}
+{"id": "t-019", "raw": "{\"label\": \"contradiction\", \"type\": \"null\", \"reason\": \"The two memories cannot both be true about Grace's birthplace.\"}"}
+{"id": "t-020", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Memory B updates the information about Oscar's pet ownership.\"}"}
+{"id": "t-021", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Both memories can be true as Ivan plays bass and lead guitar simultaneously in the band.\"}"}
+{"id": "t-022", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Memory B updates the location of Baraka's residence.\"}"}
+{"id": "t-023", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"The change in days is an update to the original fact.\"}"}
+{"id": "t-024", "raw": "{\"label\": \"contradiction\", \"type\": \"null\", \"reason\": \"The two memories cannot both be true about the color of the key cover.\"}"}
+{"id": "t-025", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Aiko has different modes of transportation to work.\"}"}
+{"id": "t-026", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Memory B updates the state of Eleni's hair from long to short.\"}"}
+{"id": "t-027", "raw": "{\"label\": \"contradiction\", \"type\": \"null\", \"reason\": \"The goldfish names cannot both be Captain and Admiral.\"}"}
+{"id": "t-028", "raw": "{\"label\": \"contradiction\", \"type\": \"update\", \"reason\": \"The second memory updates the first by providing additional information about Zofia's car usage.\"}"}
+{"id": "t-029", "raw": "{\"label\": \"contradiction\", \"type\": \"update\", \"reason\": \"Obinna's football club preference changed over time.\"}"}
+{"id": "t-030", "raw": "{\"label\": \"contradiction\", \"type\": \"update\", \"reason\": \"The later memory updates Priya's floor number.\"}"}
+{"id": "t-031", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories can be true together as vegetarianism typically includes not eating meat, fish, eggs, or dairy products.\"}"}
+{"id": "t-032", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Asha's musical activities are unrelated and do not conflict.\"}"}
+{"id": "t-033", "raw": "{\"label\": \"contradiction\", \"type\": \"null\", \"reason\": \"The memories cannot both be true at the same time.\"}"}
+{"id": "t-034", "raw": "{\"label\": \"contradiction\", \"type\": \"null\", \"reason\": \"Both memories cannot be true at the same time.\"}"}
+{"id": "t-035", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Both memories can be true together as they describe different aspects of Wen's fish collection.\"}"}
+{"id": "t-036", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Yuki cannot work from home on both Friday and Monday.\"}"}
+{"id": "t-037", "raw": "{\"label\": \"contradiction\", \"type\": \"null\", \"reason\": \"Both memories cannot be true at the same time.\"}"}
+{"id": "t-038", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Both memories can be true simultaneously.\"}"}
+{"id": "t-039", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Both memories can be true together without contradiction.\"}"}
+{"id": "t-040", "raw": "{\"label\": \"contradiction\", \"type\": \"null\", \"reason\": \"Malik's car cannot be both a blue hatchback and a blue Golf at the same time.\"}"}
+{"id": "t-041", "raw": "{\"label\": \"contradiction\", \"type\": \"update\", \"reason\": \"Giorgos' storage location for his kayak has changed.\"}"}
+{"id": "t-042", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"The two memories are about different aspects of Javier's life.\"}"}
+{"id": "t-043", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Both memories describe Viktor's train schedule on the same day.\"}"}
+{"id": "t-044", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories can be true together.\"}"}
+{"id": "t-045", "raw": "{\"label\": \"contradiction\", \"type\": \"null\", \"reason\": \"The dog is described as having different colors in each memory.\"}"}
+{"id": "t-046", "raw": "{\"label\": \"contradiction\", \"type\": \"null\", \"reason\": \"The two memories cannot both be true about Hana's birthplace.\"}"}
+{"id": "t-047", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"The number of pots has changed over time.\"}"}
+{"id": "t-048", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories can be true together as they describe different aspects of Joaquín's life.\"}"}
+{"id": "t-049", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories can be true together as Wangari could have switched to growing her own vegetables and still grow kale and spinach in raised beds.\"}"}
+{"id": "t-050", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Different habits on the same day.\"}"}
+{"id": "t-051", "raw": "{\"label\": \"contradiction\", \"type\": \"null\", \"reason\": \"Bongani's catch cannot be both nothing and two kob on the same trip.\"}"}
+{"id": "t-052", "raw": "{\"label\": \"contradiction\", \"type\": \"null\", \"reason\": \"Hiroshi's activities are mutually exclusive on the same date.\"}"}
+{"id": "t-053", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Memory B updates the status of Rashid's pets after a life event.\"}"}
+{"id": "t-054", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Memory B updates the time of Ximena's visit to Mexico City.\"}"}
+{"id": "t-055", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Memory B updates the status of Italian lessons.\"}"}
+{"id": "t-056", "raw": "{\"label\": \"contradiction\", \"type\": \"null\", \"reason\": \"The two memories cannot both be true as they state different colors for Elif's front door at the same time.\"}"}
+{"id": "t-057", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories can be true together.\"}"}
+{"id": "t-058", "raw": "{\"label\": \"contradiction\", \"type\": \"null\", \"reason\": \"Omar's favourite football club cannot be two different clubs at the same time.\"}"}
+{"id": "t-059", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"The second memory updates the age at which Roza started violin lessons.\"}"}
+{"id": "t-060", "raw": "{\"label\": \"contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories cannot be true at the same time.\"}"}
+{"id": "t-061", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"The later memory updates the fact about Olumide's coaching team.\"}"}
+{"id": "t-062", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories describe Wiremu's fishing activities on Sunday mornings.\"}"}
+{"id": "t-063", "raw": "{\"label\": \"contradiction\", \"type\": \"update\", \"reason\": \"Liam's work schedule changed from Monday to Wednesday to Thursday and Friday.\"}"}
+{"id": "t-064", "raw": "{\"label\": \"contradiction\", \"type\": \"null\", \"reason\": \"The two memories cannot both be true as they state opposite facts about the age relationship between Chiara and her sister Giulia.\"}"}
+{"id": "t-065", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Memory B updates the location of Tango's sleeping spot.\"}"}
+{"id": "t-066", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"The later memory updates the job position of Nikos.\"}"}
+{"id": "t-067", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Both memories can be true together as they mention different establishments on the same street.\"}"}
+{"id": "t-068", "raw": "{\"label\": \"contradiction\", \"type\": \"null\", \"reason\": \"The two memories cannot both be true as they state different favourite meals at the same moment.\"}"}
+{"id": "t-069", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories can be true together, with Memory B adding detail to the fact in Memory A.\"}"}
+{"id": "t-070", "raw": "{\"label\": \"contradiction\", \"type\": \"null\", \"reason\": \"The ages of Bess cannot be both two and five years old at the same time.\"}"}
+{"id": "t-071", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories can be true together.\"}"}
+{"id": "t-072", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Both memories can be true simultaneously without contradiction.\"}"}
+{"id": "t-073", "raw": "{\"label\": \"contradiction\", \"type\": \"null\", \"reason\": \"The two memories cannot both be true as they state different days for the weekly match.\"}"}
+{"id": "t-074", "raw": "{\"label\": \"contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Jomo's preferences are mutually exclusive.\"}"}
+{"id": "t-075", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Anil moved from York to Leeds.\"}"}
+{"id": "t-076", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"The second memory updates the state of Erik's kitchen after renovation.\"}"}
+{"id": "t-077", "raw": "{\"label\": \"contradiction\", \"type\": \"null\", \"reason\": \"The two memories cannot both be true as they state different locations for the book club meeting.\"}"}
+{"id": "t-078", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Both memories can be true simultaneously.\"}"}
+{"id": "t-079", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories can be true together as they describe different aspects of Valentina's pasta-making habits.\"}"}
+{"id": "t-080", "raw": "{\"label\": \"contradiction\", \"type\": \"null\", \"reason\": \"Both memories cannot be true at the same time.\"}"}
+{"id": "t-081", "raw": "{\"label\": \"contradiction\", \"type\": \"update\", \"reason\": \"Lars moved his boat's berth from Bergen to Stavanger.\"}"}
+{"id": "t-082", "raw": "{\"label\": \"contradiction\", \"type\": \"null\", \"reason\": \"Ruth's vocal part in the choir is different in the two memories.\"}"}
+{"id": "t-083", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories can be true together as Yasmin's favourite colour and the colour of her bedroom walls can be the same.\"}"}
+{"id": "t-084", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Memory B updates the number of languages Magnus speaks.\"}"}
+{"id": "t-085", "raw": "{\"label\": \"contradiction\", \"type\": \"null\", \"reason\": \"The two memories cannot both be true as they describe different outcomes for the same event.\"}"}
+{"id": "t-086", "raw": "{\"label\": \"contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories cannot be true as they contradict the order of Selam's speech.\"}"}
+{"id": "t-087", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories can be true together.\"}"}
+{"id": "t-088", "raw": "{\"label\": \"contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories cannot be true simultaneously as they state different numbers of children.\"}"}
+{"id": "t-089", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"The two memories cannot both be true about the number of pieces in the puzzle.\"}"}
+{"id": "t-090", "raw": "{\"label\": \"contradiction\", \"type\": \"null\", \"reason\": \"Both memories cannot be true simultaneously.\"}"}
+{"id": "t-091", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Pita's activities on different days do not conflict.\"}"}
+{"id": "t-092", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Memory B updates the status of the sofa from red to green.\"}"}
+{"id": "t-093", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Both memories can be true together.\"}"}
+{"id": "t-094", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Both memories can be true together.\"}"}
+{"id": "t-095", "raw": "{\"label\": \"contradiction\", \"type\": \"null\", \"reason\": \"The colors of the first car are mutually exclusive.\"}"}
+{"id": "t-096", "raw": "{\"label\": \"contradiction\", \"type\": \"update\", \"reason\": \"Pilar's piano lessons schedule changed from Monday to Tuesday.\"}"}
+{"id": "t-097", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories are true together, with Memory B adding detail to the fact in Memory A.\"}"}
+{"id": "t-098", "raw": "{\"label\": \"contradiction\", \"type\": \"null\", \"reason\": \"Both memories cannot be true at the same time.\"}"}
+{"id": "t-099", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories describe Sakura's residence near the sea in Kamakura.\"}"}
+{"id": "t-100", "raw": "{\"label\": \"contradiction\", \"type\": \"update\", \"reason\": \"Tamar's shift change is described in the second memory.\"}"}
+{"id": "t-101", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Carmen's mode of transportation to work has changed over time.\"}"}
+{"id": "t-102", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories can be true together, as one wedding could be in Kumasi and the other two in different locations.\"}"}
+{"id": "t-103", "raw": "{\"label\": \"contradiction\", \"type\": \"update\", \"reason\": \"The second memory updates the fact about Mehmet's sport from tennis to padel.\"}"}
+{"id": "t-104", "raw": "{\"label\": \"contradiction\", \"type\": \"update\", \"reason\": \"The dates and destinations of Noor's first move abroad differ.\"}"}
+{"id": "t-105", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories are true together, with Memory B adding detail to Memory A.\"}"}
+{"id": "t-106", "raw": "{\"label\": \"contradiction\", \"type\": \"null\", \"reason\": \"The two memories cannot both be true about the strap color of the watch.\"}"}
+{"id": "t-107", "raw": "{\"label\": \"contradiction\", \"type\": \"update\", \"reason\": \"The start times for Mateo's shift are different.\"}"}
+{"id": "t-108", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories can be true together as playing blitz chess online and at the club are compatible activities.\"}"}
+{"id": "t-109", "raw": "{\"label\": \"contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories cannot be true at the same time.\"}"}
+{"id": "t-110", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"The second memory updates the fact about Ravi's tea preference.\"}"}
+{"id": "t-111", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Both memories can be true as they describe different contributions to the family dinner.\"}"}
+{"id": "t-112", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Both memories can be true together without contradiction.\"}"}
+{"id": "t-113", "raw": "{\"label\": \"contradiction\", \"type\": \"compatible_detail\", \"reason\": \"The colors of Lorenzo's espresso machine cannot both be red and silver.\"}"}
+{"id": "t-114", "raw": "{\"label\": \"contradiction\", \"type\": \"null\", \"reason\": \"The two memories cannot both be true as they describe opposite gear configurations for Felix's bike.\"}"}
+{"id": "t-115", "raw": "{\"label\": \"contradiction\", \"type\": \"update\", \"reason\": \"Camille switched banks in May.\"}"}
+{"id": "t-116", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Dr Mensah's retirement is an update to the original fact.\"}"}
+{"id": "t-117", "raw": "{\"label\": \"contradiction\", \"type\": \"null\", \"reason\": \"The two memories cannot both be true at the same moment.\"}"}
+{"id": "t-118", "raw": "```json\n{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Memory B updates the location of Rafael's job in January.\"}\n```"}
+{"id": "t-119", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Both activities are related to baking bread.\"}"}
+{"id": "t-120", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Different alarm times on different days.\"}"}
+{"id": "t-121", "raw": "{\"label\": \"contradiction\", \"type\": \"update\", \"reason\": \"The two memories disagree on the ferry time.\"}"}
+{"id": "t-122", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Memory B updates the location of Sami's desk.\"}"}
+{"id": "t-123", "raw": "{\"label\": \"contradiction\", \"type\": \"update\", \"reason\": \"Later memory updates the fact about Isabela's car ownership.\"}"}
+{"id": "t-124", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Memory B updates the location of Ioana's family residence.\"}"}
+{"id": "t-125", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"The two memories cannot both be true about the start time of Yara's only dance class of the week.\"}"}
+{"id": "t-126", "raw": "{\"label\": \"contradiction\", \"type\": \"null\", \"reason\": \"Both cannot be true simultaneously.\"}"}
+{"id": "t-127", "raw": "{\"label\": \"contradiction\", \"type\": \"null\", \"reason\": \"The two memories cannot both be true as they describe opposite directions for Rania's balcony.\"}"}
+{"id": "t-128", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories can be true together.\"}"}
+{"id": "t-129", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Kalani's activities are different but related to the north beach.\"}"}
+{"id": "t-130", "raw": "{\"label\": \"contradiction\", \"type\": \"null\", \"reason\": \"The two memories cannot both be true about Kuchik's winter behavior.\"}"}
+{"id": "t-131", "raw": "{\"label\": \"contradiction\", \"type\": \"update\", \"reason\": \"The second memory updates the fact about Ngozi's travel history.\"}"}
+{"id": "t-132", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Both memories can be true together without contradiction.\"}"}
+{"id": "t-133", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Both memories can be true together without contradiction.\"}"}
+{"id": "t-134", "raw": "{\"label\": \"contradiction\", \"type\": \"null\", \"reason\": \"The two memories cannot both be true about the location of Dalia's sourdough starter.\"}"}
+{"id": "t-135", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"The second memory updates the location of the book club meeting.\"}"}
+{"id": "t-136", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"The later memory updates Rahul's involvement from the city youth orchestra to the university orchestra in Pune.\"}"}
+{"id": "t-137", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Both memories can be true together without contradiction.\"}"}
+{"id": "t-138", "raw": "{\"label\": \"contradiction\", \"type\": \"null\", \"reason\": \"Haruto cannot keep his bonsai trees on two different facing windowsills simultaneously.\"}"}
+{"id": "t-139", "raw": "{\"label\": \"contradiction\", \"type\": \"null\", \"reason\": \"The two memories cannot both be true as they state opposite living arrangements.\"}"}
+{"id": "t-140", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Both memories can be true together without contradiction.\"}"}
+{"id": "t-141", "raw": "{\"label\": \"contradiction\", \"type\": \"update\", \"reason\": \"Sofia's dietary change is contradicted by her eating meat at a wedding.\"}"}
+{"id": "t-142", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Memory B is an update to Memory A.\"}"}
+{"id": "t-143", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Memory B updates the location of Paola's workplace.\"}"}
+{"id": "t-144", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Both memories can be true simultaneously without contradiction.\"}"}
+{"id": "t-145", "raw": "```json\n{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Memory B is an update to Memory A indicating a change in Ana's commute method.\"}\n```"}
+{"id": "t-146", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories can be true together.\"}"}
+{"id": "t-147", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories can be true together as Ugo's collection includes a stamp from Tuvalu, which is in the Pacific region.\"}"}
+{"id": "t-148", "raw": "{\"label\": \"contradiction\", \"type\": \"update\", \"reason\": \"Olga's accommodation changed from a hotel to a flat.\"}"}
+{"id": "t-149", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Memory B updates the living situation described in Memory A.\"}"}
+{"id": "t-150", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Both memories can be true together without contradiction.\"}"}
+{"id": "t-151", "raw": "{\"label\": \"contradiction\", \"type\": \"update\", \"reason\": \"Arjun's seat preference changed on the same flight.\"}"}
+{"id": "t-152", "raw": "{\"label\": \"contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories cannot be true simultaneously as they describe different appearances of the cat Dubu.\"}"}
+{"id": "t-153", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Memory B updates the mode of transportation due to a change in location.\"}"}
+{"id": "t-154", "raw": "{\"label\": \"contradiction\", \"type\": \"null\", \"reason\": \"The two memories cannot both be true as they state opposite times for the hallway clock.\"}"}
+{"id": "t-155", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Memory B updates the hobby status of Tatiana.\"}"}
+{"id": "t-156", "raw": "{\"label\": \"contradiction\", \"type\": \"null\", \"reason\": \"The two memories cannot both be true as they describe different locations for Samira's morning walk.\"}"}
+{"id": "t-157", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Memory B updates the information about Jonah's life in Denver.\"}"}
+{"id": "t-158", "raw": "{\"label\": \"contradiction\", \"type\": \"null\", \"reason\": \"The two memories cannot both be true as they state different numbers of floors for the same building.\"}"}
+{"id": "t-159", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Memory B updates the shift schedule from night to day shifts.\"}"}
+{"id": "t-160", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"The location of the photo albums has changed over time.\"}"}
+{"id": "t-161", "raw": "{\"label\": \"contradiction\", \"type\": \"null\", \"reason\": \"Daniela teaching swimming contradicts her fear of deep water.\"}"}
+{"id": "t-162", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Memory B updates the information from Memory A about Rohan's work laptop.\"}"}
+{"id": "t-163", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories can be true together.\"}"}
+{"id": "t-164", "raw": "{\"label\": \"contradiction\", \"type\": \"update\", \"reason\": \"Emil's address changed between the dates.\"}"}
+{"id": "t-165", "raw": "```json\n{\"label\": \"contradiction\", \"type\": \"null\", \"reason\": \"The two memories cannot both be true as they state different locations for the band's rehearsals.\"}\n```"}
+{"id": "t-166", "raw": "{\"label\": \"contradiction\", \"type\": \"null\", \"reason\": \"The two memories cannot both be true about the balcony presence.\"}"}
+{"id": "t-167", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories can be true together as Keiko's tea preferences are not mutually exclusive.\"}"}
+{"id": "t-168", "raw": "{\"label\": \"contradiction\", \"type\": \"null\", \"reason\": \"The two memories cannot both be true as they describe different views from Kaveh's study.\"}"}
+{"id": "t-169", "raw": "{\"label\": \"contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories cannot be true at the same time.\"}"}
+{"id": "t-170", "raw": "{\"label\": \"contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories cannot be true simultaneously as they describe Goran's position at the summit differently.\"}"}
+{"id": "t-171", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories can be true together as they describe different aspects of Lucía's electric bike.\"}"}
+{"id": "t-172", "raw": "{\"label\": \"contradiction\", \"type\": \"null\", \"reason\": \"The two memories cannot both be true about Ibrahim's siblings.\"}"}
+{"id": "t-173", "raw": "{\"label\": \"contradiction\", \"type\": \"null\", \"reason\": \"Minh's coffee preferences are mutually exclusive.\"}"}
+{"id": "t-174", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Aylin's language learning activities are updated over time.\"}"}
+{"id": "t-175", "raw": "```json\n{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Memory B updates the location from Memory A\"}\n```"}
+{"id": "t-176", "raw": "{\"label\": \"contradiction\", \"type\": \"null\", \"reason\": \"The two memories cannot both be true as they state different numbers of strings on Nalani's ukulele.\"}"}
+{"id": "t-177", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Both memories can be true together without contradiction.\"}"}
+{"id": "t-178", "raw": "{\"label\": \"contradiction\", \"type\": \"update\", \"reason\": \"Gustavo moved his barbecue indoors due to rain.\"}"}
+{"id": "t-179", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories can be true together as Zeynep playing the bağlama and buying new strings are related activities.\"}"}
+{"id": "t-180", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Yan moved from Chengdu to Shanghai and rented her own flat.\"}"}
+{"id": "t-181", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories can be true together as six feet is approximately 1.83 metres, which is close to Ulrich's height of 1.85 metres.\"}"}
+{"id": "t-182", "raw": "```json\n{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Memory B updates the location and time period of Catalina's teaching.\"}\n```"}
+{"id": "t-183", "raw": "{\"label\": \"contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories cannot be true as Juno cannot be alive and dead at the same time.\"}"}
+{"id": "t-184", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Memory B updates the number of cats Thandiwe has.\"}"}
+{"id": "t-185", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Quentin's favorite café changed due to the closure of Café Lumière.\"}"}
+{"id": "t-186", "raw": "{\"label\": \"contradiction\", \"type\": \"update\", \"reason\": \"The kitchen color changed from white to pale yellow.\"}"}
+{"id": "t-187", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Different aspects of Zola's music preferences.\"}"}
+{"id": "t-188", "raw": "{\"label\": \"contradiction\", \"type\": \"null\", \"reason\": \"Linh's lunch choices cannot be both noodles and pho on the same day.\"}"}
+{"id": "t-189", "raw": "{\"label\": \"contradiction\", \"type\": \"update\", \"reason\": \"The location of the spare house key has changed.\"}"}
+{"id": "t-190", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories can be true together.\"}"}
+{"id": "t-191", "raw": "{\"label\": \"contradiction\", \"type\": \"update\", \"reason\": \"Memories cannot both be true at the same time.\"}"}
+{"id": "t-192", "raw": "{\"label\": \"contradiction\", \"type\": \"null\", \"reason\": \"Esi's subject teaching at Osu Primary School cannot be both maths and English simultaneously.\"}"}
+{"id": "t-193", "raw": "{\"label\": \"contradiction\", \"type\": \"null\", \"reason\": \"The two memories cannot both be true about Bilal's batting hand.\"}"}
+{"id": "t-194", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Both memories are true without contradicting each other.\"}"}
+{"id": "t-195", "raw": "{\"label\": \"contradiction\", \"type\": \"null\", \"reason\": \"The two memories cannot both be true as they state different locations for Sanna's sauna cabin.\"}"}
+{"id": "t-196", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"The two memories are about different aspects of Zara's life.\"}"}
+{"id": "t-197", "raw": "{\"label\": \"contradiction\", \"type\": \"update\", \"reason\": \"The modes of travel to Cusco are contradictory.\"}"}
+{"id": "t-198", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Paulo cooked different dishes on the same day.\"}"}
+{"id": "t-199", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"The two memories are about different aspects of Anjali's life.\"}"}
+{"id": "t-200", "raw": "{\"label\": \"contradiction\", \"type\": \"null\", \"reason\": \"Hiba's language skills are mutually exclusive on the same date.\"}"}

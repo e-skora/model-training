@@ -1,0 +1,12 @@
+{
+  "model": "unsloth/Qwen3-4B-Instruct-2507",
+  "pairs": 200,
+  "wall_seconds": 177.6,
+  "load_seconds": 58.1,
+  "answer_seconds": 113.0,
+  "gpu": "NVIDIA L4",
+  "peak_vram_gib": 6.57,
+  "unsloth": "2026.10.7",
+  "transformers": "5.17.0",
+  "first_prompt": null
+}

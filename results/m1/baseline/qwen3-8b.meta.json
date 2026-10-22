@@ -1,0 +1,12 @@
+{
+  "model": "unsloth/Qwen3-8B",
+  "pairs": 200,
+  "wall_seconds": 206.8,
+  "load_seconds": 80.2,
+  "answer_seconds": 119.6,
+  "gpu": "NVIDIA L4",
+  "peak_vram_gib": 10.19,
+  "unsloth": "2026.10.7",
+  "transformers": "5.17.0",
+  "first_prompt": null
+}

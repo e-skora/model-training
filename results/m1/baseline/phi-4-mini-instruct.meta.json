@@ -1,0 +1,12 @@
+{
+  "model": "unsloth/Phi-4-mini-instruct",
+  "pairs": 200,
+  "wall_seconds": 156.3,
+  "load_seconds": 63.9,
+  "answer_seconds": 84.8,
+  "gpu": "NVIDIA L4",
+  "peak_vram_gib": 5.96,
+  "unsloth": "2026.10.7",
+  "transformers": "5.17.0",
+  "first_prompt": null
+}
