@@ -102,7 +102,7 @@ def main(models: str = ",".join(CANDIDATES), limit: int = 0, out: str = "results
         pairs = pairs[:limit]
     # One item per pair and version; the id says which version ("swapped/t-001").
     items = [
-        {"id": f"{version}/{pair['id']}", "messages": build_messages(shown)}
+        {"id": f"{version}/{shown['id']}", "messages": build_messages(shown)}
         for version in VERSIONS
         for shown in derive(pairs, version)
     ]
