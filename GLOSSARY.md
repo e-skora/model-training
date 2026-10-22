@@ -48,3 +48,13 @@ Plain meanings. Add a term the first time it shows up.
 - **Change word:** a word that often signals a change, such as "now", "moved", "switched", "since", "stopped", "later" or "replaced". In the M1 test set these words appear in every label, so they cannot be used as a shortcut.
 - **Hard case:** a pair built to fool a shortcut, for example two "now" memories that still contradict, or an update that never uses a change word.
 - **Template:** a sentence pattern reused with only a word swapped, such as "X's only bike is red" and "X's only bike is blue". Too many of them make a test set easy to game.
+- **System message:** the first message in a chat with a model, which tells it its job and the rules. The person's question comes after it, in the user message.
+- **Chat template:** the exact way a model expects a chat to be written out as one piece of text, with special markers for who is speaking. Each model family has its own; the tokenizer applies it.
+- **Tokenizer:** the part of a model that cuts text into small pieces (tokens) and turns them into numbers the model can read, and back again.
+- **Greedy decoding:** the model always picks its single most likely next word. No dice are rolled, so the same question always gets the same answer.
+- **4-bit:** storing each of the model's numbers in 4 bits instead of 16. The model needs about a quarter of the memory and gets only a little less accurate. QLoRA trains on top of a 4-bit copy.
+- **Thinking model:** a model that writes out its reasoning (inside `<think>` tags) before it answers. Qwen3-8B is one; we turn thinking off so it answers straight away.
+- **Pin:** writing down an exact version of a package (for example `unsloth==2026.10.7`) so every run installs the same one.
+- **Smoke test:** a tiny first run (here 8 pairs instead of 200) to catch obvious breakage cheaply before the real run.
+- **Invalid answer:** a model answer the scorer cannot use, because it is not JSON or uses a label that does not exist. It counts as wrong.
+- **False alarm:** the model says "contradiction" when there is none. False alarms lower precision; missed contradictions lower recall.
