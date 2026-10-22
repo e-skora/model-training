@@ -60,3 +60,9 @@ Each published model gets a Hugging Face model card, its dataset on Hugging Face
 
 ### D-019 (2026-10-21, Elias): No Modal spending cap
 "skipping the modal part, forget about it dont worry about cap". No workspace budget is set in Modal. D-014 ($0 beyond the free credits) stays the goal; the per-run stop in each prompt (ask before anything over $1) stays.
+
+### D-020 (2026-10-22, Elias): Test set accepted
+Elias spot-checked 20 of the 200 test pairs and marked all 20 OK ("spot check done"). The test set is frozen at SHA-256 `6e2a08323f445477f9600e371f1074ad3e2b41ef97d7072d6734ef481f6e574b`.
+
+### D-021 (2026-10-22, Default): Shared prompt and greedy scoring
+One function in `src/judge/prompt.py` builds the model's input for scoring, training and later use. Scoring uses greedy decoding, so a model always gives the same answer to the same pair. An answer that is not valid JSON counts as wrong.
