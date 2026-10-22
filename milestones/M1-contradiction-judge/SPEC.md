@@ -18,6 +18,8 @@ It reads two memories about the same person, each with the date it was written, 
 1. Two memories that state a current favourite, choice or fact as true at the same moment, and disagree, are a `contradiction`.
 2. If the second memory was written later and describes a change ("later", "now", "moved", "switched"), it is an `update`, not a contradiction.
 3. If both can be true together, it is not a contradiction.
+4. **Do not invent an escape.** If the two memories state different current facts about the same thing, it is a `contradiction`, even if you can imagine a way out ("maybe she has two dogs", "maybe the inside is yellow and the outside white"). `unclear` is only for pairs where a fact that is truly missing decides it, and neither reading is more natural (D-029).
+5. **Different days, times or places with no exclusive word** ("only", "always", "every day", "never") can both be true, so they are not a contradiction: "works from home on Fridays" and "works from home on Mondays" is `merely_related` (D-029).
 
 ## Fitting Aeverum (from the Aeverum operator's reply, 2026-10-22)
 - The order of the two memories carries no meaning, and dates may be missing (D-026). The model must judge correctly either way.

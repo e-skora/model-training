@@ -87,3 +87,6 @@ The prompt and the generation settings stay fixed and get a SHA-256 each, so Aev
 
 ### D-028 (2026-10-22, Elias): No spot-check of the training set
 "skip the spot checking step". Elias does not spot-check the training set. Instead, Claude in Cowork has a separate agent judge a sample blind before Step 6 merges, as it did for the test set.
+
+### D-029 (2026-10-22, Default): Two more reading rules, so `unclear` stays rare and honest
+A blind review of the training set (`reviews/M1-06-blind-review.md`) found that about half the `unclear` pairs could actually be decided, and that one pattern was labelled two different ways. Two rules were added to the SPEC. Rule 4: do not invent an escape; different current facts about the same thing are a contradiction, and `unclear` is only for pairs a truly missing fact decides. Rule 5: different days, times or places with no exclusive word are not a contradiction. Both rules agree with the frozen test set (for example t-036 is `merely_related`).
