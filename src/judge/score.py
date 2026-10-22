@@ -2,17 +2,25 @@
 
 Run from the repo folder:
     uv run python -m judge.score data/m1/test.jsonl results/m1/baseline/qwen3-4b.jsonl
+Score the three versions of the test set side by side (as is, swapped, no dates):
+    uv run python -m judge.score data/m1/test.jsonl as_is.jsonl swapped.jsonl no_dates.jsonl
 
 The test file must match its "Frozen files" entry in STATE.md, or scoring stops.
-The answers file is JSONL with one line per pair: {"id": ..., "raw": "<model text>"}.
+An answers file is JSONL with one line per pair: {"id": ..., "raw": "<model text>"}.
 """
 
+import copy
 import json
 import re
 import sys
 
 from judge.frozen import FrozenFileError, load_frozen
 from judge.prompt import LABELS, TYPES
+
+# The frozen test set as is, and two versions built from it in memory (D-026).
+# The right answers stay the same: order means nothing, and an update must
+# be clear from its wording when the dates are gone.
+VERSIONS = ("as_is", "swapped", "no_dates")
 
 # One markdown code fence around the whole answer, such as ```json ... ```.
 FENCE = re.compile(r"\A```[a-zA-Z]*\s*\n(.*?)\n?```\Z", re.DOTALL)
@@ -67,16 +75,34 @@ def parse_answer(raw):
     return answer, None, fenced
 
 
+def derive(pairs, version):
+    """Return the pairs as they are shown in one version of the test set.
+
+    "swapped" exchanges memories a and b; "no_dates" removes both dates.
+    The pairs are copied, so the loaded test set itself never changes.
+    """
+    if version not in VERSIONS:
+        raise ValueError(f"unknown version {version!r}; choose from {VERSIONS}")
+    derived = copy.deepcopy(pairs)
+    for pair in derived:
+        if version == "swapped":
+            pair["a"], pair["b"] = pair["b"], pair["a"]
+        elif version == "no_dates":
+            for which in ("a", "b"):
+                pair[which]["written_at"] = None
+    return derived
+
+
 def format_problem(answer):
     """For an answer with a known label, say which required field breaks the prompt's format, or None.
 
-    The prompt asks for "type": JSON null for a contradiction and one of the
-    three types otherwise, and "reason": a short sentence (non-empty text).
+    The prompt asks for "type": JSON null for a contradiction or unclear, and
+    one of the three types otherwise, and "reason": a short sentence (non-empty text).
     """
     if "type" not in answer:
         return "no type"
-    if answer["label"] == "contradiction" and answer["type"] is not None:
-        return "type not null for contradiction"
+    if answer["label"] in ("contradiction", "unclear") and answer["type"] is not None:
+        return f"type not null for {answer['label']}"
     if answer["label"] == "non_contradiction" and answer["type"] not in TYPES:
         return "unknown type"
     reason = answer.get("reason")
@@ -110,8 +136,11 @@ def score(pairs, answers):
     "yes" answer (D-024). An invalid or missing answer is neither yes nor no:
     it lowers recall when the right label is contradiction, it lowers
     accuracy, and it never enters precision. So `invalid` is always reported
-    next to them. `format_errors` counts answers with a known label that
-    break the type or reason fields; they do not change label accuracy.
+    next to them. An "unclear" answer is valid but is not a yes either
+    (D-025): it never enters precision, it lowers recall when the right
+    label is contradiction, and it is counted in `unclear`. `format_errors`
+    counts answers with a known label that break the type or reason fields;
+    they do not change label accuracy.
     """
     check_ids(pairs, answers)
     by_id = {answer["id"]: answer.get("raw") for answer in answers}
@@ -148,6 +177,7 @@ def score(pairs, answers):
         "accuracy": ratio(len(label_right), len(rows)),
         "type_accuracy": ratio(len(type_right), len(right_non)),
         "type_accuracy_of": len(right_non),
+        "unclear": sum(1 for r in rows if r["label"] == "unclear"),
         "invalid": len(invalid),
         "invalid_not_json": sum(1 for r in invalid if r["problem"] in ("not valid JSON", "no answer")),
         "invalid_repeated_field": sum(1 for r in invalid if r["problem"] == "repeated field"),
@@ -158,18 +188,43 @@ def score(pairs, answers):
     return metrics, rows
 
 
+def score_versions(pairs, answers_by_version):
+    """Score each version's answers against the same right labels. Returns {version: metrics}."""
+    return {version: score(pairs, answers)[0] for version, answers in answers_by_version.items()}
+
+
+def side_by_side(metrics_by_version):
+    """A plain-text table with one column per version."""
+    versions = list(metrics_by_version)
+    names = list(next(iter(metrics_by_version.values())))
+    lines = ["metric".ljust(24) + "".join(v.rjust(12) for v in versions)]
+    for name in names:
+        cells = []
+        for version in versions:
+            value = metrics_by_version[version][name]
+            cells.append(("-" if value is None else f"{value:.3f}" if isinstance(value, float) else str(value)).rjust(12))
+        lines.append(name.ljust(24) + "".join(cells))
+    return "\n".join(lines)
+
+
 def main(argv):
-    if len(argv) != 3:
-        sys.exit("usage: python -m judge.score <test.jsonl> <answers.jsonl>")
+    if len(argv) not in (3, 5):
+        sys.exit("usage: python -m judge.score <test.jsonl> <answers.jsonl>\n"
+                 "   or: python -m judge.score <test.jsonl> <as_is.jsonl> <swapped.jsonl> <no_dates.jsonl>")
     try:
         pairs = load_frozen(argv[1])
     except FrozenFileError as error:
         sys.exit(f"STOP: {error}")
-    try:
-        metrics, _ = score(pairs, load_jsonl(argv[2]))
-    except ValueError as error:
-        sys.exit(f"STOP: {argv[2]}: {error}")
-    print(json.dumps(metrics, indent=2))
+    metrics = {}
+    for version, path in zip(VERSIONS, argv[2:]):
+        try:
+            metrics[version] = score_versions(pairs, {version: load_jsonl(path)})[version]
+        except ValueError as error:
+            sys.exit(f"STOP: {path}: {error}")
+    if len(metrics) == 1:
+        print(json.dumps(metrics["as_is"], indent=2))
+    else:
+        print(side_by_side(metrics))
 
 
 if __name__ == "__main__":

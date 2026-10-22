@@ -4,8 +4,17 @@ import json
 
 import pytest
 
-from judge.prompt import SYSTEM_MESSAGE, build_messages
-from judge.score import format_problem, load_jsonl, parse_answer, score
+from judge.prompt import SYSTEM_MESSAGE, build_messages, prompt_sha256
+from judge.score import (
+    VERSIONS,
+    derive,
+    format_problem,
+    load_jsonl,
+    parse_answer,
+    score,
+    score_versions,
+    side_by_side,
+)
 
 
 def pair(pair_id, label, kind=None):
@@ -216,3 +225,119 @@ def test_missing_answers_still_count_as_wrong():
     assert metrics["accuracy"] == pytest.approx(1 / 6)
     assert metrics["invalid"] == 5
     assert rows[1]["problem"] == "no answer"
+
+
+def test_unclear_is_valid_but_never_a_yes():
+    # D-025: "unclear" never enters precision, lowers recall on a real contradiction, and is counted.
+    answers = [
+        said("p1", "contradiction"),  # caught
+        said("p2", "unclear"),  # real contradiction, not caught
+        said("p3", "contradiction"),  # caught
+        said("p4", "unclear"),  # real update, wrong label but no false alarm
+        said("p5", "non_contradiction", "compatible_detail"),
+        said("p6", "non_contradiction", "merely_related"),
+    ]
+    metrics, rows = score(PAIRS, answers)
+    assert metrics["unclear"] == 2
+    assert metrics["invalid"] == 0
+    assert metrics["format_errors"] == 0
+    assert metrics["precision"] == 1.0  # the two "unclear" answers are not counted as "contradiction"
+    assert metrics["recall"] == pytest.approx(2 / 3)  # p2 is missed
+    assert metrics["accuracy"] == pytest.approx(4 / 6)
+    assert rows[1]["label"] == "unclear" and rows[1]["problem"] is None
+
+
+def test_unclear_right_answer_counts_for_accuracy_and_its_false_alarm_for_precision():
+    pairs = [pair("u1", "unclear"), pair("u2", "unclear"), pair("c1", "contradiction")]
+    answers = [said("u1", "unclear"), said("u2", "contradiction"), said("c1", "contradiction")]
+    metrics, _ = score(pairs, answers)
+    assert metrics["accuracy"] == pytest.approx(2 / 3)
+    assert metrics["precision"] == pytest.approx(1 / 2)  # u2 is a false alarm
+    assert metrics["recall"] == 1.0
+
+
+@pytest.mark.parametrize(
+    "answer, problem",
+    [
+        ({"label": "unclear", "type": None, "reason": "x"}, None),
+        ({"label": "unclear", "type": "update", "reason": "x"}, "type not null for unclear"),
+    ],
+)
+def test_format_problem_unclear(answer, problem):
+    assert format_problem(answer) == problem
+
+
+def test_derived_versions_swap_or_drop_dates_without_touching_the_original():
+    original = [dict(PAIRS[0], a=dict(PAIRS[0]["a"]), b=dict(PAIRS[0]["b"]))]
+    before = json.dumps(original, sort_keys=True)
+
+    assert derive(original, "as_is") == original
+    swapped = derive(original, "swapped")[0]
+    assert swapped["a"] == original[0]["b"] and swapped["b"] == original[0]["a"]
+    assert swapped["label"] == original[0]["label"]
+    no_dates = derive(original, "no_dates")[0]
+    assert no_dates["a"]["written_at"] is None and no_dates["b"]["written_at"] is None
+    assert no_dates["a"]["text"] == original[0]["a"]["text"]
+
+    assert json.dumps(original, sort_keys=True) == before  # the loaded test set is never changed
+    with pytest.raises(ValueError, match="unknown version"):
+        derive(original, "reversed")
+
+
+def test_derived_versions_build_the_right_prompts():
+    swapped = build_messages(derive([PAIRS[0]], "swapped")[0])[1]["content"]
+    assert swapped.index("likes coffee") < swapped.index("likes tea")
+    assert "Memory A (written 2025-01-02)" in swapped
+    no_dates = build_messages(derive([PAIRS[0]], "no_dates")[0])[1]["content"]
+    assert "written" not in no_dates and "2025" not in no_dates
+    assert "Memory A: Test Person likes tea." in no_dates
+
+
+def test_score_versions_scores_each_version_against_the_same_labels():
+    right = [said(p["id"], p["label"], p["type"]) for p in PAIRS]
+    flipped = [said(p["id"], "non_contradiction" if p["label"] == "contradiction" else "contradiction", "update")
+               for p in PAIRS]
+    metrics = score_versions(PAIRS, {"as_is": right, "swapped": flipped, "no_dates": right})
+    assert list(metrics) == ["as_is", "swapped", "no_dates"]
+    assert metrics["as_is"]["accuracy"] == 1.0
+    assert metrics["swapped"]["accuracy"] == 0.0
+    table = side_by_side(metrics)
+    assert table.splitlines()[0].split() == ["metric", "as_is", "swapped", "no_dates"]
+    assert any(line.split() == ["accuracy", "1.000", "0.000", "1.000"] for line in table.splitlines())
+    assert any(line.split()[0] == "unclear" for line in table.splitlines())
+
+
+def test_main_scores_three_versions_side_by_side(tmp_path, monkeypatch, capsys):
+    import judge.score as score_module
+
+    files = []
+    for version in VERSIONS:
+        path = tmp_path / f"{version}.jsonl"
+        path.write_text("\n".join(json.dumps(said(p["id"], p["label"], p["type"])) for p in PAIRS) + "\n")
+        files.append(str(path))
+    monkeypatch.setattr(score_module, "load_frozen", lambda path: PAIRS)
+    score_module.main(["score", "test.jsonl", *files])
+    out = capsys.readouterr().out
+    assert out.splitlines()[0].split() == ["metric", "as_is", "swapped", "no_dates"]
+
+
+def test_build_messages_without_dates_and_prompt_mentions_aeverum_rules():
+    user = build_messages(PAIRS[0], dates=False)[1]["content"]
+    assert "2025" not in user
+    assert user.splitlines() == [
+        "Person: Test Person",
+        "Memory A: Test Person likes tea.",
+        "Memory B: Test Person likes coffee.",
+    ]
+    assert '"unclear"' in SYSTEM_MESSAGE
+    assert "order of the two memories means nothing" in SYSTEM_MESSAGE
+    assert "dates can be missing" in SYSTEM_MESSAGE
+
+
+def test_prompt_sha256_is_fixed_and_changes_with_the_prompt(monkeypatch):
+    import judge.prompt as prompt_module
+
+    first = prompt_sha256()
+    assert len(first) == 64 and first == prompt_sha256()
+    monkeypatch.setattr(prompt_module, "SYSTEM_MESSAGE", SYSTEM_MESSAGE + " ")
+    assert prompt_module.prompt_sha256() != first
