@@ -93,7 +93,7 @@ def test_invalid_answers_lower_recall_and_accuracy_not_precision():
         assert metrics_valid[name] == metrics[name]
 
 
-def test_invalid_answers_count_as_wrong():
+def test_each_kind_of_invalid_answer_is_counted():
     answers = [
         {"id": "p1", "raw": "contradiction"},  # not JSON
         {"id": "p2", "raw": json.dumps({"label": "conflict", "type": None})},  # unknown label

@@ -56,5 +56,8 @@ Plain meanings. Add a term the first time it shows up.
 - **Thinking model:** a model that writes out its reasoning (inside `<think>` tags) before it answers. Qwen3-8B is one; we turn thinking off so it answers straight away.
 - **Pin:** writing down an exact version of a package (for example `unsloth==2026.10.7`) so every run installs the same one.
 - **Smoke test:** a tiny first run (here 8 pairs instead of 200) to catch obvious breakage cheaply before the real run.
-- **Invalid answer:** a model answer the scorer cannot use, because it is not JSON or uses a label that does not exist. It counts as wrong.
+- **Invalid answer:** a model answer the scorer cannot use, because it is not JSON or uses a label that does not exist. It is neither a "yes" nor a "no": it lowers recall (when the right answer was contradiction) and accuracy, but not precision.
+- **Format error:** an answer with a readable label that breaks the prompt's other rules, for example a contradiction whose type is not `null`. Counted on its own; it does not change the label scores.
+- **num_beams:** how many candidate answers the model builds side by side before picking one. `num_beams=1` means one, which together with no sampling is greedy decoding.
+- **Revision (commit):** the exact saved version of a model's files on Hugging Face, named by a long code. Loading the same revision gives the same files every time.
 - **False alarm:** the model says "contradiction" when there is none. False alarms lower precision; missed contradictions lower recall.
