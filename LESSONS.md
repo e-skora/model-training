@@ -38,3 +38,11 @@ Modal's Unsloth example pins Unsloth 2025.7.8 and transformers 4.54.0. With them
 ## 2026-10-22: Lesson: the untrained models already pass Aeverum's bar on our test set
 Untrained, Qwen3-8B scored precision 0.96 and recall 0.94 on the frozen test set, above the 0.85 and 0.80 bar. The other two candidates passed it too. So on this test set there is little room left for training to improve the contradiction label. The clearest room is the type (Qwen3-8B got it right only 66% of the time), and Aeverum's own benchmark may be harder than ours.
 **Lesson:** score the base model before planning training, so the goal is measured against a real starting point.
+
+## 2026-10-22: Lesson: a safety check belongs in the shared loader, not in one script
+The frozen-file check lived only in `scripts/run_baseline.py`, so the scoring command could score an edited test set without warning. Codex caught it. Now every reader of the test set goes through `judge.frozen.load_frozen`, which checks against `STATE.md` itself.
+**Lesson:** put a check where the data is loaded, so every path gets it, and read the expected value from the one place it is recorded instead of copying it.
+
+## 2026-10-22: Lesson: current transformers does not remember which model commit it loaded
+The loaded config and tokenizer no longer carry the Hugging Face commit (`_commit_hash` is dropped). To record which files a run used, look the commit up first (`HfApi().model_info(repo).sha`) and load that exact commit with `revision=`.
+**Lesson:** to make a run repeatable, choose and save the exact version before the run, rather than hoping to read it back afterwards.

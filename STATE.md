@@ -4,7 +4,7 @@ Read this first in every session.
 
 - **Phase:** 1, fine-tuning (supervised).
 - **Active milestone:** M1, Memory contradiction judge. Spec: `milestones/M1-contradiction-judge/SPEC.md`.
-- **Updated:** 2026-10-22 (Step 5 done)
+- **Updated:** 2026-10-22 (Step 5 review fixed)
 
 ## Done
 - 2026-10-21: Step 1. Repo created with control files (Claude, from Cowork).
@@ -15,9 +15,10 @@ Read this first in every session.
 - 2026-10-21: Step 4 independent review (a separate Claude agent, judging blind): round 1 found 0 wrong labels but shortcut patterns and 4 broken pairs, fixed in M1-04b; round 2 found 0 wrong labels and 0 wrong types. Kept as correct under reading rule 1: contradictions months apart with no change words (for example t-008, t-123).
 - 2026-10-22: Step 4 done. Elias spot-checked 20 pairs (seed 7), all OK ("spot check done"). Test set frozen and merged to `main` by Claude in Cowork.
 - 2026-10-22: Step 5 done (Claude Code, branch `m1-05-baseline`, pushed, not merged). Shared prompt `src/judge/prompt.py`; scoring `src/judge/score.py` with 7 tests in `tests/test_score.py` (all pass, `uv run pytest`); baseline run `scripts/run_baseline.py`; shared Modal image `src/judge/modal_image.py`. Untrained scores on the frozen test set (precision / recall): Qwen3-8B 0.96 / 0.94, Qwen3-4B-Instruct-2507 0.93 / 0.83, Phi-4-mini-instruct 0.89 / 0.85. Base model: Qwen3-8B, thinking off (D-022). GPU use for the whole step: about 17 GPU minutes, about $0.23. Results: `results/m1/baseline/summary.md`.
+- 2026-10-22: Step 5 review fixed (Claude Code, branch `m1-05-baseline`, pushed, not merged). All 6 findings of `reviews/M1-05-codex-review.md` addressed; what changed and which test covers each: `reviews/M1-05-fixes.md`. New shared frozen-file check `src/judge/frozen.py` (scorer and runner both stop if the test set's SHA-256 differs from "Frozen files" below). Scorer rejects `NaN`/`Infinity` and repeated fields, stops on repeated or unknown answer IDs, and adds a "format errors" count. Runner sets `num_beams=1` and saves generation settings, template options, model commit and first-prompt SHA-256 (not yet run on a GPU). 33 tests pass. Saved answers rescored without a GPU: precision, recall and accuracy unchanged; format errors 0 / 0 / 90 (Phi). No GPU or Modal use.
 
 ## Next single action
-Elias: paste `prompts/M1-05b-review-fixes.md` into Claude Code (new session). Codex reviewed Step 5 on 2026-10-22: CHANGES REQUIRED (3 must-fix, 3 nice-to-have; scores reproduced). After the fixes, Claude in Cowork checks and merges Step 5.
+Claude in Cowork: check the review fixes (`reviews/M1-05-fixes.md`) and merge Step 5 (`m1-05-baseline`) into `main`.
 
 ## Frozen files
 - `data/m1/test.jsonl`, 200 pairs, SHA-256 `6e2a08323f445477f9600e371f1074ad3e2b41ef97d7072d6734ef481f6e574b`, frozen 2026-10-22. Never edit it and never train on it.
