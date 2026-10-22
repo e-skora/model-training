@@ -46,3 +46,19 @@ The frozen-file check lived only in `scripts/run_baseline.py`, so the scoring co
 ## 2026-10-22: Lesson: current transformers does not remember which model commit it loaded
 The loaded config and tokenizer no longer carry the Hugging Face commit (`_commit_hash` is dropped). To record which files a run used, look the commit up first (`HfApi().model_info(repo).sha`) and load that exact commit with `revision=`.
 **Lesson:** to make a run repeatable, choose and save the exact version before the run, rather than hoping to read it back afterwards.
+
+## 2026-10-22: Lesson: untrained models read order as time
+On the frozen test set with the newer memory shown first, both untrained models called most updates contradictions (Qwen3-4B 21 of 34, Qwen3-8B 29 of 34), and precision fell from about 0.95 to 0.73-0.79. Without dates they did almost as well as with them. So order, not dates, is the weak spot, and the training formatter shows the newer memory first in half the examples to teach it.
+**Lesson:** test the conditions the real user creates (Aeverum stores pairs in no order), not only the tidy version of the data.
+
+## 2026-10-22: Lesson: when dates can vanish, a contradiction must not look like an update
+If dates are hidden, a contradiction where only the newer memory has change wording ("Ravi now lives in Pune" after "Ravi lives in Goa") reads exactly like an update. One of the helper agents caught this in its own batches and rewrote 8 pairs; a search of all 1,600 pairs then found 5 more candidates, all of them real contradictions (the change word was about something else).
+**Lesson:** when the training format hides or shuffles information, write each label so it is still right without that information, and search for the cases that break.
+
+## 2026-10-22: Lesson: splitting data writing across helper agents works with one shared brief and a checker
+Eight helper agents each wrote 200 pairs from one written brief (rules, hard cases by name, counts, a separate range of names and topics) and ran the checker after every batch of 50. All 8 files passed on their own; merging needed only small fixes: `unclear` pairs had too few change words (the brief asked for them in every other label, not in `unclear`), and one full name came up twice across agents.
+**Lesson:** put every count and share the checker enforces into the brief itself, and check the merged file again, because some rules (repeated names, shares across the whole set) only show up after merging.
+
+## 2026-10-22: Mistake: a smoke test failed on a typo before reaching the GPU
+The first run of the updated baseline runner stopped on the Mac with a `NameError` (a renamed loop variable), before Modal started any GPU. No cost.
+**Lesson:** the runner's local part has no test. A quick `--limit 8` smoke test caught it for free; keep doing that before every full run.

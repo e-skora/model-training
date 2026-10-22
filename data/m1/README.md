@@ -2,8 +2,12 @@
 
 ## The files
 
-- `test.jsonl`: the test set. 200 pairs of memories, one pair per line. The model is scored on these and never trained on them.
+- `test.jsonl`: the test set. 200 pairs of memories, one pair per line. The model is scored on these and never trained on them. Frozen (SHA-256 in `STATE.md`).
 - `spotcheck-test.md`: 20 pairs from the test set, picked at random with seed 7, for Elias to check by hand.
+- `train.jsonl`: the training set. 1,500 pairs the model learns from (Step 6).
+- `valid.jsonl`: the validation set. 100 more pairs, used during training only to watch for overfitting (see below). Never trained on.
+- `spotcheck-train.md`: 20 pairs from the training set, picked with seed 11, ready for a reviewer (D-028: Elias does not spot-check the training set).
+- `train-writing-brief.md`: the exact instructions the writers of the training and validation pairs followed.
 
 Each line of `test.jsonl` looks like this:
 
@@ -11,7 +15,7 @@ Each line of `test.jsonl` looks like this:
 {"id": "t-001", "person": "...", "a": {"text": "...", "written_at": "2025-11-08"}, "b": {"text": "...", "written_at": "2025-11-08"}, "label": "contradiction", "type": null, "reason": "..."}
 ```
 
-`label` is `contradiction` or `non_contradiction`. `type` is empty (`null`) for a contradiction, and for a non-contradiction it is `update`, `compatible_detail` or `merely_related`. The meaning of each, and the reading rules, are in `milestones/M1-contradiction-judge/SPEC.md`.
+`label` is `contradiction`, `non_contradiction` or (in the training and validation sets only) `unclear`. `type` is empty (`null`) for a contradiction and for unclear, and for a non-contradiction it is `update`, `compatible_detail` or `merely_related`. In every file, memory `a` is the earlier one (or written the same day). The meaning of each, and the reading rules, are in `milestones/M1-contradiction-judge/SPEC.md`.
 
 ## Label counts
 
@@ -63,3 +67,56 @@ uv run python scripts/check_dataset.py data/m1/test.jsonl
 ## The test set is never used for training
 
 Once Elias has spot-checked it, the test set is frozen: it is never edited again, and it is never used for training. Its fingerprint (SHA-256) goes in `STATE.md`. The training set is written separately, in Step 6, and must not share any pair with this file.
+
+## The training and validation sets (Step 6, 2026-10-22)
+
+`train.jsonl` and `valid.jsonl` use the same format as the test set, with a third label, `unclear` (D-025): the text alone cannot settle the pair, because whether the memories clash depends on a fact neither one gives, such as the scope or the time ("is allergic to cats" / "has a cat"). Silent changes (a current fact stated differently months apart, with no change wording) are never `unclear`; they stay `contradiction` under reading rule 1.
+
+| Label | Type | Train | Valid |
+|---|---|---|---|
+| contradiction | | 675 (45%) | 45 |
+| non_contradiction | update | 255 | 17 |
+| non_contradiction | compatible_detail | 248 | 16 |
+| non_contradiction | merely_related | 248 | 17 |
+| unclear | | 74 (5%) | 5 |
+| **Total** | | **1,500** | **100** |
+
+Every pair has its own made-up person: 1,600 different people, none sharing a first name or surname with anyone in the test set.
+
+### How they were made
+
+Claude Code wrote the brief (`train-writing-brief.md`) and split the writing across 8 Claude helper agents on 2026-10-22. Each wrote 200 pairs in 4 batches of 50, with its own range of cultures for names and its own topic focus (food and music; pets, gardens and sport; home; work and study; travel and transport; hobbies and films; clothes and belongings; routines and past events). Each reread every batch against the reading rules and ran the checker after it. Then Claude Code:
+
+- reread every pair the writers marked as unsure (about 50) and changed two: one `unclear` pair got the missing fact made explicit, and one ("has never driven a car" / "drove a golf cart") became `merely_related`;
+- searched all 1,600 for contradictions that could look like updates once the dates are hidden (change wording in the newer memory only); all 5 found were real contradictions;
+- added a change word to 7 `unclear` pairs, so every label has them;
+- gave one repeated person a new surname;
+- read a random 40 pairs (seed 5): no wrong labels found.
+
+The 100 validation pairs were drawn from the 1,600 with seed 20261022, by label and type (45, 17, 16, 17, 5), and the rest became the training set. Both files were then shuffled with the same seed and numbered `tr-0001` to `tr-1500` and `v-001` to `v-100`.
+
+Hard cases, from the checker (train): 213 of 675 contradictions contain a change word; 108 of 255 updates (42%) use none; 67 compatible details, 76 merely related pairs and 11 unclear pairs contain one. About half of each label is written on the same day (contradiction 347 of 675, compatible detail 128 of 248, merely related 134 of 248, unclear 36 of 74); updates never are.
+
+### Order and dates are shuffled at training time, not here
+
+The model will meet pairs in any order and sometimes without dates (D-026). The files keep the earlier memory as `a`. `src/judge/format.py` turns pairs into chat examples and, with seed 20261022, shows the later memory first in exactly half and leaves the dates out of exactly a third. So every update in these files can be recognised from its wording alone, and no reason mentions "first", "second" or a date.
+
+### Validation set and overfitting
+
+During training, the model is scored now and then on `valid.jsonl`. If it keeps getting better on the training pairs but worse on the validation pairs, it is overfitting: memorising its practice examples instead of learning the rule. Then training should stop earlier. The validation set is never trained on, and the test set is never looked at during training at all.
+
+### The walls, checked by `scripts/check_dataset.py`
+
+```
+uv run python scripts/check_dataset.py data/m1/train.jsonl --against data/m1/test.jsonl --distinct-from data/m1/valid.jsonl
+uv run python scripts/check_dataset.py data/m1/valid.jsonl --against data/m1/test.jsonl --distinct-from data/m1/train.jsonl
+```
+
+Both print PASS. Besides the earlier checks, the checker now stops if:
+- any first name or surname of a test-set person appears anywhere in the file (whole word);
+- a pair is a near copy of a test pair, or repeats or nearly copies a pair of the other file (in either order). Near copy means more than 60% shared words: the words of both memories, without the person's name, shared divided by all the different words of the two pairs together;
+- Mara or Lindqvist appears;
+- a sentence pattern is used more than 3 times in any block of 100 pairs (a memory shares at least 60% of its words with memories in 3 or more other pairs of its block);
+- a label or type with at least 20 pairs has change words in under 10% of them, fewer than 10% of updates are said without one, or fewer than 35% or more than 65% of a label or type (updates aside) is same-day.
+
+SHA-256 as written: `train.jsonl` `a910ed814096c6f7ffbd3803cc93049977391ee48d72102e6e0fcfd71e65619d`, `valid.jsonl` `ef439b8d3e6b7ccf40055e632c6e91d1619868ae7f76ea87adc2a48fd57a2393` (not frozen; the review may still change pairs).
