@@ -72,3 +72,6 @@ One function in `src/judge/prompt.py` builds the model's input for scoring, trai
 
 ### D-023 (2026-10-22, Elias): Train the 4B to beat the untrained 8B
 "lets go with your rec". This replaces D-022. The base model for training is `unsloth/Qwen3-4B-Instruct-2507` (Apache 2.0). Untrained, it scored precision 0.93, recall 0.83, with 10 invalid answers. The goal is for the trained 4B to match or beat the untrained Qwen3-8B (precision 0.96, recall 0.94) on the frozen test set. Why: a clear before-and-after gain that can be proven, cheaper training and much cheaper RL later, and a faster model on the Mac for Aeverum's nightly runs.
+
+### D-024 (2026-10-22, Default): Invalid answers and the scores
+Precision and recall stay standard, the same definitions Aeverum's bar uses (02 §8.4). An invalid answer is neither a "yes" nor a "no". It lowers recall when the right answer was contradiction, and it lowers accuracy, but it does not enter precision, because Aeverum turns an unreadable judge answer into "needs manual review", not a false alarm. So the invalid-answer count is always reported next to precision and recall, and the trained model must have 0 invalid answers. This answers Codex review finding 1 (`reviews/M1-05-codex-review.md`). Claude disagrees with folding invalid answers into precision, because it would mix two different failures into one number.
