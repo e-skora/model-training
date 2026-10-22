@@ -23,7 +23,7 @@ It reads two memories about the same person, each with the date it was written, 
 Aeverum's night pass compares memories two at a time and flags contradictions for Elias to review. It runs a local model on the Mac. Aeverum's bar, measured on its own benchmark at its step 12: when the judge says "contradiction" it is right at least 85% of the time (precision 0.85), and it catches at least 80% of real contradictions (recall 0.80).
 
 ## Done means
-1. The fine-tuned model reaches precision 0.85 and recall 0.80 on our own frozen test set, and beats the base model.
+1. The fine-tuned Qwen3-4B (D-023) reaches precision 0.85 and recall 0.80 on our own frozen test set, beats its untrained self (0.93 and 0.83, 10 invalid answers), and aims to match or beat the untrained Qwen3-8B (0.96 and 0.94).
 2. It runs on Elias's Mac (Ollama or MLX).
 3. The model and its training data are published on Hugging Face with a model card. The code is on GitHub.
 4. A LinkedIn post is drafted.

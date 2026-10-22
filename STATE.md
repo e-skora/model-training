@@ -17,11 +17,11 @@ Read this first in every session.
 - 2026-10-22: Step 5 done (Claude Code, branch `m1-05-baseline`, pushed, not merged). Shared prompt `src/judge/prompt.py`; scoring `src/judge/score.py` with 7 tests in `tests/test_score.py` (all pass, `uv run pytest`); baseline run `scripts/run_baseline.py`; shared Modal image `src/judge/modal_image.py`. Untrained scores on the frozen test set (precision / recall): Qwen3-8B 0.96 / 0.94, Qwen3-4B-Instruct-2507 0.93 / 0.83, Phi-4-mini-instruct 0.89 / 0.85. Base model: Qwen3-8B, thinking off (D-022). GPU use for the whole step: about 17 GPU minutes, about $0.23. Results: `results/m1/baseline/summary.md`.
 
 ## Next single action
-Elias: paste `prompts/M1-05-codex-review.md` into Codex (new session), and answer the base-model question (train Qwen3-4B to beat the untrained Qwen3-8B, or train Qwen3-8B itself). Claude in Cowork verified the baseline numbers independently on 2026-10-22 (same precision, recall, accuracy and invalid counts). After the review, Claude in Cowork merges Step 5.
+Elias: paste `prompts/M1-05-codex-review.md` into Codex (new session). Claude in Cowork verified the baseline numbers independently on 2026-10-22 (same precision, recall, accuracy and invalid counts). After the review, Claude in Cowork merges Step 5.
 
 ## Frozen files
 - `data/m1/test.jsonl`, 200 pairs, SHA-256 `6e2a08323f445477f9600e371f1074ad3e2b41ef97d7072d6734ef481f6e574b`, frozen 2026-10-22. Never edit it and never train on it.
 
 ## Open items
 - Closed 2026-10-22: Unsloth pins. Unsloth 2025.7.8 could not load Qwen3-4B-Instruct-2507 or Phi-4-mini-instruct ("not supported in your current Unsloth version"). Pins moved to Unsloth 2026.10.7, transformers 5.17.0, trl 1.15.0, torch 2.14.1, now in one place, `src/judge/modal_image.py`. `scripts/hello_gpu.py` reran on them and works. Details: `LESSONS.md`.
-- The untrained Qwen3-8B already passes Aeverum's bar on our test set (precision 0.96, recall 0.94 against 0.85 and 0.80). "Done means" item 1 also needs the fine-tuned model to beat the base model, so training must beat 0.96 and 0.94. The clearest room to improve is the type (66% right). Worth deciding, before Step 6, whether this goal still fits or the training set should aim at the hard cases and types.
+- Settled 2026-10-22 by D-023 (train Qwen3-4B to beat the untrained Qwen3-8B). Background: the untrained Qwen3-8B already passes Aeverum's bar on our test set (precision 0.96, recall 0.94 against 0.85 and 0.80). "Done means" item 1 also needs the fine-tuned model to beat the base model, so training must beat 0.96 and 0.94. The clearest room to improve is the type (66% right). Worth deciding, before Step 6, whether this goal still fits or the training set should aim at the hard cases and types.
