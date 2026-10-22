@@ -66,3 +66,6 @@ Elias spot-checked 20 of the 200 test pairs and marked all 20 OK ("spot check do
 
 ### D-021 (2026-10-22, Default): Shared prompt and greedy scoring
 One function in `src/judge/prompt.py` builds the model's input for scoring, training and later use. Scoring uses greedy decoding, so a model always gives the same answer to the same pair. An answer that is not valid JSON counts as wrong.
+
+### D-022 (2026-10-22, Default): Base model is Qwen3-8B
+`unsloth/Qwen3-8B` (Apache 2.0), with thinking turned off (`enable_thinking=False` in the chat template, as Qwen's model card says). Why: on the frozen test set, untrained, it had the best contradiction precision (0.96) and recall (0.94) of the three candidates, ahead of Qwen3-4B-Instruct-2507 (0.93 and 0.83) and Phi-4-mini-instruct (0.89 and 0.85). The gap is too big to call close, so the "choose the smaller one" rule does not apply. It fits training on an L4: in 4-bit it used at most 10.2 GiB of the L4's 22.1 GiB while answering, and Unsloth lists about 6 GB as the minimum for QLoRA on an 8B model (https://unsloth.ai/docs/get-started/fine-tuning-for-beginners/unsloth-requirements). Full results: `results/m1/baseline/summary.md`.
