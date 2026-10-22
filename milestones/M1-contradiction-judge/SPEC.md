@@ -48,7 +48,7 @@ Aeverum's night pass compares memories two at a time and flags contradictions fo
 | 3 | Install tools and prove a GPU job runs on Modal | Claude Code (prompt M1-03) |
 | 4 | Write the test set; Elias spot-checks 20 pairs; freeze it | Claude Code, then Elias |
 | 5 | Score 2 or 3 base models on the test set (the baseline); pick one | Claude Code; Codex reviews the scoring code |
-| 6 | Write the training set; Elias spot-checks 20 pairs | Claude Code, then Elias |
+| 6 | Write the training set; a separate agent checks a sample (D-028) | Claude Code, then Claude in Cowork |
 | 7 | Fine-tune on Modal; score it on the test set | Claude Code; Codex reviews the training code |
 | 8 | Save the model in a format the Mac can run; test it locally | Claude Code |
 | 9 | Publish model and dataset to Hugging Face; write the model card | Claude Code |

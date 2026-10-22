@@ -84,3 +84,6 @@ Aeverum stores the two memories in no particular order and has not promised the 
 
 ### D-027 (2026-10-22, Default): Fixed, fingerprinted prompt and settings
 The prompt and the generation settings stay fixed and get a SHA-256 each, so Aeverum can name the judge's policy identity. Step 8 records the model file's SHA-256. Whatever runs the model must not log memory text (Aeverum §12.4); that is Aeverum's side, noted here so we don't build anything that depends on logging.
+
+### D-028 (2026-10-22, Elias): No spot-check of the training set
+"skip the spot checking step". Elias does not spot-check the training set. Instead, Claude in Cowork has a separate agent judge a sample blind before Step 6 merges, as it did for the test set.

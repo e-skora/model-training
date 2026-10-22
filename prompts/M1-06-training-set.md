@@ -36,12 +36,10 @@ Create and switch to a branch named `m1-06-training-set`. Commit after each part
    - No pair may be repeated across train and valid.
    - Never Mara or Lindqvist, and nothing from Aeverum.
    - Extend `scripts/check_dataset.py` to check all of these (`--against data/m1/test.jsonl`), then run it until it passes on both files.
-8. **Spot-check sheet:** `data/m1/spotcheck-train.md`, 20 pairs from train chosen with seed 11, including at least 2 `unclear` pairs and at least 5 hard cases. Use the same `Elias: OK` format as before.
-
 ## Part C: new baseline with the new prompt
 9. The prompt changed, so the Step 5 numbers are no longer a fair "before" score. Rerun the baseline for `unsloth/Qwen3-4B-Instruct-2507` and `unsloth/Qwen3-8B` (thinking off) on all three test versions (as is, swapped, no dates). Save the results under `results/m1/baseline-v2/` with a `summary.md` that has the same columns plus `unclear` and the prompt's SHA-256. Keep `results/m1/baseline/` as it is. Use an L4 and log the runs in `runs/RUNLOG.md`. If this would cost more than $1, stop and ask.
 
 ## Close
-10. Update `data/m1/README.md`, `STATE.md` (Step 6 written, waiting for Elias's spot-check of `data/m1/spotcheck-train.md`), `GLOSSARY.md` (validation set, overfitting, and any other new terms) and `LESSONS.md`. Run `uv run pytest` until it passes. Push the branch. Do not merge.
+10. Update `data/m1/README.md`, `STATE.md` (Step 6 written; next action: Claude in Cowork has a separate agent review a sample of the training data, then merges), `GLOSSARY.md` (validation set, overfitting, and any other new terms) and `LESSONS.md`. Run `uv run pytest` until it passes. Push the branch. Do not merge.
 
-**Report back** in plain language: the label counts for train and valid, what the checker printed, the new baseline table across all three test versions, total GPU minutes and cost, and the spot-check file path.
+**Report back** in plain language: the label counts for train and valid, what the checker printed, the new baseline table across all three test versions, and total GPU minutes and cost.

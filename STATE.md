@@ -19,7 +19,7 @@ Read this first in every session.
 - 2026-10-22: Step 5 done. Codex review CHANGES REQUIRED, fixed in M1-05b (33 tests pass; scores unchanged, checked by Claude in Cowork). Merged to `main` at 4212139. Base model: Qwen3-4B-Instruct-2507 (D-023). Aeverum operator replied to the coordination notice; changes adopted as D-025 to D-027.
 
 ## Next single action
-Elias: paste `prompts/M1-06-training-set.md` into Claude Code (new session). It updates the prompt and scorer for Aeverum, writes about 1,500 training pairs and 100 validation pairs, reruns the baseline with the new prompt, and makes a 20-pair spot-check sheet for Elias.
+Elias: paste `prompts/M1-06-training-set.md` into Claude Code (new session). It updates the prompt and scorer for Aeverum, writes about 1,500 training pairs and 100 validation pairs and reruns the baseline with the new prompt. No spot-check by Elias (D-028).
 
 ## Frozen files
 - `data/m1/test.jsonl`, 200 pairs, SHA-256 `6e2a08323f445477f9600e371f1074ad3e2b41ef97d7072d6734ef481f6e574b`, frozen 2026-10-22. Never edit it and never train on it.
