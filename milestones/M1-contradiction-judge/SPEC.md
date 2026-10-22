@@ -7,7 +7,7 @@ It reads two memories about the same person, each with the date it was written, 
 {"label": "contradiction", "type": null, "reason": "Both say what her favourite season is, and they name different seasons."}
 ```
 
-- `label` is `contradiction` or `non_contradiction`.
+- `label` is `contradiction`, `non_contradiction`, or `unclear` when the text alone cannot settle it (D-025).
 - `type` is only filled for `non_contradiction`:
   - `update`: the later memory replaces the earlier one ("She moved to Bergen" after "She lives in Oslo").
   - `compatible_detail`: both can be true together ("She likes tea" and "She drinks green tea in the morning").
@@ -18,6 +18,12 @@ It reads two memories about the same person, each with the date it was written, 
 1. Two memories that state a current favourite, choice or fact as true at the same moment, and disagree, are a `contradiction`.
 2. If the second memory was written later and describes a change ("later", "now", "moved", "switched"), it is an `update`, not a contradiction.
 3. If both can be true together, it is not a contradiction.
+
+## Fitting Aeverum (from the Aeverum operator's reply, 2026-10-22)
+- The order of the two memories carries no meaning, and dates may be missing (D-026). The model must judge correctly either way.
+- It must be able to say `unclear` instead of guessing (D-025).
+- Prompt and settings are fixed and fingerprinted (D-027). It runs under Ollama on the Mac.
+- A wrong "contradiction" interrupts Elias, so precision matters most in daily use.
 
 ## Why Aeverum needs it
 Aeverum's night pass compares memories two at a time and flags contradictions for Elias to review. It runs a local model on the Mac. Aeverum's bar, measured on its own benchmark at its step 12: when the judge says "contradiction" it is right at least 85% of the time (precision 0.85), and it catches at least 80% of real contradictions (recall 0.80).

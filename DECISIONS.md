@@ -75,3 +75,12 @@ One function in `src/judge/prompt.py` builds the model's input for scoring, trai
 
 ### D-024 (2026-10-22, Default): Invalid answers and the scores
 Precision and recall stay standard, the same definitions Aeverum's bar uses (02 §8.4). An invalid answer is neither a "yes" nor a "no". It lowers recall when the right answer was contradiction, and it lowers accuracy, but it does not enter precision, because Aeverum turns an unreadable judge answer into "needs manual review", not a false alarm. So the invalid-answer count is always reported next to precision and recall, and the trained model must have 0 invalid answers. This answers Codex review finding 1 (`reviews/M1-05-codex-review.md`). Claude disagrees with folding invalid answers into precision, because it would mix two different failures into one number.
+
+### D-025 (2026-10-22, Default): A third answer, `unclear`
+Aeverum must be able to stage "needs manual review" instead of guessing (Aeverum operator's reply, `~/code/Aeverum-Auditer/.handoffs/2026-10-22-judge-coordination-reply.md`, SHA-256 `9722025d39bec4273ed4512955e0ee5511f71de7f64f878da74f1f6642565fd6`). So the model may answer `"label": "unclear"` when the text alone cannot settle the pair. About 5% of training pairs teach this. For scoring, `unclear` is not a "yes": it never enters precision, it lowers recall when the right label is contradiction, and it is counted on its own line. The frozen test set does not change.
+
+### D-026 (2026-10-22, Default): Order means nothing, and dates may be missing
+Aeverum stores the two memories in no particular order and has not promised the judge will see write dates (same reply). The data files keep the earlier memory as `a`. When building training examples, the later memory is shown first about half the time, and dates are left out of about a third of pairs, chosen with a fixed seed. Scoring adds two derived versions of the frozen test set, made in memory without editing the file: order swapped, and dates removed.
+
+### D-027 (2026-10-22, Default): Fixed, fingerprinted prompt and settings
+The prompt and the generation settings stay fixed and get a SHA-256 each, so Aeverum can name the judge's policy identity. Step 8 records the model file's SHA-256. Whatever runs the model must not log memory text (Aeverum §12.4); that is Aeverum's side, noted here so we don't build anything that depends on logging.
