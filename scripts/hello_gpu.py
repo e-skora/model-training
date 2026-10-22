@@ -6,26 +6,9 @@ Run from the repo folder:
 
 import modal
 
-app = modal.App("hello-gpu")
+from judge.modal_image import image  # the one shared image, with its pins
 
-# Same image as Modal's Unsloth example (https://modal.com/docs/examples/unsloth_finetune),
-# so later training steps start from a setup we already know works.
-image = (
-    modal.Image.debian_slim(python_version="3.11")
-    .uv_pip_install(
-        "accelerate==1.9.0",
-        "datasets==3.6.0",
-        "hf-transfer==0.1.9",
-        "huggingface_hub==0.34.2",
-        "peft==0.16.0",
-        "transformers==4.54.0",
-        "trl==0.19.1",
-        "unsloth[cu128-torch270]==2025.7.8",
-        "unsloth_zoo==2025.7.10",
-        "wandb==0.21.0",
-    )
-    .env({"HF_HOME": "/model_cache"})
-)
+app = modal.App("hello-gpu")
 
 
 @app.function(
