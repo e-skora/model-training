@@ -2,7 +2,8 @@
 
 The adapter is loaded from the private Hugging Face repo at the exact commit
 `scripts/train.py --stage upload` recorded in results/m1/trained-v1/train.meta.json,
-on top of the same base-model commit the baseline used. It answers all three
+on top of the base-model commit training used (the baseline most likely loaded
+the same files, but did not record it: results/m1/trained-v1/base-files.md). It answers all three
 versions of the test set (as is, swapped, no dates) with the baseline's
 greedy settings and answer loop (`judge.generate`), so the scores compare
 fairly with results/m1/baseline-v2/.
