@@ -23,5 +23,31 @@
         "sha256": "a5956a8913646c5d01b5aa9d1781cfc07acfe32a0ab51e580ac24ea27c84b0c3"
       }
     }
+  },
+  {
+    "when_utc": "2026-10-23T09:15:54Z",
+    "repo": "eskora/m1-contradiction-judge-qwen3-4b-gguf",
+    "repo_type": "model",
+    "private": true,
+    "commit": "ae588bbc01ce92178f4e88048117e91f5138cbe7",
+    "files": {
+      "README.md": {
+        "from": "hf/m1-contradiction-judge-qwen3-4b-gguf/README.md",
+        "sha256": "e15fb9860276f4cbb2c8990963569d15210ef984a692d67bda2861921b88609f"
+      }
+    }
+  },
+  {
+    "when_utc": "2026-10-23T09:15:54Z",
+    "repo": "eskora/m1-contradiction-judge-qwen3-4b-lora",
+    "repo_type": "model",
+    "private": true,
+    "commit": "4561c799b743b64895450b5640b2f74915347567",
+    "files": {
+      "README.md": {
+        "from": "hf/m1-contradiction-judge-qwen3-4b-lora/README.md",
+        "sha256": "1fabb86e04b888a16a3b26af6c10860273456d793aeb775feb7253320c028dce"
+      }
+    }
   }
 ]
