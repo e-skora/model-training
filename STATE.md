@@ -28,7 +28,7 @@ Read this first in every session.
 - 2026-10-23: Step 8 done. GGUF `m1-judge:v1` runs on the Mac (0.88 s a pair). Frozen test through Ollama: precision/recall 0.98/0.96, 0.94/0.96, 0.98/0.94, 0 invalid (rescored independently by Claude in Cowork). Shipped below the 97% agreement bar by D-032. Ollama digest recorded in `docs/run-judge-on-mac.md`. Merged to `main` by Claude in Cowork.
 
 ## Next single action
-Claude in Cowork: write the Step 9 prompt (publish the model, dataset and repo; model card; LinkedIn draft).
+Elias: paste `prompts/M1-09-publish-prep.md` into Claude Code (new session). It prepares the model cards, dataset and README while everything stays private. Then Elias says whether to go public (D-007). LinkedIn draft: `docs/posts/m1-linkedin-draft.md` (Claude in Cowork, D-018).
 
 ## Frozen files
 - `data/m1/test.jsonl`, 200 pairs, SHA-256 `6e2a08323f445477f9600e371f1074ad3e2b41ef97d7072d6734ef481f6e574b`, frozen 2026-10-22. Never edit it and never train on it.
