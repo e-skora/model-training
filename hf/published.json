@@ -1,0 +1,27 @@
+[
+  {
+    "when_utc": "2026-10-23T09:15:38Z",
+    "repo": "eskora/memory-contradiction-pairs",
+    "repo_type": "dataset",
+    "private": true,
+    "commit": "b92da22ad06fb6191032bfb4b360c01d29bc24ce",
+    "files": {
+      "train.jsonl": {
+        "from": "data/m1/train.jsonl",
+        "sha256": "a41de541d2a25c564009e232b2d75ccb714c5a668dcd30ef73004fae778231b1"
+      },
+      "valid.jsonl": {
+        "from": "data/m1/valid.jsonl",
+        "sha256": "0476bc57e19460a10f1a3299f17e570b0d7926cb893d6ce5d57d49f356e042d3"
+      },
+      "test.jsonl": {
+        "from": "data/m1/test.jsonl",
+        "sha256": "6e2a08323f445477f9600e371f1074ad3e2b41ef97d7072d6734ef481f6e574b"
+      },
+      "README.md": {
+        "from": "hf/memory-contradiction-pairs/README.md",
+        "sha256": "a5956a8913646c5d01b5aa9d1781cfc07acfe32a0ab51e580ac24ea27c84b0c3"
+      }
+    }
+  }
+]
