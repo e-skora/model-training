@@ -87,3 +87,4 @@ Plain meanings. Add a term the first time it shows up.
 - **Adapter upload:** sending the trained adapter files from Modal to a Hugging Face repo, so later steps (and later, other people) can load them. Ours goes to a private repo, which only Elias's account can see, until Step 9.
 - **Private repo:** a Hugging Face repo that only its owner can see. Without a login, Hugging Face answers "not allowed" (401).
 - **Empty think block:** `<think></think>` with nothing inside. Qwen3's chat template adds it to a whole conversation, but our model never thinks out loud, so it is left out of the training text.
+- **Inferred (a claim):** worked out from evidence, but not seen directly in a record. "The baseline most likely loaded the same files" is inferred; "training loaded these files" is recorded. (Not to be confused with *inference*, which also means a model answering.)

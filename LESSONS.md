@@ -86,3 +86,12 @@ Over 3 epochs the training loss fell from 0.54 to 0.10, but the validation loss 
 ## 2026-10-22: Lesson: what training fixed, and what it did not
 Training fixed what the data aimed at. The order weakness is mostly gone (swapped precision 0.79 became 0.95), invalid answers went from 70 to 0, and type accuracy went from about 0.75 to 0.96. Two weak spots are left. Without dates, a contradiction whose memory says "switched" reads like an update. And `unclear` sometimes dodges a real contradiction with an invented escape (8 of 12 `unclear` answers). The prompt lists reading rules 1 to 3 only, while the labels follow rules 4 and 5 too.
 **Lesson:** when the labels follow rules, the prompt the model sees should state them as well.
+
+## 2026-10-22: Mistake: the scripts trusted their own records too much
+Codex found three ways the Step 7 scripts could quietly spoil saved results. A smoke run used the final file names, so a quick check could write over the final exam. Choosing again kept the upload record of the old choice. And choosing did not check that the validation file and settings were still the ones the training record named. None of it happened, but nothing stopped it. The fixes (M1-07b) check before any remote work starts: no output file may already exist, the upload must be the chosen adapter, and fingerprints and settings must match the record.
+**Lesson:** a script that writes a record should check that record before it acts on it, and should refuse to replace a saved result. Do the checks before any paid or remote work, and test them with fake remote calls.
+
+## 2026-10-22: Lesson: say "inferred" when you did not see it
+The Step 7 summary said the baseline "used the same base files". The code and the file history make that very likely, but the baseline never recorded what it loaded, so nobody saw it. Codex asked for the claim to say what the evidence proves.
+**Lesson:** for every "same as" claim in a result, ask whether a record shows it or it is worked out. If it is worked out, say so and point to the evidence.
+
