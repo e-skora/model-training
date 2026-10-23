@@ -111,7 +111,7 @@ def train(run, train_pairs, valid_pairs, max_steps=0, eval_steps=None):
     from unsloth.chat_templates import train_on_responses_only
 
     from judge.load import MAX_SEQ_LENGTH
-    from judge.train_data import build_rows, check_masks, loss_curves
+    from judge.train_data import build_rows, check_masks, loss_curves, plain
 
     model, tokenizer = FastLanguageModel.from_pretrained(
         model_name=BASE_REPO, max_seq_length=MAX_SEQ_LENGTH, load_in_4bit=True, revision=BASE_REVISION
@@ -179,15 +179,15 @@ def train(run, train_pairs, valid_pairs, max_steps=0, eval_steps=None):
         saved.append({"name": name, "step": trainer.state.global_step, "epoch": round(trainer.state.epoch, 3)})
     volume.commit()
 
-    return {
+    return plain({
         "run": run,
         "loaded_model": model.config._name_or_path,
         "planned_steps": total,
         "global_step": trainer.state.global_step,
         "warmup_steps": config.warmup_steps,
         "eval_steps": config.eval_steps,
-        "valid_loss_before": round(before["eval_loss"], 4),
-        "train_metrics": {k: (round(v, 4) if isinstance(v, float) else v) for k, v in result.metrics.items()},
+        "valid_loss_before": round(float(before["eval_loss"]), 4),
+        "train_metrics": result.metrics,
         "curves": loss_curves(trainer.state.log_history),
         "saved": saved,
         "masks": masks,
@@ -203,7 +203,7 @@ def train(run, train_pairs, valid_pairs, max_steps=0, eval_steps=None):
         "versions": {"unsloth": unsloth.__version__, "transformers": transformers.__version__,
                      "trl": trl.__version__, "peft": peft.__version__, "torch": torch.__version__,
                      "datasets": datasets.__version__},
-    }
+    })
 
 
 @app.function(image=image, gpu="L4", timeout=1800, secrets=[modal.Secret.from_name("huggingface")],

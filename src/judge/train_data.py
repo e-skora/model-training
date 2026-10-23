@@ -110,14 +110,25 @@ def check_masks(rows, dataset, tokenizer):
     return {"rows": len(rows), "trained_tokens": trained, "longest_row_tokens": longest}
 
 
+def plain(value):
+    """Turn a result into plain JSON values, so the Mac can read it without PyTorch installed.
+
+    A number held in a PyTorch or NumPy object becomes a Python number (its
+    `.item()`); anything else unknown becomes text.
+    """
+    return json.loads(json.dumps(value, default=lambda o: o.item() if hasattr(o, "item") else str(o)))
+
+
 def loss_curves(log_history):
-    """Split the trainer's log into the training and validation loss curves."""
-    train, valid = [], []
-    for entry in log_history:
-        if "loss" in entry:
-            train.append({"step": entry["step"], "epoch": round(entry["epoch"], 3), "loss": round(entry["loss"], 4)})
-        if "eval_loss" in entry:
-            valid.append({"step": entry["step"], "epoch": round(entry["epoch"], 3), "loss": round(entry["eval_loss"], 4)})
+    """Split the trainer's log into the training and validation loss curves.
+
+    Numbers are read with float(), because Unsloth's log may hold them as text.
+    """
+    def point(entry, key):
+        return {"step": int(entry["step"]), "epoch": round(float(entry["epoch"]), 3), "loss": round(float(entry[key]), 4)}
+
+    train = [point(e, "loss") for e in log_history if "loss" in e]
+    valid = [point(e, "eval_loss") for e in log_history if "eval_loss" in e]
     return {"train": train, "valid": valid}
 
 

@@ -23,6 +23,7 @@ from judge.train_data import (
     loss_curves,
     mask_problem,
     per_epoch,
+    plain,
 )
 
 REPO = Path(__file__).resolve().parents[1]
@@ -182,6 +183,7 @@ def test_loss_curves_and_per_epoch():
         {"eval_loss": 0.55, "step": 8, "epoch": 2.0},
         {"train_runtime": 10.0, "train_loss": 0.5, "step": 8, "epoch": 2.0},
     ]
+    log[0] = {"loss": "1.0", "step": 2, "epoch": "0.5"}  # Unsloth may log numbers as text
     curves = loss_curves(log)
     assert [p["loss"] for p in curves["train"]] == [1.0, 0.6, 0.3, 0.2]
     assert [p["loss"] for p in curves["valid"]] == [0.9, 0.5, 0.55]
@@ -189,6 +191,15 @@ def test_loss_curves_and_per_epoch():
         {"epoch": 1, "train_loss_mean": 0.8, "train_loss_last": 0.6, "valid_loss_end": 0.5},
         {"epoch": 2, "train_loss_mean": 0.25, "train_loss_last": 0.2, "valid_loss_end": 0.55},
     ]
+
+
+def test_plain_turns_tensor_numbers_into_python_numbers():
+    class Scalar:  # stands in for a 0-d torch tensor
+        def item(self):
+            return 0.25
+
+    assert plain({"loss": Scalar(), "steps": [1, Scalar()], "other": object}) == {
+        "loss": 0.25, "steps": [1, 0.25], "other": str(object)}
 
 
 def metrics(precision, recall, invalid=0, accuracy=0.9):
