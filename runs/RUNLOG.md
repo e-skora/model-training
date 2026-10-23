@@ -17,3 +17,6 @@ One line per GPU run.
 | 2026-10-22 | M1-07 | Trial 3, 20 training steps plus 8 validation answers: all worked. 7.4 s a step, peak VRAM 4.5 GiB | L4 | 9 or less (app time 17:51-18:00 PDT; training 2.5 min, model loads 3.3 min) | about $0.12 or less |
 | 2026-10-22 | M1-07 | Full training, 3 epochs, 288 steps (scripts/train.py --stage train). Adapter saved after each epoch | L4 | 33.6 (wall; load 1.6 + training 29.6) | about $0.45 |
 | 2026-10-22 | M1-07 | Validation answers, 99 pairs x 3 versions x 3 epoch adapters, to pick one (scripts/train.py --stage choose) | L4 x3 | 10.2 (GPU minutes inside the 3 functions; 6.8 min wall) | about $0.14 |
+| 2026-10-22 | M1-07 | Smoke test of scripts/eval_trained.py: adapter from Hugging Face, 8 validation pairs x 3 versions | L4 | 2.1 (wall) | about $0.03 |
+| 2026-10-22 | M1-07 | Trained judge on the frozen test set, 200 pairs x 3 versions (scripts/eval_trained.py) | L4 | 6.8 (wall; load 1.3 + answer 4.4) | about $0.09 |
+| 2026-10-22 | M1-07 | Upload of the chosen adapter to the private Hugging Face repo (scripts/train.py --stage upload, CPU only, no GPU) | CPU | about 1 | under $0.01 |
