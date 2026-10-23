@@ -1,0 +1,18 @@
+# Output of scripts/prepublish_check.py at commit 458b96a, 2026-10-23T09:25:53Z
+PASS  no secrets, tokens or .env files in git (138 files at HEAD, 270 file versions in history)
+PASS  no model files in git, at HEAD or in history (largest file 614,056 bytes)
+PASS  no em dashes in public text (git): 6 files
+PASS  no e-mail addresses or phone numbers in public text, and no Aeverum or Mara Lindqvist in the cards, README or posts (git)
+PASS  data files: no e-mail addresses, phone numbers, Mara Lindqvist or Aeverum (the people are made up; no check can prove a made-up name is not also a real one)
+PASS  every number, fingerprint, example, prompt and Modelfile in the cards and README traces to the repo's results and data (git): 4 files
+PASS  eskora/memory-contradiction-pairs: private=True, commit b92da22ad06fb6191032bfb4b360c01d29bc24ce, 5 files, 5 scanned for secrets
+PASS  eskora/m1-contradiction-judge-qwen3-4b-gguf: private=True, commit ae588bbc01ce92178f4e88048117e91f5138cbe7, 3 files, 2 scanned for secrets (not scanned, too big or model files: ['m1-contradiction-judge-qwen3-4b-Q4_K_M.gguf'])
+PASS  eskora/m1-contradiction-judge-qwen3-4b-lora: private=True, commit 4561c799b743b64895450b5640b2f74915347567, 8 files, 6 scanned for secrets (not scanned, too big or model files: ['adapter_model.safetensors', 'tokenizer.json'])
+PASS  no em dashes in public text (Hugging Face): 3 files
+PASS  no e-mail addresses or phone numbers in public text, and no Aeverum or Mara Lindqvist in the cards, README or posts (Hugging Face)
+PASS  every number, fingerprint, example, prompt and Modelfile in the cards and README traces to the repo's results and data (Hugging Face): 3 files
+NOTE  21 files in git name Aeverum (plans, decisions, reviews, docs). They go public with the GitHub repo: ['AGENTS.md', 'DECISIONS.md', 'GLOSSARY.md', 'LESSONS.md', 'STATE.md', 'data/m1/README.md', 'data/m1/train-writing-brief.md', 'docs/handoffs/2026-10-22-aeverum-judge-notice.md', 'docs/handoffs/2026-10-22-aeverum-update.md', 'docs/run-judge-on-mac.md', 'milestones/M1-contradiction-judge/SPEC.md', 'prompts/M1-05b-review-fixes.md', 'prompts/M1-06-training-set.md', 'prompts/M1-08-mac-export.md', 'prompts/M1-09-publish-prep.md', 'results/m1/baseline/summary.md', 'results/m1/gguf-v1/summary.md', 'results/m1/trained-v1/summary.md', 'scripts/check_dataset.py', 'scripts/run_ollama.py', 'tests/test_score.py']
+NOTE  the name Mara Lindqvist appears, as a rule not to use it, in: ['AGENTS.md', 'DECISIONS.md', 'STATE.md', 'data/m1/README.md', 'data/m1/train-writing-brief.md', 'docs/handoffs/2026-10-22-aeverum-judge-notice.md', 'milestones/M1-contradiction-judge/SPEC.md', 'prompts/M1-04-test-set.md', 'prompts/M1-06-training-set.md', 'tests/test_check_dataset.py']
+NOTE  a Mac home folder path (/Users/...) appears in: ['data/m1/train-writing-brief.md', 'reviews/M1-05-codex-review.md', 'reviews/M1-07-codex-review.md']
+NOTE  the GitHub repo has no LICENSE file: once public, its code can be read but not reused
+RESULT: PASS
