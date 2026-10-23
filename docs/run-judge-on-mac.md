@@ -10,9 +10,9 @@ What you need: Ollama (0.24.0 was used), the Hugging Face command `hf` logged in
 |---|---|
 | Hugging Face repo (private) | `eskora/m1-contradiction-judge-qwen3-4b-gguf` |
 | File | `m1-contradiction-judge-qwen3-4b-Q4_K_M.gguf` |
-| SHA-256 | FILL_SHA |
-| Size | FILL_SIZE |
-| Commit | FILL_COMMIT |
+| SHA-256 | `b6d930ce83c06512d12da2549b219edda8506e57404007acd877de29308172a9` |
+| Size | 2,497,280,320 bytes (2.5 GB) |
+| Commit | f9a1ae6ec40ba6b9e1c544b13a317fdf5a452360 |
 | Made by | `scripts/export_gguf.py`; settings in `results/m1/gguf-v1/export.meta.json` |
 
 ## Set it up (about 5 minutes)
@@ -21,8 +21,9 @@ Open Terminal.
 
 1. Download the file into `~/models/m1-judge/` (outside the repo, because model files never go in git):
    ```bash
-   hf download eskora/m1-contradiction-judge-qwen3-4b-gguf m1-contradiction-judge-qwen3-4b-Q4_K_M.gguf --revision FILL_COMMIT --local-dir ~/models/m1-judge
+   hf download eskora/m1-contradiction-judge-qwen3-4b-gguf m1-contradiction-judge-qwen3-4b-Q4_K_M.gguf --revision f9a1ae6ec40ba6b9e1c544b13a317fdf5a452360 --local-dir ~/models/m1-judge
    ```
+   If it shows no progress for a minute, stop it (Control-C) and put `HF_HUB_DISABLE_XET=1 ` in front of the same command. On 2026-10-23 Hugging Face's faster "Xet" download hung on this Mac and the plain download worked. At about 1 MB a second, the file takes about 45 minutes.
 2. Check its fingerprint. The line it prints must start with the SHA-256 in the table above:
    ```bash
    shasum -a 256 ~/models/m1-judge/m1-contradiction-judge-qwen3-4b-Q4_K_M.gguf

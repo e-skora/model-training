@@ -1,0 +1,123 @@
+{
+  "ours": "results/m1/gguf-v1/valid/m1-judge-v1-raw",
+  "theirs": "results/m1/gguf-v1/valid/m1-judge-v1",
+  "as_is": {
+    "pairs": 99,
+    "label_agreement": 1.0,
+    "label_differs": [],
+    "type_agreement": 1.0,
+    "type_agreement_of": 53,
+    "same_raw_text": 99,
+    "ours": {
+      "pairs": 99,
+      "precision": 0.9777777777777777,
+      "recall": 0.9565217391304348,
+      "accuracy": 0.9696969696969697,
+      "type_accuracy": 0.9607843137254902,
+      "type_accuracy_of": 51,
+      "unclear": 1,
+      "invalid": 0,
+      "invalid_not_json": 0,
+      "invalid_repeated_field": 0,
+      "invalid_unknown_label": 0,
+      "format_errors": 0,
+      "fenced": 0
+    },
+    "theirs": {
+      "pairs": 99,
+      "precision": 0.9777777777777777,
+      "recall": 0.9565217391304348,
+      "accuracy": 0.9696969696969697,
+      "type_accuracy": 0.9607843137254902,
+      "type_accuracy_of": 51,
+      "unclear": 1,
+      "invalid": 0,
+      "invalid_not_json": 0,
+      "invalid_repeated_field": 0,
+      "invalid_unknown_label": 0,
+      "format_errors": 0,
+      "fenced": 0
+    }
+  },
+  "swapped": {
+    "pairs": 99,
+    "label_agreement": 1.0,
+    "label_differs": [],
+    "type_agreement": 1.0,
+    "type_agreement_of": 52,
+    "same_raw_text": 99,
+    "ours": {
+      "pairs": 99,
+      "precision": 0.9361702127659575,
+      "recall": 0.9565217391304348,
+      "accuracy": 0.9494949494949495,
+      "type_accuracy": 0.94,
+      "type_accuracy_of": 50,
+      "unclear": 0,
+      "invalid": 0,
+      "invalid_not_json": 0,
+      "invalid_repeated_field": 0,
+      "invalid_unknown_label": 0,
+      "format_errors": 0,
+      "fenced": 0
+    },
+    "theirs": {
+      "pairs": 99,
+      "precision": 0.9361702127659575,
+      "recall": 0.9565217391304348,
+      "accuracy": 0.9494949494949495,
+      "type_accuracy": 0.94,
+      "type_accuracy_of": 50,
+      "unclear": 0,
+      "invalid": 0,
+      "invalid_not_json": 0,
+      "invalid_repeated_field": 0,
+      "invalid_unknown_label": 0,
+      "format_errors": 0,
+      "fenced": 0
+    }
+  },
+  "no_dates": {
+    "pairs": 99,
+    "label_agreement": 1.0,
+    "label_differs": [],
+    "type_agreement": 1.0,
+    "type_agreement_of": 51,
+    "same_raw_text": 99,
+    "ours": {
+      "pairs": 99,
+      "precision": 0.9565217391304348,
+      "recall": 0.9565217391304348,
+      "accuracy": 0.9595959595959596,
+      "type_accuracy": 0.98,
+      "type_accuracy_of": 50,
+      "unclear": 2,
+      "invalid": 0,
+      "invalid_not_json": 0,
+      "invalid_repeated_field": 0,
+      "invalid_unknown_label": 0,
+      "format_errors": 0,
+      "fenced": 0
+    },
+    "theirs": {
+      "pairs": 99,
+      "precision": 0.9565217391304348,
+      "recall": 0.9565217391304348,
+      "accuracy": 0.9595959595959596,
+      "type_accuracy": 0.98,
+      "type_accuracy_of": 50,
+      "unclear": 2,
+      "invalid": 0,
+      "invalid_not_json": 0,
+      "invalid_repeated_field": 0,
+      "invalid_unknown_label": 0,
+      "format_errors": 0,
+      "fenced": 0
+    }
+  },
+  "all": {
+    "pairs": 297,
+    "label_agreement": 1.0,
+    "invalid_ours": 0
+  }
+}
