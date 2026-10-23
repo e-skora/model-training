@@ -23,14 +23,20 @@ IGNORE = -100
 EMPTY_THINK = "<think>\n\n</think>\n\n"
 
 
-def sha256_file(path):
+def read_pairs(path):
+    """The pairs in a JSONL file and the SHA-256 of the exact bytes they were read from.
+
+    One read gives both, so a recorded fingerprint always belongs to the pairs
+    that were used, even if the file changes later.
+    """
     with open(path, "rb") as f:
-        return hashlib.sha256(f.read()).hexdigest()
+        data = f.read()
+    pairs = [json.loads(line) for line in data.decode("utf-8").split("\n") if line.strip()]
+    return pairs, hashlib.sha256(data).hexdigest()
 
 
 def load_pairs(path):
-    with open(path, encoding="utf-8") as f:
-        return [json.loads(line) for line in f if line.strip()]
+    return read_pairs(path)[0]
 
 
 def prompt_text(tokenizer, messages, template_kwargs=None):

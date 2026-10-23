@@ -256,43 +256,83 @@ def upload(run, checkpoint, meta_text):
             "files": files}
 
 
-@app.local_entrypoint()
-def main(stage: str = "trial", run: str = "v1"):
+def run_settings():
+    """The settings train.meta.json records about how a run was made, as today's script makes them."""
+    from judge.format import SEED as FORMAT_SEED
+    from judge.train_data import plain
+
+    return plain({
+        "base_model": BASE_REPO,
+        "base_revision": BASE_REVISION,
+        "seed": SEED,
+        "format_seed": FORMAT_SEED,
+        "lora": LORA,
+        "training": TRAIN,
+        "warmup_share": WARMUP_SHARE,
+        "instruction_part": INSTRUCTION_PART,
+        "response_part": RESPONSE_PART,
+    })
+
+
+def check_record(meta, valid_sha256):
+    """Stop unless the validation file, the prompt and the run settings are the ones train.meta.json records.
+
+    `valid_sha256` is the fingerprint of the validation bytes about to be used.
+    Called before any remote work, so a changed file or a changed script
+    constant can never pick or upload a model under an old record.
+    """
+    from judge.prompt import prompt_sha256
+
+    problems = []
+    if meta.get("valid_sha256") != valid_sha256:
+        problems.append(f"{VALID_PATH} SHA-256 is {valid_sha256}, the record says {meta.get('valid_sha256')}")
+    if meta.get("prompt_sha256") != prompt_sha256():
+        problems.append(f"prompt SHA-256 is {prompt_sha256()}, the record says {meta.get('prompt_sha256')}")
+    for key, value in run_settings().items():
+        if meta.get(key) != value:
+            problems.append(f"{key} is {value!r} in the script, {meta.get(key)!r} in the record")
+    if problems:
+        raise SystemExit("STOP: train.meta.json does not match what this run would use; nothing ran.\n  "
+                         + "\n  ".join(problems))
+
+
+def modal_calls():
+    """The GPU and upload jobs, run on Modal. Tests pass fakes with the same names."""
+    from types import SimpleNamespace
+
+    return SimpleNamespace(train=train.remote, answer=answer.remote,
+                           answer_many=lambda args: list(answer.starmap(args)), upload=upload.remote)
+
+
+def run_stage(stage, run, calls, out=OUT, train_path=TRAIN_PATH, valid_path=VALID_PATH):
     import json
     import time
     from pathlib import Path
 
-    from judge.format import SEED as FORMAT_SEED
     from judge.prompt import prompt_sha256
     from judge.score import VERSIONS, score_versions
-    from judge.train_data import CHOICE_RULE, choose, load_pairs, per_epoch, sha256_file
+    from judge.train_data import CHOICE_RULE, choose, per_epoch, read_pairs
 
-    out = Path(OUT)
+    out = Path(out)
     out.mkdir(parents=True, exist_ok=True)
     meta_path = out / "train.meta.json"
-    train_pairs, valid_pairs = load_pairs(TRAIN_PATH), load_pairs(VALID_PATH)
+    # The fingerprints come from the same bytes that are sent to Modal, read once, before dispatch.
+    valid_pairs, valid_sha256 = read_pairs(valid_path)
 
     if stage in ("trial", "train"):
+        train_pairs, train_sha256 = read_pairs(train_path)
         trial = stage == "trial"
         name = "trial" if trial else run
         start = time.time()
-        result = train.remote(name, train_pairs, valid_pairs, max_steps=20 if trial else 0,
-                              eval_steps=10 if trial else None)
+        result = calls.train(name, train_pairs, valid_pairs, max_steps=20 if trial else 0,
+                             eval_steps=10 if trial else None)
         wall = round(time.time() - start, 1)
         meta = {
             "stage": stage,
-            "base_model": BASE_REPO,
-            "base_revision": BASE_REVISION,
-            "train_sha256": sha256_file(TRAIN_PATH),
-            "valid_sha256": sha256_file(VALID_PATH),
+            "train_sha256": train_sha256,
+            "valid_sha256": valid_sha256,
             "prompt_sha256": prompt_sha256(),
-            "seed": SEED,
-            "format_seed": FORMAT_SEED,
-            "lora": LORA,
-            "training": TRAIN,
-            "warmup_share": WARMUP_SHARE,
-            "instruction_part": INSTRUCTION_PART,
-            "response_part": RESPONSE_PART,
+            **run_settings(),
             "wall_seconds": wall,
             **result,
         }
@@ -306,18 +346,22 @@ def main(stage: str = "trial", run: str = "v1"):
         if trial:
             # Prove a saved adapter loads and answers, on 8 validation items.
             checkpoint = result["saved"][-1]["name"]
-            check = answer.remote(name, checkpoint, valid_items(valid_pairs)[:8])
+            check = calls.answer(name, checkpoint, valid_items(valid_pairs)[:8])
             print(f"trial answers from {checkpoint}: load {check['load_seconds']} s, answer {check['answer_seconds']} s")
             for line in check["results"]:
                 print(f"  {line['id']}: {line['raw']}")
         return
 
+    if stage not in ("choose", "upload"):
+        raise SystemExit(f"unknown stage {stage!r}; choose trial, train, choose or upload")
     meta = json.loads(meta_path.read_text(encoding="utf-8"))
+    check_record(meta, valid_sha256)
+
     if stage == "choose":
         checkpoints = [s["name"] for s in meta["saved"]]
         items = valid_items(valid_pairs)
         start = time.time()
-        outcomes = list(answer.starmap([(meta["run"], c, items) for c in checkpoints]))
+        outcomes = calls.answer_many([(meta["run"], c, items) for c in checkpoints])
         wall = round(time.time() - start, 1)
         valid_dir = out / "valid"
         valid_dir.mkdir(exist_ok=True)
@@ -337,6 +381,13 @@ def main(stage: str = "trial", run: str = "v1"):
         chosen = choose(scores)
         meta["choice"] = {"rule": CHOICE_RULE, "chosen": chosen, "valid_scores": scores, "answer_runs": runs,
                           "wall_seconds": wall}
+        # An upload is kept only when it is provably this run's copy of the new choice.
+        old = meta.pop("upload", None)
+        if old and old.get("run") == meta["run"] and old.get("checkpoint") == chosen:
+            meta["upload"] = old
+        elif old:
+            print(f"dropped the old upload record ({old.get('run')}/{old.get('checkpoint')}): it is not "
+                  f"{meta['run']}/{chosen}; run --stage upload before scoring")
         meta_path.write_text(json.dumps(meta, indent=2) + "\n", encoding="utf-8")
         for name, by_version in scores.items():
             cells = ", ".join(f"{v} P {m['precision']:.2f} R {m['recall']:.2f} inv {m['invalid']} unc {m['unclear']}"
@@ -345,13 +396,14 @@ def main(stage: str = "trial", run: str = "v1"):
         print(f"chosen on the validation set: {chosen}; wall {wall / 60:.1f} min")
         return
 
-    if stage == "upload":
-        chosen = meta["choice"]["chosen"]
-        result = upload.remote(meta["run"], chosen, json.dumps(meta, indent=2) + "\n")
-        meta["upload"] = {"checkpoint": chosen, **result}
-        meta_path.write_text(json.dumps(meta, indent=2) + "\n", encoding="utf-8")
-        print(f"uploaded {chosen} to https://huggingface.co/{result['repo']} (private: {result['private']}), "
-              f"commit {result['commit']}, files {result['files']}")
-        return
+    chosen = meta["choice"]["chosen"]
+    result = calls.upload(meta["run"], chosen, json.dumps(meta, indent=2) + "\n")
+    meta["upload"] = {"checkpoint": chosen, "run": meta["run"], **result}
+    meta_path.write_text(json.dumps(meta, indent=2) + "\n", encoding="utf-8")
+    print(f"uploaded {chosen} to https://huggingface.co/{result['repo']} (private: {result['private']}), "
+          f"commit {result['commit']}, files {result['files']}")
 
-    raise SystemExit(f"unknown stage {stage!r}; choose trial, train, choose or upload")
+
+@app.local_entrypoint()
+def main(stage: str = "trial", run: str = "v1"):
+    run_stage(stage, run, modal_calls())
