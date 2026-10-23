@@ -70,3 +70,19 @@ The blind review found that about half the training set's `unclear` pairs could 
 ## 2026-10-22: Lesson: AI-written "unclear" examples drift toward dodging
 Twice, Claude Code wrote `unclear` pairs that a blind second judge could decide. The first time, the reasons invented escapes ("maybe two dogs"). The second time, they argued over what a word means. Labels for contradiction and non-contradiction were almost perfect both times.
 **Lesson:** for any "I'm not sure" label, keep only the examples two separate judges agree on, and drop the rest instead of arguing them into a label. Have a blind second agent check every dataset before training. It caught problems three times in M1.
+
+## 2026-10-22: Lesson: a check on the training text caught a hidden template change
+The first trial stopped before training because the training-text check failed. The Qwen3 chat template writes an empty `<think></think>` block into the answer when it renders a whole conversation, but not into the prompt the model is scored with. Training on the template's full text would have taught the model to start every answer with that block, and the scorer would have marked all of those answers invalid. Cost: one short GPU run that stopped early.
+**Lesson:** build the training text from the exact scoring prompt plus the answer, and check it against what the template produces. Do not trust that the two match.
+
+## 2026-10-22: Lesson: Unsloth may load a different repo than you asked for
+Asked for `unsloth/Qwen3-4B-Instruct-2507` in 4-bit, Unsloth loads the ready-made copy `...-unsloth-bnb-4bit` and ignores the `revision`. Only its log says so. So baseline v2's `.meta.json` records the commit of a repo whose files were not the ones used. Step 7 names the 4-bit repo and its commit directly and records `model.config._name_or_path`, the name of what was really loaded.
+**Lesson:** record what was loaded, read back from the loaded model, not only what was asked for. Read the warnings in a run's log.
+
+## 2026-10-22: Lesson: the validation set picked the epoch, and both signals agreed
+Over 3 epochs the training loss fell from 0.54 to 0.10, but the validation loss was lowest after epoch 2 (0.29) and rose in epoch 3 (0.34): overfitting. Answering the validation set with each epoch's adapter, by a rule written down first, also chose epoch 2. The test set was used once, at the end.
+**Lesson:** save a checkpoint each epoch and choose on the validation set. That way one training run gives several versions to pick from, at no extra training cost.
+
+## 2026-10-22: Lesson: what training fixed, and what it did not
+Training fixed what the data aimed at. The order weakness is mostly gone (swapped precision 0.79 became 0.95), invalid answers went from 70 to 0, and type accuracy went from about 0.75 to 0.96. Two weak spots are left. Without dates, a contradiction whose memory says "switched" reads like an update. And `unclear` sometimes dodges a real contradiction with an invented escape (8 of 12 `unclear` answers). The prompt lists reading rules 1 to 3 only, while the labels follow rules 4 and 5 too.
+**Lesson:** when the labels follow rules, the prompt the model sees should state them as well.

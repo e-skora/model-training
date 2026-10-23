@@ -93,3 +93,6 @@ A blind review of the training set (`reviews/M1-06-blind-review.md`) found that 
 
 ### D-030 (2026-10-22, Default): Keep only `unclear` pairs two judges agree on
 After two rounds of fixes, about 31 of 80 `unclear` pairs were still disputed (`reviews/M1-06-blind-review-r2.md`). They were dropped, not relabelled. Train is now 1,522 pairs with 47 `unclear` (3%); valid is 99 pairs. A smaller, trustworthy `unclear` set is better than a larger one that teaches the model to dodge, because precision matters most to Aeverum.
+
+### D-031 (2026-10-22, Default): Trained judge v1 is the epoch-2 adapter
+Training (M1 Step 7) saved a LoRA adapter after each of 3 epochs. The validation set alone chose epoch 2, by a rule fixed before any result (`judge.train_data.CHOICE_RULE`: fewest invalid answers, then worst-case precision, then worst-case recall). It also had the lowest validation loss. Settings came from Unsloth's notebook for this model and its LoRA guide, unchanged: the validation set was used to pick the epoch, not to tune other settings, because the first run already passed the bar on validation. The base files are `unsloth/Qwen3-4B-Instruct-2507-unsloth-bnb-4bit` at commit `7744afa8566e264af1a92a806d8d9aae00cc7c78`, the copy Unsloth really loads. Results: `results/m1/trained-v1/summary.md`.

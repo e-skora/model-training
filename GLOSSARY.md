@@ -69,3 +69,21 @@ Plain meanings. Add a term the first time it shows up.
 - **Prompt fingerprint:** the SHA-256 of the prompt's fixed text. If anyone changes a word of the prompt, the fingerprint changes, so a score can always be tied to the exact prompt that produced it.
 - **Stratified split:** taking a sample so that each group (here each label and type) keeps its share, for example 45 contradictions in 100 validation pairs because the whole set is 45% contradictions.
 - **Exclusive word:** a word that rules out other cases, such as "only", "always", "never" or "every day". "Works from home on Fridays" and "works from home on Mondays" can both be true; "works from home only on Fridays" and "works from home on Mondays" cannot (reading rule 5).
+- **Loss:** the model's error score while it trains: how surprised it is by the right answer. Lower is better. Training pushes it down.
+- **Training loss / validation loss:** the loss on the pairs the model learns from, and on held-back pairs it never learns from. If the training loss keeps falling while the validation loss rises, the model is memorising instead of learning (overfitting).
+- **Epoch:** one full pass through the training set. Our run did 3 epochs of 1,522 pairs.
+- **Step (training step):** one small update of the adapter, after the model has seen a few examples (here 16, the batch).
+- **Batch size and gradient accumulation:** how many examples the model sees before one update. We use 4 at a time, 4 times over, so each step learns from 16 examples.
+- **Learning rate:** how big each update is. Too big and training jumps around; too small and it learns slowly. We used Unsloth's suggested 2e-4 (0.0002).
+- **Warmup:** the first few steps use a smaller learning rate that grows to the full one, so the very first updates do not knock the model off course. Ours: 14 steps (5%).
+- **Weight decay:** a small pull that keeps the adapter's numbers from growing too large, which helps against overfitting.
+- **LoRA rank (r) and alpha:** the size of the LoRA adapter (r) and how strongly it counts (alpha). We used r = 32, alpha = 32, as in Unsloth's notebook for this model.
+- **Train on responses only:** the model is graded only on the answer it should give (the JSON), not on the prompt it was shown. The prompt's tokens are masked: marked "do not grade".
+- **Mask:** a mark on each token that says whether it counts for the loss. Our check proves, for every training row, that only the answer and its end token count.
+- **End-of-turn token:** a special token (here `<|im_end|>`) that means "my answer is finished". The model is trained to write it, so it stops after the JSON.
+- **Checkpoint:** a saved copy of the adapter at one moment of training, here after each epoch.
+- **Trial run:** a short training run (here 20 steps) to measure speed and memory and catch errors before paying for the full run.
+- **Modal volume:** a folder that lives on Modal between runs. The adapters wait there until the chosen one is uploaded.
+- **Adapter upload:** sending the trained adapter files from Modal to a Hugging Face repo, so later steps (and later, other people) can load them. Ours goes to a private repo, which only Elias's account can see, until Step 9.
+- **Private repo:** a Hugging Face repo that only its owner can see. Without a login, Hugging Face answers "not allowed" (401).
+- **Empty think block:** `<think></think>` with nothing inside. Qwen3's chat template adds it to a whole conversation, but our model never thinks out loud, so it is left out of the training text.
