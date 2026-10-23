@@ -1,0 +1,99 @@
+{"id": "v-001", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Rasa's handbag is a small satchel, the other that she carries no handbag at all.\"}"}
+{"id": "v-002", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"A cooking class and a sewing class can both be on Ijeoma's Saturdays.\"}"}
+{"id": "v-003", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Dedei drives to her shop, the other that she cannot drive and gets a lift.\"}"}
+{"id": "v-004", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"They name different wallpapers for Lenka's phone.\"}"}
+{"id": "v-005", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Cycling 50 km on three days adds up to about 150 km a week.\"}"}
+{"id": "v-006", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"The newer memory says Jamar plays the penny whistle instead of the kettle drum.\"}"}
+{"id": "v-007", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Moe goes to Ngapali Beach every April, the other that he never goes there in April.\"}"}
+{"id": "v-008", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"The newer memory says Jimena quit the café and now guides tourists.\"}"}
+{"id": "v-009", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Manpreet runs five kilometres every morning, the other that he does not run at all.\"}"}
+{"id": "v-010", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"The newer memory says Jomar's night shifts are over at the call centre.\"}"}
+{"id": "v-011", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Being in a dance club and sewing its costumes are separate facts about Yokasta.\"}"}
+{"id": "v-012", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Carrying a steel flask and drinking two litres a day can both be true.\"}"}
+{"id": "v-014", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"The newer memory says Abril switched from sprinting to the 1500 metres.\"}"}
+{"id": "v-015", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Vacuuming on Sundays and sorting recycling on Sundays are different jobs Swapnil can do.\"}"}
+{"id": "v-016", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both say Musu baked the cake for her niece's graduation, and one adds where it came from.\"}"}
+{"id": "v-017", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"They give different roof types for Itishree's house, flat and steep.\"}"}
+{"id": "v-018", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Reza saw the festival film, the other that he has never seen it.\"}"}
+{"id": "v-019", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Timur painted a mural, the other that he has not touched paint since school.\"}"}
+{"id": "v-020", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Szymon was at a party last New Year's Eve, the other that he stayed home with a cold.\"}"}
+{"id": "v-021", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Bayani's longest flight is the hour from Manila to Cebu, the other that he flew from Manila to London.\"}"}
+{"id": "v-022", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Carving a snow sculpture and being on a carnival committee are separate facts about Annick.\"}"}
+{"id": "v-023", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Mpho missed the 2024 school league final, the other that she scored the winning goal in it.\"}"}
+{"id": "v-024", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Jingwen's office is a ten-minute walk from her flat, the other that it is over an hour away.\"}"}
+{"id": "v-025", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Sardor has never seen the fantasy series, the other that he rewatched it twice.\"}"}
+{"id": "v-026", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Arben wears his glasses only for reading, the other that he puts them on at night while driving.\"}"}
+{"id": "v-027", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"The newer memory says Elikem gave up malt drinks and has water with dinner instead.\"}"}
+{"id": "v-028", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"The newer memory says Delia sells her weavings at a small shop instead of at the Tarabuco fair.\"}"}
+{"id": "v-029", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both are about Ka-lok's morning cooking, and one adds the dish and spice.\"}"}
+{"id": "v-030", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Driving a Subaru for decades and a green Forester with a roof rack are separate facts.\"}"}
+{"id": "v-031", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Ochieng plays left back, the other that he is the goalkeeper.\"}"}
+{"id": "v-032", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Anoop keeps the gate padlocked all day, the other that it is unlocked during the day.\"}"}
+{"id": "v-033", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"A better phone plan and a trip to Nadi are separate travel facts.\"}"}
+{"id": "v-034", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Watering Sunday mornings and keeping a herb garden are separate facts about Micaela's plants.\"}"}
+{"id": "v-035", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Hamdi shops at the Bakaara market weekly, the other that she has not been to a market in years.\"}"}
+{"id": "v-036", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"The newer memory says Odarkor now has just one coffee a day.\"}"}
+{"id": "v-037", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Greta drives with her sunglasses on, the other that she needs her glasses for driving.\"}"}
+{"id": "v-038", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"The newer memory says Jun stopped badminton and plays pickleball instead.\"}"}
+{"id": "v-039", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"They give different times for Nalini's one dance class.\"}"}
+{"id": "v-040", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Damani eats flying fish, the other that he does not eat fish at all.\"}"}
+{"id": "v-041", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both say Amr reads crime novels, and one adds how many he has read this month.\"}"}
+{"id": "v-042", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Teaching a group of eight children on Saturdays and having taught Carnatic singing for years are separate facts.\"}"}
+{"id": "v-043", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"A sunset photo from the corniche and a Nile wallpaper are different facts about Ayman's phone.\"}"}
+{"id": "v-044", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"They describe Ikenna's one bicycle differently, with no change mentioned.\"}"}
+{"id": "v-045", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"The newer memory says Edgardo came home to Pampanga and cooks at his sister's restaurant.\"}"}
+{"id": "v-046", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Watering the rockery once a month and growing succulents are separate facts.\"}"}
+{"id": "v-047", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Tinashe's Bulawayo garden has only indigenous plants, the other that it is full of imported roses and lavender.\"}"}
+{"id": "v-048", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"The newer memory says Elise no longer gets the printed paper and reads the news on a tablet.\"}"}
+{"id": "v-049", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"They place Behnam's photo prints in different spots, with no move mentioned.\"}"}
+{"id": "v-050", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"The newer memory says Garmai stopped singing in the choir and now goes to a cooking class on Saturdays.\"}"}
+{"id": "v-051", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both are about Su-bin's cello practice, and one adds the time and day.\"}"}
+{"id": "v-053", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Drinking tea with milk and drinking coffee black are separate habits.\"}"}
+{"id": "v-054", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Farai bakes sourdough on Sundays, the other that he stopped buying bread when he started baking every Saturday.\"}"}
+{"id": "v-055", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Seraina's hair is cut short, the other that it is always long and braided.\"}"}
+{"id": "v-056", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both are about Ataahua's standing desk at work, and one adds how it moves.\"}"}
+{"id": "v-057", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Bridie flies Qantas to Perth, the other that she never flies Qantas and always flies Virgin.\"}"}
+{"id": "v-058", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Teaching piano at home and selling at the market are separate facts about Yeabu.\"}"}
+{"id": "v-059", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both say Akinyi planted the passion fruit vine after the avocado tree, and one adds the year.\"}"}
+{"id": "v-060", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both say Xiaodan works nights at the hotel laundry, and one adds the start time.\"}"}
+{"id": "v-061", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"The newer memory says Nawaf now watches football at home on a big screen.\"}"}
+{"id": "v-062", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Kagiso has no garden at his Francistown flat, the other that he grows vegetables in a big backyard bed there.\"}"}
+{"id": "v-063", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"They name different favourite lunch spots for Mi-rae, with no change mentioned.\"}"}
+{"id": "v-064", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"They describe Ammar's one chess set differently, with no change mentioned.\"}"}
+{"id": "v-065", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"They give different months for Shanice's birthday.\"}"}
+{"id": "v-066", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"They give different opening times for Jamyang's shoe repair stall.\"}"}
+{"id": "v-067", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"A morning river run and a half marathon are separate facts about Hawa's running.\"}"}
+{"id": "v-068", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Kondwani is a night-shift security guard, the other that he is a day-shift baker.\"}"}
+{"id": "v-069", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Aya has never taught music, the other that she has taught djembe for years.\"}"}
+{"id": "v-070", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Supporting Casa Sports and playing football on Wednesday nights are separate facts about Aliou.\"}"}
+{"id": "v-071", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"They name different dishes as Hery's favourite.\"}"}
+{"id": "v-072", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Autumn's online shop and her weekly post office walk are separate facts.\"}"}
+{"id": "v-073", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"They name different trains as Siti's usual morning train from Bogor.\"}"}
+{"id": "v-074", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Mekdes has never been outside Ethiopia, the other that she spent weeks in Nairobi.\"}"}
+{"id": "v-075", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both describe Zihan's three Monday lectures, and one adds the subjects and times.\"}"}
+{"id": "v-076", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Four by five is about twenty square metres, so both describe the same room.\"}"}
+{"id": "v-077", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both are about Aminata's one djembe, and one adds its age.\"}"}
+{"id": "v-078", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Growing vegetables on a rented field and selling them at the market are separate facts about Hiroko's vegetables.\"}"}
+{"id": "v-079", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"They name different breeds for Ainembabazi's cows, with no change mentioned.\"}"}
+{"id": "v-080", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Shanice has a dog and walks it, the other that she has never owned a pet.\"}"}
+{"id": "v-081", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"The newer memory says Kouamé quit the coupé-décalé group and now drums for a zouglou band.\"}"}
+{"id": "v-082", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"The newer memory says Emre sold his DSLR and now uses a mirrorless camera.\"}"}
+{"id": "v-083", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"They name different coats as Rhys's only winter coat.\"}"}
+{"id": "v-084", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"The newer memory says Asanda left the call centre and has a new job at the harbour.\"}"}
+{"id": "v-085", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"The newer memory says Boglárka moved the sewing table to the attic.\"}"}
+{"id": "v-086", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both say Andrés goes to the gym often, and four or five times a week fits 'almost every weekday'.\"}"}
+{"id": "v-087", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Siafa farms, the other that he has never farmed.\"}"}
+{"id": "v-088", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Michal knits with wool, the other that she knits only with synthetic yarn.\"}"}
+{"id": "v-089", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"They name different cars as Iqra's only car.\"}"}
+{"id": "v-090", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"The newer memory says Ka-ming's firm moved and he now rides the MTR to work.\"}"}
+{"id": "v-091", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Playing the flute and the teacher's home city are separate facts.\"}"}
+{"id": "v-092", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Epeli takes the bus to the university, the other that he walks and never takes the bus.\"}"}
+{"id": "v-093", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both describe Min-jun's bus to the shipyard, and one adds the time it leaves.\"}"}
+{"id": "v-094", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Liking fish cakes and buying them weekly are separate facts.\"}"}
+{"id": "v-095", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"They give different weekly schedules for the same cleaner.\"}"}
+{"id": "v-096", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Charging a phone and charging headphones on the counter can both be true.\"}"}
+{"id": "v-097", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Playing chess in the park and reading about it are separate facts about Arman.\"}"}
+{"id": "v-098", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both say Hawwa sews her own cushion covers, and one adds which ones and how.\"}"}
+{"id": "v-099", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Haunani has been at the Hilo bakery for only two years, the other that she has worked there since 2015.\"}"}
+{"id": "v-100", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both are about Finda baking bread for a living, and one adds the shop and the morning.\"}"}
+{"id": "v-101", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Struan never cooks, the other that he makes toast every morning.\"}"}

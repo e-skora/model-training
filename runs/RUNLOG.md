@@ -16,3 +16,4 @@ One line per GPU run.
 | 2026-10-22 | M1-07 | Trial 2, 20 training steps. Trained, but results could not be sent back (PyTorch values) | L4 | 6 or less (app time 17:44-17:50 PDT) | about $0.08 or less |
 | 2026-10-22 | M1-07 | Trial 3, 20 training steps plus 8 validation answers: all worked. 7.4 s a step, peak VRAM 4.5 GiB | L4 | 9 or less (app time 17:51-18:00 PDT; training 2.5 min, model loads 3.3 min) | about $0.12 or less |
 | 2026-10-22 | M1-07 | Full training, 3 epochs, 288 steps (scripts/train.py --stage train). Adapter saved after each epoch | L4 | 33.6 (wall; load 1.6 + training 29.6) | about $0.45 |
+| 2026-10-22 | M1-07 | Validation answers, 99 pairs x 3 versions x 3 epoch adapters, to pick one (scripts/train.py --stage choose) | L4 x3 | 10.2 (GPU minutes inside the 3 functions; 6.8 min wall) | about $0.14 |
