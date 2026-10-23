@@ -107,3 +107,6 @@ Choices made while preparing the Hugging Face repos and the README (M1 Step 9). 
 - **Who wrote the data is said plainly:** "Claude, a language model made by Anthropic", rather than "an AI".
 - **Card metadata:** the GGUF names `Qwen/Qwen3-4B-Instruct-2507` as `base_model` with `base_model_relation: finetune`; the adapter names the 4-bit copy it attaches to, `unsloth/Qwen3-4B-Instruct-2507-unsloth-bnb-4bit`, with `base_model_relation: adapter`. That copy's own card names the Qwen original, so the Hub links all three.
 - **The cards live in `hf/`** and go to Hugging Face only through `scripts/publish_hf.py`, which uploads only to private repos. A card edited on the website would be overwritten by the next upload, and the pre-publish check fails if the two differ.
+
+### D-034 (2026-10-23, Elias): Publish M1
+Elias's answer, "aa", to two questions: (1) publish the three Hugging Face repos (the recommendation was yes); (2) make the GitHub repo public as it is, option A, with its internal files that name Aeverum. The code gets the Apache 2.0 license (`LICENSE`), the same as the base model. This carries out D-007.

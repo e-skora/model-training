@@ -64,3 +64,7 @@ The main limit: all the data, the test set included, was written by Claude, a la
 | M2 | Same judge, improved with reinforcement learning (GRPO) | Unsloth on Modal | Next |
 | Later | Managed fine-tuning, the way companies buy it | Together AI | Order not set |
 | Later | Reinforcement learning practice | Tinker (Thinking Machines) | Order not set |
+
+## License
+
+Code: Apache 2.0 (`LICENSE`). Models: Apache 2.0, from the base model. Data: CC BY 4.0.
