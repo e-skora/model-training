@@ -20,3 +20,5 @@ One line per GPU run.
 | 2026-10-22 | M1-07 | Smoke test of scripts/eval_trained.py: adapter from Hugging Face, 8 validation pairs x 3 versions | L4 | 2.1 (wall) | about $0.03 |
 | 2026-10-22 | M1-07 | Trained judge on the frozen test set, 200 pairs x 3 versions (scripts/eval_trained.py) | L4 | 6.8 (wall; load 1.3 + answer 4.4) | about $0.09 |
 | 2026-10-22 | M1-07 | Upload of the chosen adapter to the private Hugging Face repo (scripts/train.py --stage upload, CPU only, no GPU) | CPU | about 1 | under $0.01 |
+| 2026-10-22 | M1-08 | GGUF export, first try (scripts/export_gguf.py). Stopped on the Mac before reaching Modal: image build order (no GPU) | none | 0 | $0 |
+| 2026-10-23 | M1-08 | GGUF export: load 4-bit base + epoch-2 adapter, merge into 16-bit, convert, q4_k_m, upload to private HF repo (scripts/export_gguf.py) | L4 (4 CPU, 24 GiB) | 4.8 (wall; load 1.1 + export 2.8 + upload 0.8) | about $0.10 (L4 plus CPU and memory) |

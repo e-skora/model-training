@@ -1,0 +1,46 @@
+{
+  "base_model": "unsloth/Qwen3-4B-Instruct-2507-unsloth-bnb-4bit",
+  "base_revision": "7744afa8566e264af1a92a806d8d9aae00cc7c78",
+  "adapter_repo": "eskora/m1-contradiction-judge-qwen3-4b-lora",
+  "adapter_revision": "1d9ebbf66e1a2abcad9932932bb7d810a38c59b9",
+  "adapter_checkpoint": "epoch-2",
+  "prompt_sha256": "83d14d39a2115eb1f4d2d461581673090ec25d0a6f05d444cb2da8b756a2865c",
+  "method": "model.save_pretrained_gguf(folder, tokenizer, quantization_method='q4_k_m')",
+  "quantization": "q4_k_m",
+  "llama_cpp_tag": "b11798-mix-f8a7950",
+  "max_seq_length": 2048,
+  "wall_seconds": 286.9,
+  "loaded_model": "unsloth/Qwen3-4B-Instruct-2507-unsloth-bnb-4bit",
+  "merge_base": "unsloth/Qwen3-4B-Instruct-2507",
+  "merge_base_revision_before": "992063681dc2f7de4ee976110199552935cad284",
+  "merge_base_revision_after": "992063681dc2f7de4ee976110199552935cad284",
+  "local_files": [
+    {
+      "name": "Qwen3-4B-Instruct-2507.Q4_K_M.gguf",
+      "bytes": 2497280320
+    }
+  ],
+  "source_file": "Qwen3-4B-Instruct-2507.Q4_K_M.gguf",
+  "sha256": "b6d930ce83c06512d12da2549b219edda8506e57404007acd877de29308172a9",
+  "bytes": 2497280320,
+  "repo": "eskora/m1-contradiction-judge-qwen3-4b-gguf",
+  "repo_private": true,
+  "file": "m1-contradiction-judge-qwen3-4b-Q4_K_M.gguf",
+  "commit": "f9a1ae6ec40ba6b9e1c544b13a317fdf5a452360",
+  "commit_url": "https://huggingface.co/eskora/m1-contradiction-judge-qwen3-4b-gguf/commit/f9a1ae6ec40ba6b9e1c544b13a317fdf5a452360",
+  "hub_sha256": "b6d930ce83c06512d12da2549b219edda8506e57404007acd877de29308172a9",
+  "llama_cpp": {
+    "source": "unslothai/llama.cpp prebuilt release",
+    "repo": "unslothai/llama.cpp",
+    "tag": "b11798-mix-f8a7950",
+    "asset": "app-b11798-mix-f8a7950-linux-x64-cpu.tar.gz",
+    "installed_at_utc": "2026-10-23T07:00:23Z"
+  },
+  "load_seconds": 66.5,
+  "export_seconds": 168.6,
+  "upload_seconds": 45.0,
+  "gpu": "NVIDIA L4",
+  "unsloth": "2026.10.7",
+  "transformers": "5.17.0",
+  "peft": "0.21.2"
+}
