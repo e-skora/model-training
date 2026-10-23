@@ -3,8 +3,8 @@
 Read this first in every session.
 
 - **Phase:** 1, fine-tuning (supervised).
-- **Active milestone:** M1, Memory contradiction judge. Spec: `milestones/M1-contradiction-judge/SPEC.md`.
-- **Updated:** 2026-10-23 (Step 9 prepared, everything still private; waiting for Elias's go-ahead to publish)
+- **Active milestone:** none (M1 done 2026-10-23; M2 next). M1 was the Memory contradiction judge. Spec: `milestones/M1-contradiction-judge/SPEC.md`.
+- **Updated:** 2026-10-23 (M1 published)
 
 ## Done
 - 2026-10-21: Step 1. Repo created with control files (Claude, from Cowork).
@@ -28,9 +28,10 @@ Read this first in every session.
 - 2026-10-23: Step 8 done. GGUF `m1-judge:v1` runs on the Mac (0.88 s a pair). Frozen test through Ollama: precision/recall 0.98/0.96, 0.94/0.96, 0.98/0.94, 0 invalid (rescored independently by Claude in Cowork). Shipped below the 97% agreement bar by D-032. Ollama digest recorded in `docs/run-judge-on-mac.md`. Merged to `main` by Claude in Cowork.
 
 - 2026-10-23: Step 9 prepared, nothing public (Claude Code, prompt M1-09, branch `m1-09-publish-prep`, pushed, not merged). New private Hugging Face dataset repo `eskora/memory-contradiction-pairs` (commit `b92da22ad06fb6191032bfb4b360c01d29bc24ce`): `train.jsonl`, `valid.jsonl`, `test.jsonl`, byte for byte the files in `data/m1/`, with the dataset card (license CC BY 4.0, D-033). Model cards uploaded to the private GGUF repo (commit `ae588bbc01ce92178f4e88048117e91f5138cbe7`) and LoRA repo (commit `4561c799b743b64895450b5640b2f74915347567`). The cards live in `hf/`; `scripts/publish_hf.py` uploads them and refuses any repo that is not private; each upload is recorded in `hf/published.json`. The GGUF card's Python example was run, as written, against `m1-judge:v1` on the Mac and printed the recorded test answer. GitHub `README.md` rewritten: status, results, the three Hugging Face links, layout, roadmap. New `scripts/prepublish_check.py` (reports only, changes nothing) passed on everything, in git and on Hugging Face; output in `hf/prepublish-check.txt`. Public cards and README do not name Aeverum (D-033). Fixed while preparing: `data/m1/README.md` now opens with the final counts (1,522 and 99, D-030) and the glossary says 99. 122 tests pass. No GPU or Modal use.
+- 2026-10-23: Step 9 done. Published by Claude in Cowork on Elias's go-ahead (D-034): Hugging Face `eskora/m1-contradiction-judge-qwen3-4b-gguf`, `eskora/m1-contradiction-judge-qwen3-4b-lora` and dataset `eskora/memory-contradiction-pairs` are public; GitHub `e-skora/model-training` is public with an Apache 2.0 LICENSE. All four checked without a login (HTTP 200). Step 10: "why it works" note in LESSONS.md; LinkedIn draft has its links. **M1 is done** except Elias posting.
 
 ## Next single action
-Elias: say whether to go public (D-007). The check's four notes are his to weigh first: 21 internal files (plans, decisions, reviews, docs) name Aeverum and go public with the GitHub repo; the name Mara Lindqvist appears in 10 files, as the rule not to use it; 3 older files show the Mac home folder path (with the Mac account name); the code has no LICENSE file. On his go-ahead, Claude in Cowork merges `m1-09-publish-prep`, makes the three Hugging Face repos and the GitHub repo public, and reruns `scripts/prepublish_check.py` (it will then report the repos as not private, which is expected). LinkedIn draft: `docs/posts/m1-linkedin-draft.md` (Claude in Cowork, D-018).
+Elias: edit and post `docs/posts/m1-linkedin-draft.md` on LinkedIn (optional, his call). Then M2 (reinforcement learning on the same judge): Claude in Cowork writes the M2 spec when Elias asks.
 
 ## Frozen files
 - `data/m1/test.jsonl`, 200 pairs, SHA-256 `6e2a08323f445477f9600e371f1074ad3e2b41ef97d7072d6734ef481f6e574b`, frozen 2026-10-22. Never edit it and never train on it.

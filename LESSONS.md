@@ -131,3 +131,10 @@ D-030 dropped 31 pairs (train 1,522, valid 99), but `data/m1/README.md` still sa
 ## 2026-10-23: Lesson: run the code in a card exactly as written
 The model card's Python example was copied out of the card and run against the real model on the Mac. It printed the recorded test answer, byte for byte. The pre-publish check now also compares the card's prompt with `src/judge/prompt.py` and its Modelfile with `ollama/Modelfile`, so the two cannot drift apart.
 **Lesson:** code meant for strangers gets run once, as they would run it, before it is published.
+
+## 2026-10-23: M1 "why it works" note (Claude in Cowork, SPEC Step 10)
+- **Why a 4B model beat an untrained 8B on the hard version.** Untrained models read "two different statements" as "a clash", and they lean on the order the memories come in. Fine-tuning showed the 4B about 1,500 worked answers, with the order shuffled and dates sometimes removed. So it learned the actual rule (same moment versus a change over time) instead of a shortcut. Size helps general knowledge; examples teach the specific rule.
+- **Why LoRA was enough.** The model already understands language. The job only needed a small steer: about 66 million trained numbers, 1.6% of the model. That is why training took 30 minutes on a cheap GPU.
+- **Why learning only from the answer matters.** Masking the prompt makes the model spend all its learning on producing the right JSON, not on repeating the instructions.
+- **Why the validation set picked epoch 2.** In epoch 3 the training loss kept falling but the validation loss rose. The model was starting to memorize its practice pairs instead of the rule, which is called overfitting.
+- **Why the test set mattered most.** A model can only be as good as the exam that measures it. Three blind reviews of the data caught shortcut patterns and fake "unclear" pairs that would have taught bad habits, before any GPU money was spent.
