@@ -29,8 +29,9 @@ volume = modal.Volume.from_name("m1-train", create_if_missing=True)
 RUNS = "/runs"  # where the volume is mounted on the GPU machine
 
 # Asked for "unsloth/Qwen3-4B-Instruct-2507" in 4-bit, Unsloth loads this ready-made 4-bit copy
-# instead and ignores the revision (its log says so). So the baseline's answers came from this
-# repo, whose only upload is this commit (2025-08-06). Naming it directly makes the pin real.
+# instead and ignores the revision (its log says so). Its only upload is this commit (2025-08-06),
+# so the baseline most likely ran on it too; the baseline did not record what it loaded, so this
+# is inferred (results/m1/trained-v1/base-files.md). Naming it directly makes the pin real.
 BASE_REPO = "unsloth/Qwen3-4B-Instruct-2507-unsloth-bnb-4bit"
 BASE_REVISION = "7744afa8566e264af1a92a806d8d9aae00cc7c78"
 HF_REPO = "eskora/m1-contradiction-judge-qwen3-4b-lora"  # private until Step 9

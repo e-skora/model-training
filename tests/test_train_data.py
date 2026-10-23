@@ -234,7 +234,8 @@ def load_train_script():
 def test_train_settings():
     script = load_train_script()
     baseline = json.loads((REPO / "results/m1/baseline-v2/qwen3-4b-instruct-2507.meta.json").read_text())
-    # Trained on the same base files the untrained baseline used: Unsloth swapped in the 4-bit copy.
+    # Names only: the trained base is the 4-bit copy Unsloth maps the baseline's repo name to. This does
+    # not prove the baseline loaded the same weight files; that evidence is in results/m1/trained-v1/base-files.md.
     assert script.BASE_REPO == baseline["model"] + "-unsloth-bnb-4bit"
     assert len(script.BASE_REVISION) == 40
     assert script.HF_REPO == "eskora/m1-contradiction-judge-qwen3-4b-lora"

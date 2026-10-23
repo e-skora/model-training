@@ -30,7 +30,7 @@ A reminder of the words: **precision** is how often "contradiction" was right wh
 - **Aeverum's bar (precision 0.85, recall 0.80):** passed on all three versions. The lowest numbers are precision 0.95 (swapped) and recall 0.90 (no dates).
 - **0 invalid answers:** yes, on all 600 answers. The untrained 4B had 70.
 - **Beats its untrained self:** yes, on precision, recall and accuracy in every version. The biggest gain is the swapped version, where precision went from 0.79 to 0.95. False alarms there fell from 24 to 5.
-- **How close to the untrained 8B:** better precision in all three versions (0.99, 0.95, 0.98 against 0.95, 0.73, 0.94). Recall: as is 0.95 against 0.96 (one pair fewer), swapped 0.96 against 0.93 (three more), no dates 0.90 against 0.96 (six fewer). Type accuracy is far higher (about 0.96 against 0.53 to 0.72). Measured against the older Step 5 numbers the SPEC quotes (8B: 0.96 and 0.94), the trained 4B "as is" matches or beats both. The one place it falls short of the 8B is recall without dates.
+- **How close to the untrained 8B:** better precision in all three versions (0.99, 0.95, 0.98 against 0.95, 0.73, 0.94). Recall: as is 0.95 against 0.96 (one pair fewer), swapped 0.96 against 0.93 (three more), no dates 0.90 against 0.96 (six fewer). Type accuracy is far higher (about 0.96 against 0.53 to 0.72). Measured against the older Step 5 numbers the SPEC quotes (8B: 0.96 and 0.94), the trained 4B "as is" matches or beats both. Against baseline v2's 8B, recall is lower in two versions: as is (0.95 against 0.96) and without dates (0.90 against 0.96).
 
 ## The losses
 
@@ -75,7 +75,7 @@ The trained judge got 7, 12 and 12 labels wrong in the three versions. Five exam
 
 ## Base model files
 
-Asked for `unsloth/Qwen3-4B-Instruct-2507` in 4-bit, Unsloth 2026.10.7 loads the ready-made copy `unsloth/Qwen3-4B-Instruct-2507-unsloth-bnb-4bit` instead, and ignores any `revision` (its log says so). The untrained baseline v2 loaded the model the same way with the same Unsloth version, so it ran on that copy too (its own logs were not kept), though its `.meta.json` records the commit of the original repo (`99206368...`). The 4-bit copy has had one upload only (commit `7744afa8566e264af1a92a806d8d9aae00cc7c78`, 2025-08-06). Training, validation and this test run name that repo and commit directly, so all of them, and the baseline, used the same base files.
+Training, validation and this test run name the base files directly: the ready-made 4-bit copy `unsloth/Qwen3-4B-Instruct-2507-unsloth-bnb-4bit` at commit `7744afa8566e264af1a92a806d8d9aae00cc7c78`, and they record the name of what was really loaded. The untrained baseline v2 asked for `unsloth/Qwen3-4B-Instruct-2507` and recorded that repo's commit (`99206368...`). Two checks without a GPU say it most likely got the same files. The pinned Unsloth 2026.10.7 code replaces that name with the 4-bit copy when loading in 4-bit, drops the revision, and so reads the copy's `main` branch. On 2026-10-22, the day the baseline ran, `main` was `7744afa8...`: the copy has had no other upload since 2025-08-06. **This is an inference, not a verified fact:** the baseline did not record what it really loaded, and its log was not kept. The evidence, with sources and line numbers: `base-files.md`.
 
 ## GPU use for the whole step
 
