@@ -22,3 +22,4 @@ One line per GPU run.
 | 2026-10-22 | M1-07 | Upload of the chosen adapter to the private Hugging Face repo (scripts/train.py --stage upload, CPU only, no GPU) | CPU | about 1 | under $0.01 |
 | 2026-10-22 | M1-08 | GGUF export, first try (scripts/export_gguf.py). Stopped on the Mac before reaching Modal: image build order (no GPU) | none | 0 | $0 |
 | 2026-10-23 | M1-08 | GGUF export: load 4-bit base + epoch-2 adapter, merge into 16-bit, convert, q4_k_m, upload to private HF repo (scripts/export_gguf.py) | L4 (4 CPU, 24 GiB) | 4.8 (wall; load 1.1 + export 2.8 + upload 0.8) | about $0.10 (L4 plus CPU and memory) |
+| 2026-10-23 | M1-08 | Diagnosis: merged 16-bit model (no quantization), 99 validation pairs x 3 versions (scripts/check_merge.py) | L4 | 3.4 (wall; load 1.5 + answer 1.8) | about $0.05 |

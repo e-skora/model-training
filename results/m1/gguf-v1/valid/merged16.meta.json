@@ -1,0 +1,40 @@
+{
+  "model": "unsloth/Qwen3-4B-Instruct-2507 (16-bit) + eskora/m1-contradiction-judge-qwen3-4b-lora, merged, not quantized",
+  "base_model": "unsloth/Qwen3-4B-Instruct-2507",
+  "base_revision": "992063681dc2f7de4ee976110199552935cad284",
+  "adapter_repo": "eskora/m1-contradiction-judge-qwen3-4b-lora",
+  "adapter_revision": "1d9ebbf66e1a2abcad9932932bb7d810a38c59b9",
+  "data": "data/m1/valid.jsonl",
+  "data_sha256": "0476bc57e19460a10f1a3299f17e570b0d7926cb893d6ce5d57d49f356e042d3",
+  "pairs": 99,
+  "versions": [
+    "as_is",
+    "swapped",
+    "no_dates"
+  ],
+  "prompt_sha256": "83d14d39a2115eb1f4d2d461581673090ec25d0a6f05d444cb2da8b756a2865c",
+  "wall_seconds": 201.2,
+  "loaded_model": "unsloth/Qwen3-4B-Instruct-2507",
+  "dtype": "torch.bfloat16",
+  "load_seconds": 88.3,
+  "answer_seconds": 107.2,
+  "gpu": "NVIDIA L4",
+  "peak_vram_gib": 11.09,
+  "unsloth": "2026.10.7",
+  "transformers": "5.17.0",
+  "peft": "0.21.2",
+  "generation": {
+    "max_new_tokens": 256,
+    "do_sample": false,
+    "num_beams": 1,
+    "temperature": null,
+    "top_p": null,
+    "top_k": null
+  },
+  "chat_template_options": {
+    "tokenize": false,
+    "add_generation_prompt": true
+  },
+  "first_prompt_sha256": "da74aae49d9a7dc9f9c1e3d28ebc0de9a4fa83613396017aeea5f9e312775fd9",
+  "first_prompt": null
+}

@@ -1,0 +1,135 @@
+{
+  "ours": "results/m1/gguf-v1/valid/merged16",
+  "theirs": "results/m1/trained-v1/valid/epoch-2",
+  "as_is": {
+    "pairs": 99,
+    "label_agreement": 0.9797979797979798,
+    "label_differs": [
+      "v-054",
+      "v-101"
+    ],
+    "type_agreement": 0.9615384615384616,
+    "type_agreement_of": 52,
+    "same_raw_text": 36,
+    "ours": {
+      "pairs": 99,
+      "precision": 0.9555555555555556,
+      "recall": 0.9347826086956522,
+      "accuracy": 0.9494949494949495,
+      "type_accuracy": 0.94,
+      "type_accuracy_of": 50,
+      "unclear": 2,
+      "invalid": 0,
+      "invalid_not_json": 0,
+      "invalid_repeated_field": 0,
+      "invalid_unknown_label": 0,
+      "format_errors": 0,
+      "fenced": 0
+    },
+    "theirs": {
+      "pairs": 99,
+      "precision": 1.0,
+      "recall": 0.9347826086956522,
+      "accuracy": 0.9696969696969697,
+      "type_accuracy": 0.9803921568627451,
+      "type_accuracy_of": 51,
+      "unclear": 3,
+      "invalid": 0,
+      "invalid_not_json": 0,
+      "invalid_repeated_field": 0,
+      "invalid_unknown_label": 0,
+      "format_errors": 0,
+      "fenced": 0
+    }
+  },
+  "swapped": {
+    "pairs": 99,
+    "label_agreement": 0.9595959595959596,
+    "label_differs": [
+      "v-021",
+      "v-037",
+      "v-055",
+      "v-101"
+    ],
+    "type_agreement": 0.9615384615384616,
+    "type_agreement_of": 52,
+    "same_raw_text": 36,
+    "ours": {
+      "pairs": 99,
+      "precision": 0.9347826086956522,
+      "recall": 0.9347826086956522,
+      "accuracy": 0.9393939393939394,
+      "type_accuracy": 0.94,
+      "type_accuracy_of": 50,
+      "unclear": 0,
+      "invalid": 0,
+      "invalid_not_json": 0,
+      "invalid_repeated_field": 0,
+      "invalid_unknown_label": 0,
+      "format_errors": 0,
+      "fenced": 0
+    },
+    "theirs": {
+      "pairs": 99,
+      "precision": 0.9772727272727273,
+      "recall": 0.9347826086956522,
+      "accuracy": 0.9595959595959596,
+      "type_accuracy": 0.98,
+      "type_accuracy_of": 50,
+      "unclear": 3,
+      "invalid": 0,
+      "invalid_not_json": 0,
+      "invalid_repeated_field": 0,
+      "invalid_unknown_label": 0,
+      "format_errors": 0,
+      "fenced": 0
+    }
+  },
+  "no_dates": {
+    "pairs": 99,
+    "label_agreement": 0.9696969696969697,
+    "label_differs": [
+      "v-020",
+      "v-021",
+      "v-037"
+    ],
+    "type_agreement": 0.9803921568627451,
+    "type_agreement_of": 51,
+    "same_raw_text": 45,
+    "ours": {
+      "pairs": 99,
+      "precision": 0.9565217391304348,
+      "recall": 0.9565217391304348,
+      "accuracy": 0.9595959595959596,
+      "type_accuracy": 0.96,
+      "type_accuracy_of": 50,
+      "unclear": 2,
+      "invalid": 0,
+      "invalid_not_json": 0,
+      "invalid_repeated_field": 0,
+      "invalid_unknown_label": 0,
+      "format_errors": 0,
+      "fenced": 0
+    },
+    "theirs": {
+      "pairs": 99,
+      "precision": 0.9767441860465116,
+      "recall": 0.9130434782608695,
+      "accuracy": 0.9494949494949495,
+      "type_accuracy": 0.98,
+      "type_accuracy_of": 50,
+      "unclear": 4,
+      "invalid": 0,
+      "invalid_not_json": 0,
+      "invalid_repeated_field": 0,
+      "invalid_unknown_label": 0,
+      "format_errors": 0,
+      "fenced": 0
+    }
+  },
+  "all": {
+    "pairs": 297,
+    "label_agreement": 0.9696969696969697,
+    "invalid_ours": 0
+  }
+}
