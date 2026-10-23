@@ -11,3 +11,7 @@ One line per GPU run.
 | 2026-10-22 | M1-05 | Baseline, 200 pairs x 3 models (scripts/run_baseline.py) | L4 x3 | 9.0 (3.0 + 3.4 + 2.6) | about $0.12 |
 | 2026-10-22 | M1-06 | Smoke test, 8 pairs x 3 test versions x 2 models (scripts/run_baseline.py --limit 8). A first try stopped on the Mac before reaching Modal (no GPU) | L4 x2 | 3.3 (1.3 + 2.0) | about $0.04 |
 | 2026-10-22 | M1-06 | Baseline v2, new prompt, 200 pairs x 3 test versions x 2 models (scripts/run_baseline.py) | L4 x2 | 14.5 (6.6 + 7.9) | about $0.19 |
+| 2026-10-22 | M1-07 | Trial 1, 20 training steps (scripts/train.py --stage trial). Stopped before training: the example check found the template's empty think block | L4 | 8 or less (app time 17:34-17:42 PDT, upper bound) | about $0.11 or less |
+| 2026-10-22 | M1-07 | Template probe, one tokenizer render (scratch script, CPU only, no GPU) | CPU | under 1 | under $0.01 |
+| 2026-10-22 | M1-07 | Trial 2, 20 training steps. Trained, but results could not be sent back (PyTorch values) | L4 | 6 or less (app time 17:44-17:50 PDT) | about $0.08 or less |
+| 2026-10-22 | M1-07 | Trial 3, 20 training steps plus 8 validation answers: all worked. 7.4 s a step, peak VRAM 4.5 GiB | L4 | 9 or less (app time 17:51-18:00 PDT; training 2.5 min, model loads 3.3 min) | about $0.12 or less |
