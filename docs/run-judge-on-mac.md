@@ -79,3 +79,9 @@ Privacy: the request and the answer contain memory text. Do not write either to 
 ## How well it does
 
 On the frozen test set (200 pairs, as is / swapped / no dates): precision 0.98 / 0.94 / 0.98, recall 0.96 / 0.96 / 0.94, 0 invalid answers in 600, and 0.91 seconds per pair on an Apple M4 Pro. Aeverum's bar is precision 0.85 and recall 0.80. Full table, the comparison with the trained adapter on Modal, and the known weak spots: `results/m1/gguf-v1/summary.md`.
+
+## Pinning (for Aeverum's step 12)
+- GGUF file SHA-256: `b6d930ce83c06512d12da2549b219edda8506e57404007acd877de29308172a9`
+- Ollama model digest of `m1-judge:v1` (the SHA-256 of its manifest; `ollama list` shows the first 12 characters, `4490a9bd0a72`): `4490a9bd0a72dd944f6366f4f7cce9c97371682f70b9992497af59f6854bab11`, created with Ollama 0.24.0 on 2026-10-23. Recreating the model from the same GGUF and `ollama/Modelfile` should give the same digest. The GGUF SHA-256 above is the stable pin.
+- Prompt SHA-256: `83d14d39a2115eb1f4d2d461581673090ec25d0a6f05d444cb2da8b756a2865c`
+- Logging: `scripts/run_ollama.py` writes memory text only to the results file you name, never to logs. Ollama's own server log does not record prompt text by default, but that has not been checked here.
