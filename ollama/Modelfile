@@ -1,0 +1,20 @@
+# M1 contradiction judge v1 for Ollama. How to set it up and call it: docs/run-judge-on-mac.md
+# The GGUF file lives outside the repo (model files never go in git). Get it from the private
+# Hugging Face repo eskora/m1-contradiction-judge-qwen3-4b-gguf and check its SHA-256 first.
+FROM ~/models/m1-judge/m1-contradiction-judge-qwen3-4b-Q4_K_M.gguf
+
+# The chat template the model was trained with (Qwen3-4B-Instruct-2507's ChatML): each message is
+# <|im_start|>role, a new line, the text, <|im_end|> and a new line; then the assistant's turn starts.
+# Send the system message from judge.prompt (SHA-256 83d14d39...2865c) and the pair as the user message.
+TEMPLATE """{{- range .Messages }}<|im_start|>{{ .Role }}
+{{ .Content }}<|im_end|>
+{{ end }}<|im_start|>assistant
+"""
+
+# Greedy answers, as in training and scoring: always the most likely next word.
+PARAMETER temperature 0
+PARAMETER num_ctx 2048
+PARAMETER num_predict 256
+PARAMETER repeat_penalty 1
+PARAMETER stop "<|im_end|>"
+PARAMETER stop "<|endoftext|>"
