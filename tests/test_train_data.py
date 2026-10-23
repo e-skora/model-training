@@ -15,6 +15,7 @@ from judge.format import answer_text, format_pairs
 from judge.generate import TEMPLATE_BASE
 from judge.train_data import (
     CHOICE_RULE,
+    EMPTY_THINK,
     IGNORE,
     build_rows,
     check_masks,
@@ -107,6 +108,21 @@ def test_template_that_differs_from_scoring_stops():
 
     with pytest.raises(ValueError, match="would not match scoring"):
         build_rows(PAIRS, OddTokenizer())
+
+
+def test_qwen3_empty_think_block_is_left_out_of_the_answer():
+    # The real Qwen3-4B-Instruct-2507 template does this (checked on Modal, 2026-10-22).
+    class Qwen3Tokenizer(ChatMLTokenizer):
+        def apply_chat_template(self, messages, tokenize, add_generation_prompt):
+            text = super().apply_chat_template(messages, tokenize, add_generation_prompt)
+            if add_generation_prompt:
+                return text
+            head, _, last = text.rpartition("<|im_start|>assistant\n")
+            return head + "<|im_start|>assistant\n" + EMPTY_THINK + last
+
+    rows = build_rows(PAIRS, Qwen3Tokenizer())
+    assert all("<think>" not in r["text"] for r in rows)
+    assert all(r["text"] == r["prompt"] + r["answer"] + "<|im_end|>" for r in rows)
 
 
 def test_right_mask_passes_and_counts_answer_tokens():
@@ -207,8 +223,9 @@ def load_train_script():
 def test_train_settings():
     script = load_train_script()
     baseline = json.loads((REPO / "results/m1/baseline-v2/qwen3-4b-instruct-2507.meta.json").read_text())
-    # Trained on the same base files the untrained baseline used.
-    assert (script.BASE_REPO, script.BASE_REVISION) == (baseline["model"], baseline["model_revision"])
+    # Trained on the same base files the untrained baseline used: Unsloth swapped in the 4-bit copy.
+    assert script.BASE_REPO == baseline["model"] + "-unsloth-bnb-4bit"
+    assert len(script.BASE_REVISION) == 40
     assert script.HF_REPO == "eskora/m1-contradiction-judge-qwen3-4b-lora"
     assert script.TRAIN["per_device_train_batch_size"] * script.TRAIN["gradient_accumulation_steps"] == 16
     assert 1 <= script.TRAIN["num_train_epochs"] <= 3

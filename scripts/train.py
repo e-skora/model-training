@@ -28,9 +28,11 @@ app = modal.App("m1-train")
 volume = modal.Volume.from_name("m1-train", create_if_missing=True)
 RUNS = "/runs"  # where the volume is mounted on the GPU machine
 
-BASE_REPO = "unsloth/Qwen3-4B-Instruct-2507"
-# The same commit the untrained baseline v2 used (results/m1/baseline-v2/qwen3-4b-instruct-2507.meta.json).
-BASE_REVISION = "992063681dc2f7de4ee976110199552935cad284"
+# Asked for "unsloth/Qwen3-4B-Instruct-2507" in 4-bit, Unsloth loads this ready-made 4-bit copy
+# instead and ignores the revision (its log says so). So the baseline's answers came from this
+# repo, whose only upload is this commit (2025-08-06). Naming it directly makes the pin real.
+BASE_REPO = "unsloth/Qwen3-4B-Instruct-2507-unsloth-bnb-4bit"
+BASE_REVISION = "7744afa8566e264af1a92a806d8d9aae00cc7c78"
 HF_REPO = "eskora/m1-contradiction-judge-qwen3-4b-lora"  # private until Step 9
 TRAIN_PATH = "data/m1/train.jsonl"
 VALID_PATH = "data/m1/valid.jsonl"
@@ -179,6 +181,7 @@ def train(run, train_pairs, valid_pairs, max_steps=0, eval_steps=None):
 
     return {
         "run": run,
+        "loaded_model": model.config._name_or_path,
         "planned_steps": total,
         "global_step": trainer.state.global_step,
         "warmup_steps": config.warmup_steps,
@@ -220,6 +223,7 @@ def answer(run, checkpoint, items):
         results, settings = answer_items(model, tokenizer, items, {}, BATCH_SIZE)
     return {
         "checkpoint": checkpoint,
+        "loaded_model": model.base_model.config._name_or_path,
         "results": results,
         "load_seconds": round(loaded - start, 1),
         "answer_seconds": round(time.time() - loaded, 1),

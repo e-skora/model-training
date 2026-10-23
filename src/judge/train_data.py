@@ -17,6 +17,10 @@ from judge.generate import TEMPLATE_BASE
 
 # Labels set to this value are not trained on (the Hugging Face convention).
 IGNORE = -100
+# The Qwen3 template writes this empty thinking block into the last assistant turn of a
+# whole conversation, but not into the scoring prompt. Qwen3-4B-Instruct-2507 never thinks
+# out loud, so the model is trained to answer straight after the prompt, without it.
+EMPTY_THINK = "<think>\n\n</think>\n\n"
 
 
 def sha256_file(path):
@@ -39,7 +43,8 @@ def build_rows(pairs, tokenizer, seed=None, template_kwargs=None):
 
     `text` is the prompt, then the answer, then the end-of-turn token. It is
     checked against the template's own rendering of the whole conversation,
-    so it is the model's own format, not a copy of it.
+    so it is the model's own format, not a copy of it. The one difference
+    allowed is EMPTY_THINK before the answer, which `text` leaves out.
     """
     examples = format_pairs(pairs) if seed is None else format_pairs(pairs, seed=seed)
     end = tokenizer.eos_token
@@ -53,7 +58,8 @@ def build_rows(pairs, tokenizer, seed=None, template_kwargs=None):
         )
         text = prompt + answer + end
         # The template may close the turn with a newline after the end token; we stop at the token.
-        if full != text and full != text + "\n":
+        allowed = {text, text + "\n", prompt + EMPTY_THINK + answer + end, prompt + EMPTY_THINK + answer + end + "\n"}
+        if full not in allowed:
             raise ValueError(f"{example['id']}: the chat template's full conversation is not prompt + answer + "
                              f"{end!r}, so training would not match scoring")
         rows.append({"id": example["id"], "swapped": example["swapped"], "dates": example["dates"],
