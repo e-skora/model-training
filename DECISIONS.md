@@ -110,3 +110,6 @@ Choices made while preparing the Hugging Face repos and the README (M1 Step 9). 
 
 ### D-034 (2026-10-23, Elias): Publish M1
 Elias's answer, "aa", to two questions: (1) publish the three Hugging Face repos (the recommendation was yes); (2) make the GitHub repo public as it is, option A, with its internal files that name Aeverum. The code gets the Apache 2.0 license (`LICENSE`), the same as the base model. This carries out D-007.
+
+### D-034 (2026-10-23, Elias): Go public, GitHub included as it is
+"yes and a", answering two questions: publish the three Hugging Face repos (yes), and make the GitHub repo public as it is, including the internal files that name Aeverum (option A). The code is under Apache 2.0 (`LICENSE`, the canonical text from apache.org), the same license as the base model. The dataset stays CC BY 4.0 (D-033).

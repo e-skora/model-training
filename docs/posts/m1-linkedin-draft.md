@@ -15,4 +15,6 @@ What I learned: the test set matters more than the training. Two independent che
 
 Next: improving the same model with reinforcement learning.
 
-Model, data and code: [links]
+Model (runs in Ollama): https://huggingface.co/eskora/m1-contradiction-judge-qwen3-4b-gguf
+Data: https://huggingface.co/datasets/eskora/memory-contradiction-pairs
+Code and every decision along the way: https://github.com/e-skora/model-training
