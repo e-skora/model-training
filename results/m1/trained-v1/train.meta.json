@@ -1201,5 +1201,21 @@
       }
     },
     "wall_seconds": 408.9
+  },
+  "upload": {
+    "checkpoint": "epoch-2",
+    "repo": "eskora/m1-contradiction-judge-qwen3-4b-lora",
+    "commit": "1d9ebbf66e1a2abcad9932932bb7d810a38c59b9",
+    "commit_url": "https://huggingface.co/eskora/m1-contradiction-judge-qwen3-4b-lora/commit/1d9ebbf66e1a2abcad9932932bb7d810a38c59b9",
+    "private": true,
+    "files": [
+      "README.md",
+      "adapter_config.json",
+      "adapter_model.safetensors",
+      "chat_template.jinja",
+      "tokenizer.json",
+      "tokenizer_config.json",
+      "train.meta.json"
+    ]
   }
 }
