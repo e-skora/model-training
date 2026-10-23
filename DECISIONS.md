@@ -90,3 +90,6 @@ The prompt and the generation settings stay fixed and get a SHA-256 each, so Aev
 
 ### D-029 (2026-10-22, Default): Two more reading rules, so `unclear` stays rare and honest
 A blind review of the training set (`reviews/M1-06-blind-review.md`) found that about half the `unclear` pairs could actually be decided, and that one pattern was labelled two different ways. Two rules were added to the SPEC. Rule 4: do not invent an escape; different current facts about the same thing are a contradiction, and `unclear` is only for pairs a truly missing fact decides. Rule 5: different days, times or places with no exclusive word are not a contradiction. Both rules agree with the frozen test set (for example t-036 is `merely_related`).
+
+### D-030 (2026-10-22, Default): Keep only `unclear` pairs two judges agree on
+After two rounds of fixes, about 31 of 80 `unclear` pairs were still disputed (`reviews/M1-06-blind-review-r2.md`). They were dropped, not relabelled. Train is now 1,522 pairs with 47 `unclear` (3%); valid is 99 pairs. A smaller, trustworthy `unclear` set is better than a larger one that teaches the model to dodge, because precision matters most to Aeverum.
