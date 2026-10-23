@@ -536,8 +536,9 @@ def check_hugging_face(report, root=REPO):
 
 def notes(report, files, root=REPO):
     """Things that go public with the GitHub repo, for Elias to know. They do not fail the check."""
+    this_script = "scripts/prepublish_check.py"  # it names what it looks for
     text_files = {p: head_text(p, root) for p, size in files.items()
-                  if size <= BIG_FILE_BYTES and not p.endswith((".jsonl", ".lock"))}
+                  if size <= BIG_FILE_BYTES and not p.endswith((".jsonl", ".lock")) and p != this_script}
     aeverum = sorted(p for p, t in text_files.items() if "aeverum" in t.lower())
     named = sorted(p for p, t in text_files.items() if BANNED_NAMES.search(t))
     homes = sorted(p for p, t in text_files.items() if HOME_PATH.search(t))

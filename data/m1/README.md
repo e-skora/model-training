@@ -1,5 +1,7 @@
 # M1 data: memory contradiction judge
 
+**Final counts (2026-10-22, D-030).** After the second blind review, the 31 `unclear` pairs it still disputed were dropped. The files as used for training and published are: `train.jsonl` 1,522 pairs (697 contradiction, 255 update, 253 compatible_detail, 270 merely_related, 47 unclear), SHA-256 `a41de541d2a25c564009e232b2d75ccb714c5a668dcd30ef73004fae778231b1`; `valid.jsonl` 99 pairs (46, 17, 16, 18, 2), SHA-256 `0476bc57e19460a10f1a3299f17e570b0d7926cb893d6ce5d57d49f356e042d3`; `test.jsonl` unchanged. The sections below tell the story in order, so their counts are the ones from each stage. Details: `reviews/M1-06-blind-review-r2.md`.
+
 ## The files
 
 - `test.jsonl`: the test set. 200 pairs of memories, one pair per line. The model is scored on these and never trained on them. Frozen (SHA-256 in `STATE.md`).

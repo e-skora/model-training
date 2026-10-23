@@ -61,7 +61,7 @@ Plain meanings. Add a term the first time it shows up.
 - **num_beams:** how many candidate answers the model builds side by side before picking one. `num_beams=1` means one, which together with no sampling is greedy decoding.
 - **Revision (commit):** the exact saved version of a model's files on Hugging Face, named by a long code. Loading the same revision gives the same files every time.
 - **False alarm:** the model says "contradiction" when there is none. False alarms lower precision; missed contradictions lower recall.
-- **Validation set:** a small set of examples kept apart from the training set and checked now and then during training, to see whether the model is still learning the rule or only memorising. The model never trains on it. Ours is `data/m1/valid.jsonl`, 102 pairs.
+- **Validation set:** a small set of examples kept apart from the training set and checked now and then during training, to see whether the model is still learning the rule or only memorising. The model never trains on it. Ours is `data/m1/valid.jsonl`, 99 pairs.
 - **Overfitting:** when a model memorises its practice examples instead of learning the rule behind them. It keeps getting better on the training set but gets worse on new examples, like a student who memorised last year's answers.
 - **Unclear (label):** the third answer the judge may give when the two memories alone cannot settle whether they clash, because it depends on a fact neither gives. Aeverum turns it into "needs manual review" instead of a guess.
 - **Swapped / no-dates versions:** two copies of the frozen test set made in memory, never saved: one with the two memories in the other order, one with the dates removed. They check that the judge does not depend on order or dates.
@@ -99,3 +99,10 @@ Plain meanings. Add a term the first time it shows up.
 - **16-bit weights:** the model's numbers at full working precision (about 8 GB for our model). Unsloth merges the adapter into these, not into the 4-bit copy used for training, then quantizes the result.
 - **Label agreement:** the share of pairs where two versions of the judge give the same label. Step 8 needed at least 97% between the Mac file and the trained adapter on Modal.
 - **Greedy answers (temperature 0):** the model always picks its most likely next word, so the same question gets the same answer every time.
+- **Dataset card:** a dataset's info page on Hugging Face (its `README.md`): what is in it, how it was made, its counts, fingerprints, license and limits.
+- **Card metadata:** the short block at the top of a model or dataset card, between two `---` lines, that Hugging Face reads: license, base model, language, tags, and for a dataset which file is which split.
+- **base_model:** the card metadata field that names the model this one was made from. Hugging Face uses it to link the two and to show "fine-tuned from" or "adapter of".
+- **CC BY 4.0:** a license for data and writing: anyone may use it for anything, including paid work, if they credit the author. Our dataset uses it.
+- **Apache 2.0:** a license for software and models: anyone may use, change and sell it, if they keep the license notice. Qwen3-4B uses it, so our models do too.
+- **Pre-publish check:** `scripts/prepublish_check.py`. Before anything goes public, it looks for secrets, model files in git, em dashes, personal data and numbers in the cards that do not match the results. It changes nothing; it only reports.
+- **Round half up:** rounding where an exact half goes up, so 0.965 becomes 0.97. Python's usual rounding of decimals can give 0.96 instead, because 0.965 is stored as a hair less than 0.965.

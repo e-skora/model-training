@@ -99,3 +99,11 @@ Training (M1 Step 7) saved a LoRA adapter after each of 3 epochs. The validation
 
 ### D-032 (2026-10-23, Elias): Ship the q4_k_m GGUF as it is, below the 97% agreement bar
 "Accept the current Mac file below the 97% bar and go on to the test-set run." The GGUF (`b6d930ce...72a9`, Unsloth's standard export) gave the same label as the Step 7 adapter on 287 of 297 validation answers (96.6%), with 0 invalid answers. The gap comes mostly from the merge into the original 16-bit weights, then the q4_k_m squeeze, not from the template; validation scores stay about the same (`results/m1/gguf-v1/validation-check.md`). The re-export that merges into the 4-bit training weights is not done. The frozen test set is run once, through Ollama, to report this file's score.
+
+### D-033 (2026-10-23, Default): How M1 is described in public
+Choices made while preparing the Hugging Face repos and the README (M1 Step 9). Nothing is public yet (D-007).
+- **Dataset license: CC BY 4.0** (`cc-by-4.0`). Anyone may use the pairs, including in paid work, if they credit the author. It is the usual license for open datasets, and the data is all made up, so there is nothing to protect. The models keep the base model's Apache 2.0.
+- **The public cards and the README do not name Aeverum or Mara Lindqvist.** They say "a personal memory app", and give its target (precision 0.85, recall 0.80) as that app's target. The pre-publish check fails if either name appears in a card, the README or a post. Many internal files (plans, decisions, reviews) do name Aeverum; whether those go public with the GitHub repo is Elias's call at the go-ahead.
+- **Who wrote the data is said plainly:** "Claude, a language model made by Anthropic", rather than "an AI".
+- **Card metadata:** the GGUF names `Qwen/Qwen3-4B-Instruct-2507` as `base_model` with `base_model_relation: finetune`; the adapter names the 4-bit copy it attaches to, `unsloth/Qwen3-4B-Instruct-2507-unsloth-bnb-4bit`, with `base_model_relation: adapter`. That copy's own card names the Qwen original, so the Hub links all three.
+- **The cards live in `hf/`** and go to Hugging Face only through `scripts/publish_hf.py`, which uploads only to private repos. A card edited on the website would be overwritten by the next upload, and the pre-publish check fails if the two differ.

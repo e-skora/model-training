@@ -115,3 +115,19 @@ The Mac file agreed with the trained adapter on 96.6% of validation labels, just
 ## 2026-10-23: Lesson: a fidelity bar and a quality bar answer different questions
 The Mac file missed the 97% agreement bar on validation (96.6%), yet on the test set it scored as well as the adapter or better (recall without dates 0.94 against 0.90), and the two agreed on 97.3%. Where they differed, the Mac file was right 10 times and the adapter 4. Agreement measures "is it the same model"; scores against the right answers measure "is it as good". Elias chose to ship on the second (D-032).
 **Lesson:** when a copy of a model misses an agreement bar, also score it against the right answers on the validation set before deciding, and put both numbers in front of the person who decides.
+
+## 2026-10-23: Lesson: Python rounds 0.965 down
+Rescoring the saved answers for the model cards, `f"{193/200:.2f}"` printed 0.96, while the results files say 0.97. The float 0.965 is stored as a hair less than 0.965, so it rounds down. The summaries had been written by hand, half up. Four accuracy numbers would have disagreed between the cards and the results.
+**Lesson:** round from the exact counts (`Decimal(top) / Decimal(bottom)`, half up) in one function, and use that function wherever a number is printed for people.
+
+## 2026-10-23: Lesson: a check that passes on its first run proves little
+The pre-publish check passed on the first full run. Tests that break a card on purpose (a wrong score, a stray number, a changed prompt line, a token in a deleted file) showed what it really catches, and one of them found a gap: the phone pattern missed a 3-2-3 digit layout.
+**Lesson:** for every check, write a test that feeds it the problem and expects a failure, before trusting a PASS.
+
+## 2026-10-23: Lesson: the same count written in many places goes stale
+D-030 dropped 31 pairs (train 1,522, valid 99), but `data/m1/README.md` still said 1,550 and 102 on its first lines, and the glossary said 102. Readers of the published dataset would have seen two different counts.
+**Lesson:** when a decision changes a count, search the repo for the old number and update every place that states it as current. Better: state it in one place and point to it.
+
+## 2026-10-23: Lesson: run the code in a card exactly as written
+The model card's Python example was copied out of the card and run against the real model on the Mac. It printed the recorded test answer, byte for byte. The pre-publish check now also compares the card's prompt with `src/judge/prompt.py` and its Modelfile with `ollama/Modelfile`, so the two cannot drift apart.
+**Lesson:** code meant for strangers gets run once, as they would run it, before it is published.
