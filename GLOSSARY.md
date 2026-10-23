@@ -88,3 +88,14 @@ Plain meanings. Add a term the first time it shows up.
 - **Private repo:** a Hugging Face repo that only its owner can see. Without a login, Hugging Face answers "not allowed" (401).
 - **Empty think block:** `<think></think>` with nothing inside. Qwen3's chat template adds it to a whole conversation, but our model never thinks out loud, so it is left out of the training text.
 - **Inferred (a claim):** worked out from evidence, but not seen directly in a record. "The baseline most likely loaded the same files" is inferred; "training loaded these files" is recorded. (Not to be confused with *inference*, which also means a model answering.)
+- **GGUF:** a model saved as one file, ready for llama.cpp and Ollama to run on an ordinary computer. It holds the model's numbers, its tokenizer and its chat template.
+- **llama.cpp:** free software that runs language models on ordinary computers, including Macs, without a big GPU. It also has the tools that turn a model into a GGUF and shrink it. Ollama uses the same file format.
+- **Ollama:** an app that runs models on your own computer and answers questions on a local web address (`http://127.0.0.1:11434`), so other programs on the Mac can ask the model things.
+- **Modelfile:** Ollama's recipe file for a model: which GGUF to use, which chat template to wrap messages in, and settings such as temperature. Ours is `ollama/Modelfile`.
+- **Chat template:** the exact wrapping text a model expects around each message, such as `<|im_start|>user` before a question and `<|im_end|>` after it. A model trained with one template can give broken answers with another.
+- **Quantization:** storing each of the model's numbers with fewer bits, so the file is smaller and runs faster, at the cost of a little accuracy. Like saving a photo at lower quality.
+- **q4_k_m:** a common quantization setting from llama.cpp: about 4 bits for most numbers, a bit more for the ones that matter most. Our 4-billion-parameter judge shrinks from about 8 GB to 2.5 GB.
+- **Merge (an adapter):** adding the trained adapter's changes into the model's own numbers, so base model and adapter become one model that needs no add-on.
+- **16-bit weights:** the model's numbers at full working precision (about 8 GB for our model). Unsloth merges the adapter into these, not into the 4-bit copy used for training, then quantizes the result.
+- **Label agreement:** the share of pairs where two versions of the judge give the same label. Step 8 needed at least 97% between the Mac file and the trained adapter on Modal.
+- **Greedy answers (temperature 0):** the model always picks its most likely next word, so the same question gets the same answer every time.

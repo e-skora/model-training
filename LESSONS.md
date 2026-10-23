@@ -95,3 +95,15 @@ Codex found three ways the Step 7 scripts could quietly spoil saved results. A s
 The Step 7 summary said the baseline "used the same base files". The code and the file history make that very likely, but the baseline never recorded what it loaded, so nobody saw it. Codex asked for the claim to say what the evidence proves.
 **Lesson:** for every "same as" claim in a result, ask whether a record shows it or it is worked out. If it is worked out, say so and point to the evidence.
 
+
+## 2026-10-23: Lesson: attach an adapter the way the save function expects
+Unsloth's GGUF save merges the adapter only when it is called on the adapter model itself. `judge.load` attaches the adapter with `peft.PeftModel.from_pretrained`, which is fine for answering, but a save call on that model reaches the base model underneath and would write the base without the adapter. Unsloth 2026.10.7 refuses that case, and its source says so. The export loads the adapter folder with `FastLanguageModel.from_pretrained`, as Unsloth asks, and stops unless the result is a PEFT model.
+**Lesson:** read the pinned library's source for a step that changes the model (merge, save, export), not only the docs page. The docs page shows the one-line call; the source shows what it needs to be called on.
+
+## 2026-10-23: Mistake: Modal wants local code added last
+The first export try stopped on the Mac before reaching Modal: the shared image adds our `judge` code last, and the export added more build steps after it. Modal refuses that order. No GPU was used. `src/judge/modal_image.py` now offers `packages` (the image without our code), so a job can add its own steps and then the code.
+**Lesson:** when one job needs a bigger image, build on the image before the local code is added, and add the code last.
+
+## 2026-10-23: Lesson: a stuck download can be the transfer method, not the network
+The first download of the GGUF to the Mac sat at 0 bytes for 12 minutes. Hugging Face stores new large files with its "Xet" system, and the `hf` command's Xet path hung here. A plain web request for the same file worked at once, so `HF_HUB_DISABLE_XET=1` was set and the download moved. The Mac's line then gave about 1 MB a second, so 2.5 GB took about 45 minutes.
+**Lesson:** when a download shows no progress, test the same file with a plain request before blaming the network, and check the speed early to plan around it.
