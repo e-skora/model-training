@@ -78,4 +78,4 @@ Privacy: the request and the answer contain memory text. Do not write either to 
 
 ## How well it does
 
-See `results/m1/gguf-v1/summary.md` for the scores on the frozen test set, the comparison with the trained adapter on Modal, and the speed on the Mac.
+On the frozen test set (200 pairs, as is / swapped / no dates): precision 0.98 / 0.94 / 0.98, recall 0.96 / 0.96 / 0.94, 0 invalid answers in 600, and 0.91 seconds per pair on an Apple M4 Pro. Aeverum's bar is precision 0.85 and recall 0.80. Full table, the comparison with the trained adapter on Modal, and the known weak spots: `results/m1/gguf-v1/summary.md`.
