@@ -24,7 +24,7 @@ the recorded adapter upload is not the one the validation set chose.
 
 import modal
 
-from judge.modal_image import image
+from judge.modal_image import packages
 
 app = modal.App("m1-export-gguf")
 
@@ -41,7 +41,7 @@ LLAMA_CPP_TAG = "b11798-mix-f8a7950"
 MAX_SEQ_LENGTH = 2048  # the same as judge.load
 
 # libgomp1 and libcurl4 for the prebuilt llama.cpp tools; git, cmake and a compiler only if Unsloth must build it.
-export_image = image.apt_install("git", "curl", "libgomp1", "libcurl4", "cmake", "build-essential")
+export_image = packages.apt_install("git", "curl", "libgomp1", "libcurl4", "cmake", "build-essential").add_local_python_source("judge")
 
 
 @app.function(

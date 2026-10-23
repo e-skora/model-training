@@ -10,7 +10,9 @@ Change pins here only, then rerun `scripts/hello_gpu.py` to prove the image stil
 
 import modal
 
-image = (
+# The installed packages alone. A job that needs more build steps (scripts/export_gguf.py)
+# adds them to this, then our code last, as Modal requires.
+packages = (
     modal.Image.debian_slim(python_version="3.11")
     .uv_pip_install(
         "accelerate==1.15.0",
@@ -29,6 +31,6 @@ image = (
         "xformers==0.0.35",
     )
     .env({"HF_HOME": "/model_cache"})
-    # Our own code (the shared prompt), so jobs can import `judge` on the GPU machine.
-    .add_local_python_source("judge")
 )
+# Our own code (the shared prompt), so jobs can import `judge` on the GPU machine.
+image = packages.add_local_python_source("judge")
