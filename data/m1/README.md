@@ -4,9 +4,9 @@
 
 - `test.jsonl`: the test set. 200 pairs of memories, one pair per line. The model is scored on these and never trained on them. Frozen (SHA-256 in `STATE.md`).
 - `spotcheck-test.md`: 20 pairs from the test set, picked at random with seed 7, for Elias to check by hand.
-- `train.jsonl`: the training set. 1,500 pairs the model learns from (Step 6).
-- `valid.jsonl`: the validation set. 100 more pairs, used during training only to watch for overfitting (see below). Never trained on.
-- `spotcheck-train.md`: 20 pairs from the training set, picked with seed 11, ready for a reviewer (D-028: Elias does not spot-check the training set).
+- `train.jsonl`: the training set. 1,550 pairs the model learns from (Step 6; 1,500 before the M1-06b fixes below).
+- `valid.jsonl`: the validation set. 102 more pairs, used during training only to watch for overfitting (see below). Never trained on.
+- `spotcheck-train.md`: 20 pairs from the training set, picked with seed 11 before the M1-06b fixes, so some labels on it are out of date. Not used (D-028: a separate agent reviews the training set, not Elias).
 - `train-writing-brief.md`: the exact instructions the writers of the training and validation pairs followed.
 
 Each line of `test.jsonl` looks like this:
@@ -70,18 +70,20 @@ Once Elias has spot-checked it, the test set is frozen: it is never edited again
 
 ## The training and validation sets (Step 6, 2026-10-22)
 
-`train.jsonl` and `valid.jsonl` use the same format as the test set, with a third label, `unclear` (D-025): the text alone cannot settle the pair, because whether the memories clash depends on a fact neither one gives, such as the scope or the time ("is allergic to cats" / "has a cat"). Silent changes (a current fact stated differently months apart, with no change wording) are never `unclear`; they stay `contradiction` under reading rule 1.
+`train.jsonl` and `valid.jsonl` use the same format as the test set, with a third label, `unclear` (D-025): the text alone cannot settle the pair, because whether the memories clash depends on a fact neither one gives, such as the scope or the time ("is allergic to cats" / "has a cat"). Silent changes (a current fact stated differently months apart, with no change wording) are never `unclear`; they stay `contradiction` under reading rule 1. Since D-029, `unclear` also needs reading rules 4 and 5: an invented escape ("maybe she has two dogs") does not make a pair unclear, and different days, times or places with no exclusive word are not a contradiction.
 
 | Label | Type | Train | Valid |
 |---|---|---|---|
-| contradiction | | 675 (45%) | 45 |
+| contradiction | | 697 (45%) | 46 |
 | non_contradiction | update | 255 | 17 |
-| non_contradiction | compatible_detail | 248 | 16 |
-| non_contradiction | merely_related | 248 | 17 |
-| unclear | | 74 (5%) | 5 |
-| **Total** | | **1,500** | **100** |
+| non_contradiction | compatible_detail | 253 | 16 |
+| non_contradiction | merely_related | 270 | 18 |
+| unclear | | 75 (5%) | 5 |
+| **Total** | | **1,550** | **102** |
 
-Every pair has its own made-up person: 1,600 different people, none sharing a first name or surname with anyone in the test set.
+These are the counts after the M1-06b fixes (below). The first version had 675, 255, 248, 248 and 74 (1,500) in train and 45, 17, 16, 17 and 5 (100) in valid.
+
+Every pair has its own made-up person: 1,652 different people, none sharing a first name or surname with anyone in the test set.
 
 ### How they were made
 
@@ -117,6 +119,20 @@ Both print PASS. Besides the earlier checks, the checker now stops if:
 - a pair is a near copy of a test pair, or repeats or nearly copies a pair of the other file (in either order). Near copy means more than 60% shared words: the words of both memories, without the person's name, shared divided by all the different words of the two pairs together;
 - Mara or Lindqvist appears;
 - a sentence pattern is used more than 3 times in any block of 100 pairs (a memory shares at least 60% of its words with memories in 3 or more other pairs of its block);
-- a label or type with at least 20 pairs has change words in under 10% of them, fewer than 10% of updates are said without one, or fewer than 35% or more than 65% of a label or type (updates aside) is same-day.
+- a label or type with at least 20 pairs has change words in under 10% of them, fewer than 10% of updates are said without one, or fewer than 35% or more than 65% of a label or type (updates aside) is same-day;
+- among `unclear` reasons, the same start (the first 3 words, with the person's names counted as one word) is used more than 3 times in any 100 (added in M1-06b).
 
-SHA-256 as written: `train.jsonl` `a910ed814096c6f7ffbd3803cc93049977391ee48d72102e6e0fcfd71e65619d`, `valid.jsonl` `ef439b8d3e6b7ccf40055e632c6e91d1619868ae7f76ea87adc2a48fd57a2393` (not frozen; the review may still change pairs).
+### Fix of the `unclear` pairs (M1-06b, 2026-10-22)
+
+A blind review by a separate agent (`reviews/M1-06-blind-review.md`) found the contradiction and non-contradiction pairs clean, but about half the `unclear` pairs could be decided, and 73 of 74 `unclear` reasons started the same way. Reading rules 4 and 5 were added (D-029), and Claude Code then:
+
+- reread all 79 `unclear` pairs: 28 stay `unclear`, 25 became `contradiction`, 5 `compatible_detail` and 21 `merely_related`;
+- applied rule 5 to every pair of both files: 2 more contradictions (tr-0068, v-054) became `merely_related`;
+- wrote 52 new `unclear` pairs (tr-1501 to tr-1550, v-101, v-102) where a truly missing fact decides it and both readings are natural, such as "is vegan" / "takes honey in her tea";
+- rewrote every `unclear` reason so no two start the same way, and added that rule to the checker.
+
+The files grew to 1,550 and 102 pairs instead of losing 50 good pairs, and the label mix stayed at 45 / 50 / 5. Every change, pair by pair: `reviews/M1-06-fixes.md`.
+
+SHA-256 after the fixes: `train.jsonl` `22d2ff6f9f563b8712b96bf8ea6dfd2e2f01826a10ce8a367bf3ccab291bdacd`, `valid.jsonl` `5f61a3f36feed7ccb95a6b245a1e41443b2d8dd8218fcd4f5b67245ada31fc19` (not frozen; Claude in Cowork re-checks the `unclear` pairs first).
+
+SHA-256 of the first version, as written: `train.jsonl` `a910ed814096c6f7ffbd3803cc93049977391ee48d72102e6e0fcfd71e65619d`, `valid.jsonl` `ef439b8d3e6b7ccf40055e632c6e91d1619868ae7f76ea87adc2a48fd57a2393` (not frozen; the review may still change pairs).

@@ -62,3 +62,7 @@ Eight helper agents each wrote 200 pairs from one written brief (rules, hard cas
 ## 2026-10-22: Mistake: a smoke test failed on a typo before reaching the GPU
 The first run of the updated baseline runner stopped on the Mac with a `NameError` (a renamed loop variable), before Modal started any GPU. No cost.
 **Lesson:** the runner's local part has no test. A quick `--limit 8` smoke test caught it for free; keep doing that before every full run.
+
+## 2026-10-22: Mistake: `unclear` was used as a way out of hard calls
+The blind review found that about half the training set's `unclear` pairs could be decided. Their reasons invented an escape ("maybe she has two dogs", "maybe the inside is yellow and the outside white"), or they treated two activities on the same day with no times given as a possible clash. Almost every reason also started with the same words ("It depends on whether..."). Training on them would teach the model to dodge real contradictions. The fix (M1-06b) relabelled 51 of 79, wrote 52 new ones that are truly undecidable, and added a checker rule for the reason openings.
+**Lesson:** a "don't know" label needs a test written down before any pair is written: a fact that is truly missing decides it, and neither reading is more natural. Give writers the near-misses by name (invented escapes, same-day activities with no times), and check the reasons for templates, not only the memories.
