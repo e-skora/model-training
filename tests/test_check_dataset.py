@@ -76,3 +76,15 @@ def test_sentence_template_used_four_times_fails(tmp_path):
                 "merely_related") for i, p in enumerate(people)]
     result = run(write(tmp_path, "train.jsonl", bad))
     assert result.returncode != 0 and "sentence pattern used more than 3 times" in result.stderr
+
+
+def test_unclear_reasons_with_one_start_four_times_fail(tmp_path):
+    people = ["Ama Kito", "Bel Rusu", "Cai Domo", "Dov Pell"]
+    topics = [("keeps bees on the roof", "is scared of wasps"), ("sings in a choir", "has a sore throat"),
+              ("owns a red canoe", "never goes near rivers"), ("repairs old radios", "hates loud noise")]
+    bad = [pair(f"x-{i}", p, f"{p.split()[0]} {a}.", f"{p.split()[0]} {b}.", "unclear") | {
+           "reason": f"{p.split()[0]}'s case depends on {a.split()[-1]}."} for i, (p, (a, b)) in enumerate(zip(people, topics))]
+    result = run(write(tmp_path, "train.jsonl", bad))
+    assert result.returncode != 0 and "4 of 4 unclear reasons in a row start 'NAME case depends'" in result.stderr
+    result = run(write(tmp_path, "train.jsonl", bad[:3]))
+    assert result.returncode == 0, result.stdout + result.stderr

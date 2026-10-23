@@ -13,7 +13,10 @@ Quality checks on the file itself (the test-set lessons in LESSONS.md):
   35% and 65% of its pairs written on the same day;
 - no sentence pattern is used more than 3 times in any block of 100 pairs:
   a memory may not look like (TEMPLATE_SIMILARITY or more shared words)
-  memories in 3 or more other pairs of its block.
+  memories in 3 or more other pairs of its block;
+- `unclear` reasons do not follow one template: no more than 3 in any 100
+  of them start with the same REASON_OPENING words (the person's names
+  count as one word, "NAME").
 
 Walls between files:
 - `--against <test.jsonl>`: no name of a test person appears anywhere in
@@ -51,6 +54,9 @@ NEAR_COPY = 0.6
 TEMPLATE_SIMILARITY = 0.6
 BLOCK = 100
 MIN_GROUP = 20  # quality shares are only checked for groups this big
+REASON_OPENING = 3  # words that make up the start of a reason
+REASON_MAX = 3  # times one start may be used in any REASON_WINDOW unclear reasons
+REASON_WINDOW = 100
 
 
 def fail(line_no, message):
@@ -149,6 +155,26 @@ def check_templates(pairs):
                               f"{text!r} looks like memories in {len(alike)} other pairs, such as {examples}")
 
 
+def reason_opening(pair):
+    """The first REASON_OPENING words of a reason, lowercase, with the person's names as NAME and no possessive "s"."""
+    names = set(WORD.findall(pair["person"]))
+    tokens = ["NAME" if w in names else w.lower() for w in WORD.findall(pair["reason"]) if w != "s"]
+    return " ".join(tokens[:REASON_OPENING])
+
+
+def check_reasons(pairs):
+    """No start of an `unclear` reason is used more than REASON_MAX times in any REASON_WINDOW of them, in file order."""
+    unclear = [(line_no, reason_opening(pair)) for line_no, pair in pairs if pair["label"] == "unclear"]
+    for start in range(max(1, len(unclear) - REASON_WINDOW + 1)):
+        window = unclear[start : start + REASON_WINDOW]
+        if not window:
+            return
+        opening, count = Counter(o for _, o in window).most_common(1)[0]
+        if count > REASON_MAX:
+            line_no = [n for n, o in window if o == opening][REASON_MAX]
+            fail(line_no, f"{count} of {len(window)} unclear reasons in a row start {opening!r}; at most {REASON_MAX} may")
+
+
 def check_quality(labels, types, changed, same_day):
     groups = {"contradiction": labels["contradiction"], "unclear": labels["unclear"], **types}
     for name, count in groups.items():
@@ -241,6 +267,7 @@ def main():
         fail(None, f"{path} has no pairs")
     check_quality(labels, types, changed, same_day)
     check_templates(pairs)
+    check_reasons(pairs)
     walls = []
     if args.against:
         names = check_against(pairs, args.against)
@@ -263,6 +290,7 @@ def main():
     for name, count in groups:
         print(f"  {name}: {changed[name]} of {count} / {same_day[name]} of {count}")
     print(f"Sentence patterns: none used more than 3 times in any block of {BLOCK} pairs")
+    print(f"Unclear reasons: no start of {REASON_OPENING} words used more than {REASON_MAX} times in any {REASON_WINDOW}")
     for wall in walls:
         print(f"Wall: {wall}")
     print("PASS")
