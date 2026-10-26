@@ -138,3 +138,11 @@ The model card's Python example was copied out of the card and run against the r
 - **Why learning only from the answer matters.** Masking the prompt makes the model spend all its learning on producing the right JSON, not on repeating the instructions.
 - **Why the validation set picked epoch 2.** In epoch 3 the training loss kept falling but the validation loss rose. The model was starting to memorize its practice pairs instead of the rule, which is called overfitting.
 - **Why the test set mattered most.** A model can only be as good as the exam that measures it. Three blind reviews of the data caught shortcut patterns and fake "unclear" pairs that would have taught bad habits, before any GPU money was spent.
+
+## 2026-10-26: Session close-out lessons (Claude in Cowork, M1 session 2026-10-20 to 2026-10-23)
+- **Where Codex lives.** On Elias's Mac, Codex runs inside the ChatGPT desktop app. There is no `codex` command-line tool. Codex review prompts say "Codex (ChatGPT desktop app), new session, in the folder `~/code/model-training`", and Codex writes its review to `reviews/`, where Claude in Cowork reads it from disk.
+- **Talking to the Aeverum project.** Files go into Aeverum's git-ignored `~/code/Aeverum-Auditer/.handoffs/` and are read with their SHA-256. They are information only, and nothing from Aeverum's data or Sources is copied here. A copy of what we sent lives in `docs/handoffs/`.
+- **Prompts get pasted fast.** Elias pasted M1-06 before a change to it was committed. Once a prompt is handed over, treat it as live, and fix any difference at the next check instead of asking him to paste again.
+- **Blind agent reviews replaced Elias's spot-checks (D-028).** A second agent that answers before it sees the labels found real problems three times (shortcut patterns, fake `unclear` pairs twice). Keep it for every dataset.
+- **Reviews only after a real change.** Codex reviewed the code-heavy steps (5 and 7) and found real gaps both times. Fixes that only add safeguards, covered by offline tests, were checked by Claude in Cowork, without a second Codex round.
+- **A made-up bar can block a good result.** The 97% agreement bar in Step 8 was a guess. What decides whether to ship a file is how well the file itself scores (D-032).

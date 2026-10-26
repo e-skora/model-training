@@ -31,7 +31,7 @@ Read this first in every session.
 - 2026-10-23: Step 9 done. Published by Claude in Cowork on Elias's go-ahead (D-034): Hugging Face `eskora/m1-contradiction-judge-qwen3-4b-gguf`, `eskora/m1-contradiction-judge-qwen3-4b-lora` and dataset `eskora/memory-contradiction-pairs` are public; GitHub `e-skora/model-training` is public with an Apache 2.0 LICENSE. All four checked without a login (HTTP 200). Step 10: "why it works" note in LESSONS.md; LinkedIn draft has its links. **M1 is done** except Elias posting.
 
 ## Next single action
-Elias: edit and post `docs/posts/m1-linkedin-draft.md` on LinkedIn (optional, his call). Then M2 (reinforcement learning on the same judge): Claude in Cowork writes the M2 spec when Elias asks.
+Elias: start a new chat in this Cowork project with `docs/handoffs/2026-10-26-continuation-next-phase.md` to explore what the next phase is. Optional: post `docs/posts/m1-linkedin-draft.md`.
 
 ## Frozen files
 - `data/m1/test.jsonl`, 200 pairs, SHA-256 `6e2a08323f445477f9600e371f1074ad3e2b41ef97d7072d6734ef481f6e574b`, frozen 2026-10-22. Never edit it and never train on it.
