@@ -33,9 +33,14 @@ SMOKE_NAME = NAME + "-smoke"
 POOL_PATH = "data/m2/rl-pool.jsonl"
 WRONG_PATH = "data/m2/rl-pool-always-wrong.jsonl"
 SUMMARY_PATH = "results/m2/pool/summary.md"
-BATCH_SIZE = 16  # prompts per generate call, so 128 answers at a time
+# Prompts per generate call, so 32 answers at a time. 16 prompts (128 answers) ran out of the
+# L4's 22 GiB in the first smoke run: Unsloth's Qwen3 answer code grows memory with every answer.
+BATCH_SIZE = 4
 SAMPLE_SEED = 3407  # torch's random seed for the sampling
 SMOKE_PAIRS = 16
+# The full run is split over this many L4s at once: the smoke run projected 54.5 minutes in one
+# container, too close to the 60-minute timeout. Each part loads the model once more (about 75 s).
+PARTS = 4
 EXAMPLE_SEED = 5  # which mixed pairs the summary shows
 L4_PER_SECOND = 0.000222  # https://modal.com/pricing (as in the M2 SPEC)
 # v1 as D-031 pinned it; the upload record must name exactly these.
@@ -73,6 +78,37 @@ def sample_pairs(base, base_revision, adapter, adapter_revision, items, n, seed)
         "torch_seed": seed,
         **settings,
     }
+
+
+def split(items, parts):
+    """`items` in `parts` runs of nearly equal length, in order."""
+    size, extra = divmod(len(items), parts)
+    runs, start = [], 0
+    for k in range(parts):
+        end = start + size + (k < extra)
+        runs.append(items[start:end])
+        start = end
+    return [run for run in runs if run]
+
+
+def merge_parts(outs):
+    """One result from several parts: answers in order, seconds added up (the GPU time billed), peak memory the highest."""
+    merged = {**outs[0], "results": [line for out in outs for line in out["results"]]}
+    merged["load_seconds"] = round(sum(out["load_seconds"] for out in outs), 1)
+    merged["answer_seconds"] = round(sum(out["answer_seconds"] for out in outs), 1)
+    merged["peak_vram_gib"] = max(out["peak_vram_gib"] for out in outs)
+    merged["torch_seed"] = [out["torch_seed"] for out in outs]
+    merged["parts"] = len(outs)
+    return merged
+
+
+def run_in_parts(remote_starmap, parts=PARTS):
+    """A `run` for `sample` that splits the items over `parts` containers; part k uses seed + k."""
+    def run(base, base_revision, adapter, adapter_revision, items, n, seed):
+        args = [(base, base_revision, adapter, adapter_revision, part, n, seed + k)
+                for k, part in enumerate(split(items, parts))]
+        return merge_parts(list(remote_starmap(args)))
+    return run
 
 
 def check_free(paths):
@@ -164,7 +200,8 @@ def sample(smoke, out, run):
         "reward_sha256": reward_sha256(),
         "wall_seconds": wall,
         "cost_low": round(inside * L4_PER_SECOND, 2),
-        "cost_high": round(wall * L4_PER_SECOND, 2),
+        # Each part's container can be billed at most for the whole wall time.
+        "cost_high": round(wall * result.get("parts", 1) * L4_PER_SECOND, 2),
         **result,
     }
     if smoke:
@@ -239,7 +276,7 @@ def summary_text(pairs_by_id, judged, pool, wrong, meta, pool_sha, samples_rows)
         f"- **Candidates:** {total['pairs']} pairs ({total['pairs'] - m1_unclear} M2 hard training pairs and "
         f"{m1_unclear} M1 `unclear` training pairs).",
         f"- **Mixed** (the 8 rewards differ): {total['mixed']}. All of them are in the pool.",
-        f"- **Always right:** {total['right']}. {total['in_pool'] - total['mixed']} of them join the pool "
+        f"- **Always right:** {total['right']}. The pool takes {total['in_pool'] - total['mixed']} of them "
         f"({int(ALWAYS_RIGHT_SHARE * 100)}% of the mixed count, drawn with seed {KEEP_SEED}), so v1 does not forget them.",
         f"- **Always wrong the same way:** {total['wrong']}. Kept out and listed in `data/m2/rl-pool-always-wrong.jsonl` "
         "for Claude in Cowork to check for a wrong label.",
@@ -297,9 +334,9 @@ def summary_text(pairs_by_id, judged, pool, wrong, meta, pool_sha, samples_rows)
     lines += [
         "## GPU time and cost",
         "",
-        f"- One run on a Modal {meta['gpu']}: {inside:.1f} minutes inside the function "
-        f"(load {meta['load_seconds'] / 60:.1f}, answering {meta['answer_seconds'] / 60:.1f}), "
-        f"{meta['wall_seconds'] / 60:.1f} minutes from start to finish.",
+        f"- One run in {meta.get('parts', 1)} part(s) at once, each on a Modal {meta['gpu']}: {inside:.1f} GPU minutes "
+        f"inside the functions, added up (load {meta['load_seconds'] / 60:.1f}, answering "
+        f"{meta['answer_seconds'] / 60:.1f}), {meta['wall_seconds'] / 60:.1f} minutes from start to finish.",
         f"- Cost: about ${meta['cost_low']:.2f} to ${meta['cost_high']:.2f} (L4 at $0.000222 a second, "
         "https://modal.com/pricing; Modal bills while the container loads and answers, so the bill sits between the two).",
         "",
@@ -383,7 +420,7 @@ def choose_pool(samples_path, pool_path, wrong_path, summary_path):
 def main(stage: str = "sample", smoke: bool = False, out: str = OUT):
     if stage != "sample":
         raise SystemExit("the choose stage runs without Modal: uv run python scripts/sample_pool.py")
-    sample(smoke, out, sample_pairs.remote)
+    sample(smoke, out, sample_pairs.remote if smoke else run_in_parts(sample_pairs.starmap))
 
 
 if __name__ == "__main__":

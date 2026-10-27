@@ -271,3 +271,22 @@ def test_choose_stops_if_a_candidate_file_changed(fake_repo):
     with pytest.raises(SystemExit):
         script.choose_pool("results/m2/pool/v1-samples.jsonl", "out/p.jsonl", "out/w.jsonl", "out/s.md")
     assert not (fake_repo / "out/p.jsonl").exists()
+
+
+def test_split_and_merge_parts_keep_every_answer_in_order():
+    assert script.split(list(range(10)), 4) == [[0, 1, 2], [3, 4, 5], [6, 7], [8, 9]]
+    assert script.split([1], 4) == [[1]]
+    seen = []
+
+    def starmap(args):
+        seen.extend(args)
+        return [{"results": [{"id": item["id"], "raw": [str(seed)]} for item in items], "load_seconds": 75.0,
+                 "answer_seconds": 100.0, "peak_vram_gib": 10.0 + seed % 10, "torch_seed": seed, "gpu": "NVIDIA L4"}
+                for (_, _, _, _, items, n, seed) in args]
+
+    items = [{"id": f"x{i}"} for i in range(9)]
+    result = script.run_in_parts(starmap, parts=4)("b", "r", "a", "ar", items, 8, 3407)
+    assert [line["id"] for line in result["results"]] == [f"x{i}" for i in range(9)]
+    assert [s for (*_, s) in seen] == [3407, 3408, 3409, 3410] and result["torch_seed"] == [3407, 3408, 3409, 3410]
+    assert result["load_seconds"] == 300.0 and result["answer_seconds"] == 400.0 and result["parts"] == 4
+    assert result["peak_vram_gib"] == 19.0  # seed 3409 gives 10 + 9
