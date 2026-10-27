@@ -190,3 +190,10 @@ In round 1, a blind judge kept 5 of 66 `unclear` candidates. Its reasons showed 
 
 ## 2026-10-27: Mistake (repeated): AI-written `unclear` pairs drift toward dodging, even with a second agent's check
 Claude Code had a second helper agent confirm every new `unclear` pair blind, yet Cowork's blind review called 32 of 33 decidable. A helper working from the same brief shares the writer's habits, so it is not an independent check. **Lesson:** do not write new `unclear` pairs with AI agents. Reuse ones already agreed by independent reviews, or have Elias write and check a few by hand. A check is only independent if the checker never saw the writing brief.
+
+## 2026-10-27: Session close-out lessons (Claude in Cowork, session 2026-10-26 to 2026-10-27)
+- **Committing to `main` while Claude Code works.** When Claude Code has a branch checked out in `~/code/model-training`, Claude in Cowork must not touch the working files. It commits control-file changes to `main` with git's "temporary index" (a scratch staging list): `.git/cowork-commit.sh` copies files from `.git/cowork-staging/` into a commit on `main` and pushes, without changing the checkout. Run it through osascript with `/bin/bash`, because editing it with `sed -i` drops its run permission.
+- **Check the exact model before suggesting a feature** (see the 2026-10-26 thinking-mode mistake).
+- **Test sets wear out.** Measure whether a test can still show a gain before trying to improve a model (D-038).
+- **Blind reviews:** the brief lives in `reviews/blind-brief.md`. On the M2 hard test set, the reviewers agreed on 296 of 300 pairs, and the 4 disputes showed the traps work. On the training pairs, the review caught 32 bad `unclear` pairs that a helper agent working from the same brief had passed.
+- **Aeverum coordination works through one handoff file and one reply.** The reply set D-043. Elias relays the file between the two Cowork projects.
