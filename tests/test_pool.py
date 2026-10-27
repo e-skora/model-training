@@ -225,7 +225,8 @@ def test_smoke_then_full_run_and_choose(fake_repo):
 
     script.sample(False, "results/m2/pool", run)
     assert len(calls) == 2 and len(calls[1]["ids"]) == 21
-    script.choose_pool("results/m2/pool/v1-samples.jsonl", "out/rl-pool.jsonl", "out/wrong.jsonl", "out/summary.md")
+    script.choose_pool("results/m2/pool/v1-samples.jsonl", "out/rl-pool.jsonl", "out/wrong.jsonl", "out/summary.md",
+                       billed={"usd": 0.8, "l4_usd": 0.666})
     pool = [json.loads(line) for line in (fake_repo / "out/rl-pool.jsonl").read_text().splitlines()]
     wrong = [json.loads(line) for line in (fake_repo / "out/wrong.jsonl").read_text().splitlines()]
     # 10 mixed updates; 2 always right (tr2-0001 and M1's unclear), round(0.2 * 10) = 2 join; 9 always wrong.
@@ -239,6 +240,7 @@ def test_smoke_then_full_run_and_choose(fake_repo):
     summary = (fake_repo / "out/summary.md").read_text()
     assert "Pool size: 12 pairs" in summary and "Always wrong the same way:** 9" in summary
     assert "m1_unclear (unclear)" in summary
+    assert "Billed by Modal** (`modal billing report`): $0.80 in all, of which $0.67 is the L4 (about 50.0 L4 minutes)" in summary
 
     with pytest.raises(SystemExit):  # the choose stage never replaces its outputs either
         script.choose_pool("results/m2/pool/v1-samples.jsonl", "out/rl-pool.jsonl", "out/w2.jsonl", "out/s2.md")

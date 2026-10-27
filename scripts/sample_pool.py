@@ -229,7 +229,7 @@ def pct(top, bottom):
     return f"{(Decimal(100) * top / bottom).quantize(Decimal(1), rounding=ROUND_HALF_UP)}%"
 
 
-def summary_text(pairs_by_id, judged, pool, wrong, meta, pool_sha, samples_rows):
+def summary_text(pairs_by_id, judged, pool, wrong, meta, pool_sha, samples_rows, billed=None):
     """The plain-language summary, built only from the counts, so no number is typed by hand."""
     import random
 
@@ -334,11 +334,19 @@ def summary_text(pairs_by_id, judged, pool, wrong, meta, pool_sha, samples_rows)
     lines += [
         "## GPU time and cost",
         "",
-        f"- One run in {meta.get('parts', 1)} part(s) at once, each on a Modal {meta['gpu']}: {inside:.1f} GPU minutes "
+        f"- One run in {meta.get('parts', 1)} part(s), each on a Modal {meta['gpu']}: {inside:.1f} GPU minutes "
         f"inside the functions, added up (load {meta['load_seconds'] / 60:.1f}, answering "
-        f"{meta['answer_seconds'] / 60:.1f}), {meta['wall_seconds'] / 60:.1f} minutes from start to finish.",
-        f"- Cost: about ${meta['cost_low']:.2f} to ${meta['cost_high']:.2f} (L4 at $0.000222 a second, "
-        "https://modal.com/pricing; Modal bills while the container loads and answers, so the bill sits between the two).",
+        f"{meta['answer_seconds'] / 60:.1f}), {meta['wall_seconds'] / 60:.1f} minutes from start to finish "
+        "(this includes any wait for a free GPU).",
+        f"- Estimate before the bill: about ${meta['cost_low']:.2f} to ${meta['cost_high']:.2f} (L4 at $0.000222 a second, "
+        "https://modal.com/pricing; the high end assumes every part's GPU ran for the whole time).",
+    ]
+    if billed:
+        lines.append(
+            f"- **Billed by Modal** (`modal billing report`): ${billed['usd']:.2f} in all, of which "
+            f"${billed['l4_usd']:.2f} is the L4 (about {billed['l4_usd'] / L4_PER_SECOND / 60:.1f} L4 minutes); "
+            "the rest is CPU, memory and network.")
+    lines += [
         "",
         "## Fingerprints and settings",
         "",
@@ -359,8 +367,11 @@ def summary_text(pairs_by_id, judged, pool, wrong, meta, pool_sha, samples_rows)
     return "\n".join(lines)
 
 
-def choose_pool(samples_path, pool_path, wrong_path, summary_path):
-    """Score every saved answer, apply judge.pool's rule, and write the pool, the always-wrong list and the summary."""
+def choose_pool(samples_path, pool_path, wrong_path, summary_path, billed=None):
+    """Score every saved answer, apply judge.pool's rule, and write the pool, the always-wrong list and the summary.
+
+    `billed` ({"usd", "l4_usd"}), read from `modal billing report` after the run, adds the real bill to the summary.
+    """
     import hashlib
     import json
     from pathlib import Path
@@ -410,7 +421,7 @@ def choose_pool(samples_path, pool_path, wrong_path, summary_path):
             for pair_id in ids:
                 f.write(json.dumps(out_row(pair_id, with_answers), ensure_ascii=False) + "\n")
     pool_sha = hashlib.sha256(Path(pool_path).read_bytes()).hexdigest()
-    text = summary_text(pairs_by_id, judged, pool, wrong, meta, pool_sha, samples_rows)
+    text = summary_text(pairs_by_id, judged, pool, wrong, meta, pool_sha, samples_rows, billed)
     with open(summary_path, "x", encoding="utf-8") as f:
         f.write(text)
     print(f"pool {len(pool)} pairs, always wrong {len(wrong)}; rl-pool SHA-256 {pool_sha}")
@@ -429,6 +440,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Choose the RL pool from saved samples (no GPU).")
     parser.add_argument("--samples", default=f"{OUT}/{NAME}.jsonl")
     parser.add_argument("--out", default=None, help="write the pool, list and summary here instead (for smoke runs)")
+    parser.add_argument("--billed-usd", type=float, default=None, help="the run's whole Modal bill")
+    parser.add_argument("--billed-l4-usd", type=float, default=None, help="the L4 part of that bill")
     args = parser.parse_args()
     if args.out:
         from pathlib import Path
@@ -436,4 +449,7 @@ if __name__ == "__main__":
         paths = [str(Path(args.out) / Path(p).name) for p in (POOL_PATH, WRONG_PATH, SUMMARY_PATH)]
     else:
         paths = [POOL_PATH, WRONG_PATH, SUMMARY_PATH]
-    choose_pool(args.samples, *paths)
+    billed = None
+    if args.billed_usd is not None:
+        billed = {"usd": args.billed_usd, "l4_usd": args.billed_l4_usd}
+    choose_pool(args.samples, *paths, billed=billed)
