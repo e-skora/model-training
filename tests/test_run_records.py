@@ -279,3 +279,65 @@ def test_final_run_into_an_empty_folder_writes_every_file(tmp_path, monkeypatch)
     meta = json.loads((repo / "answers/qwen3-4b-trained-v1.meta.json").read_text(encoding="utf-8"))
     assert (meta["data_sha256"], meta["adapter_checkpoint"], meta["pairs"]) == (digest, "epoch-2", len(PAIRS))
     assert all(p.exists() for p in eval_script.output_paths(repo / "answers", smoke=False))
+
+
+# M2-02: another frozen file can be passed; the default and the frozen check stay the same.
+
+def make_two_frozen(tmp_path):
+    repo = tmp_path / "repo"
+    m1 = write_pairs(repo / "data/m1/test.jsonl")
+    hard = write_pairs(repo / "data/m2/test-hard.jsonl", [dict(p, id=f"h-{i:03d}") for i, p in enumerate(PAIRS)])
+    (repo / "STATE.md").write_text(f"## Frozen files\n- `data/m1/test.jsonl`, SHA-256 `{m1}`\n"
+                                   f"- `data/m2/test-hard.jsonl`, SHA-256 `{hard}`\n", encoding="utf-8")
+    return repo, hard
+
+
+def test_the_trained_runs_default_test_file_is_still_the_m1_test_set():
+    import inspect
+
+    assert eval_script.TEST_PATH == "data/m1/test.jsonl"
+    assert inspect.signature(eval_script.main.info.raw_f).parameters["test"].default == "data/m1/test.jsonl"
+    assert inspect.signature(eval_script.main.info.raw_f).parameters["out"].default == "results/m1/trained-v1"
+
+
+def test_the_trained_run_reads_and_records_another_frozen_file(tmp_path, monkeypatch):
+    run, _ = make_run(tmp_path)
+    repo, hard = make_two_frozen(tmp_path)
+    monkeypatch.chdir(repo)
+    seen = []
+
+    def answer(base, base_revision, adapter, adapter_revision, items):
+        seen.extend(i["id"] for i in items)
+        return fake_answer([])(base, base_revision, adapter, adapter_revision, items)
+
+    eval_script.evaluate(False, repo / "answers", answer, train_meta_path=run / "train.meta.json",
+                         test_path=repo / "data/m2/test-hard.jsonl")
+    assert {i.split("/", 1)[1] for i in seen} == {f"h-{i:03d}" for i in range(len(PAIRS))}
+    meta = json.loads((repo / "answers/qwen3-4b-trained-v1.meta.json").read_text(encoding="utf-8"))
+    assert (meta["data"], meta["data_sha256"]) == ("data/m2/test-hard.jsonl", hard)
+
+
+def test_the_trained_run_stops_on_an_edited_other_file(tmp_path, monkeypatch):
+    run, _ = make_run(tmp_path)
+    repo, _ = make_two_frozen(tmp_path)
+    hard = repo / "data/m2/test-hard.jsonl"
+    hard.write_text(hard.read_text(encoding="utf-8").replace("colour 2", "colour 7"), encoding="utf-8")
+    monkeypatch.chdir(repo)
+    calls = []
+    with pytest.raises(SystemExit, match="not the frozen"):
+        eval_script.evaluate(False, repo / "answers", fake_answer(calls), train_meta_path=run / "train.meta.json",
+                             test_path=hard)
+    assert calls == [] and not (repo / "answers").exists()
+
+
+def test_the_trained_run_stops_on_a_file_not_listed_as_frozen(tmp_path, monkeypatch):
+    run, _ = make_run(tmp_path)
+    repo, _ = make_two_frozen(tmp_path)
+    other = repo / "data/m2/other.jsonl"
+    write_pairs(other)
+    monkeypatch.chdir(repo)
+    calls = []
+    with pytest.raises(SystemExit, match="not listed under 'Frozen files'"):
+        eval_script.evaluate(False, repo / "answers", fake_answer(calls), train_meta_path=run / "train.meta.json",
+                             test_path=other)
+    assert calls == []
