@@ -197,3 +197,12 @@ Claude Code had a second helper agent confirm every new `unclear` pair blind, ye
 - **Test sets wear out.** Measure whether a test can still show a gain before trying to improve a model (D-038).
 - **Blind reviews:** the brief lives in `reviews/blind-brief.md`. On the M2 hard test set, the reviewers agreed on 296 of 300 pairs, and the 4 disputes showed the traps work. On the training pairs, the review caught 32 bad `unclear` pairs that a helper agent working from the same brief had passed.
 - **Aeverum coordination works through one handoff file and one reply.** The reply set D-043. Elias relays the file between the two Cowork projects.
+
+## 2026-10-27: Lesson: a smoke run with short prompts can hide how close memory is to the limit
+The first smoke run asked for 16 prompts x 8 answers (128 answers) in one batch and ran out of the L4's 22 GiB. Four prompts a batch peaked at 10.7 GiB in the second smoke run, but 19.4 GiB in the full run, because some candidates are much longer than the 16 in the smoke run. **Lesson:** after a smoke run, allow for the longest prompts in the full set before trusting its peak memory; a smoke run is worth its few cents, it caught the first failure.
+
+## 2026-10-27: Lesson: a projection near the timeout means split the work, and read the real bill afterwards
+The smoke run projected 54.5 minutes for the full set, too close to the 60-minute function timeout, so the run was split into 4 parts. The parts did not all run at once: the first started about 21 minutes after the app, and the whole took 72 minutes. The meta file's estimate was $0.69 to $3.84; `modal billing report --for today -r h --tz local --show-resources --json` gave the real bill per app: $0.80. **Lesson:** split a long GPU job before it nears its timeout, and record the billed cost from `modal billing report` rather than a wide estimate.
+
+## 2026-10-27: Mistake: a test's own arithmetic was wrong, and a log was cut short
+A test for merging parts expected a peak of 17 where the fake parts gave 19 (seed 3409 gives 9, not 7). The code was right; the test was wrong. Separately, only the end of the first smoke run's error log was kept, so that run's time inside the function was lost. **Lesson:** when a new test fails, check the test's arithmetic before the code; and always write a GPU run's whole output to a file, then read the parts you need.
