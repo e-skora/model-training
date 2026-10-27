@@ -148,7 +148,7 @@ def score(pairs, answers):
     rows = []
     for pair in pairs:
         answer, problem, fenced = parse_answer(by_id.get(pair["id"]))
-        rows.append({
+        row = {
             "id": pair["id"],
             "gold_label": pair["label"],
             "gold_type": pair["type"],
@@ -159,7 +159,10 @@ def score(pairs, answers):
             "format_problem": format_problem(answer) if answer else None,
             "fenced": fenced,
             "raw": by_id.get(pair["id"]),
-        })
+        }
+        if "hard" in pair:  # M2 hard test set; M1 rows stay exactly as they were
+            row["hard"] = pair["hard"]
+        rows.append(row)
 
     said_contradiction = [r for r in rows if r["label"] == "contradiction"]
     real_contradiction = [r for r in rows if r["gold_label"] == "contradiction"]
@@ -186,6 +189,50 @@ def score(pairs, answers):
         "fenced": sum(1 for r in rows if r["fenced"]),
     }
     return metrics, rows
+
+
+def trap_key(pair):
+    """The trap a pair belongs to, with its right type or label, such as "near_identical (merely_related)"."""
+    return f"{pair['hard']} ({pair['type'] or pair['label']})"
+
+
+def score_by_trap(pairs, answers):
+    """Score each trap of the M2 hard test set on its own. Returns {trap: metrics}, in file order.
+
+    Every pair needs a `hard` tag. The metrics are the same as `score` gives
+    for the whole file. On a trap whose pairs are all contradictions,
+    precision is 1.0 or None, and recall is what matters; on a trap with no
+    contradictions, recall is None and any "contradiction" answer is a false
+    alarm, so precision is 0.0 (None when there are none).
+    """
+    check_ids(pairs, answers)
+    missing = [pair["id"] for pair in pairs if "hard" not in pair]
+    if missing:
+        raise ValueError(f"pair(s) without a 'hard' tag: {missing[:5]}")
+    by_trap = {}
+    for pair in pairs:
+        by_trap.setdefault(trap_key(pair), []).append(pair)
+    results = {}
+    for trap, trap_pairs in by_trap.items():
+        ids = {pair["id"] for pair in trap_pairs}
+        results[trap] = score(trap_pairs, [answer for answer in answers if answer["id"] in ids])[0]
+    return results
+
+
+TRAP_COLUMNS = ("pairs", "precision", "recall", "unclear", "accuracy", "invalid")
+
+
+def trap_table(metrics_by_trap):
+    """A plain-text table with one row per trap."""
+    width = max(len(trap) for trap in metrics_by_trap) + 2
+    lines = ["trap".ljust(width) + "".join(c.rjust(11) for c in TRAP_COLUMNS)]
+    for trap, metrics in metrics_by_trap.items():
+        cells = []
+        for name in TRAP_COLUMNS:
+            value = metrics[name]
+            cells.append(("-" if value is None else f"{value:.3f}" if isinstance(value, float) else str(value)).rjust(11))
+        lines.append(trap.ljust(width) + "".join(cells))
+    return "\n".join(lines)
 
 
 def score_versions(pairs, answers_by_version):
@@ -215,16 +262,23 @@ def main(argv):
         pairs = load_frozen(argv[1])
     except FrozenFileError as error:
         sys.exit(f"STOP: {error}")
-    metrics = {}
+    metrics, traps = {}, {}
+    hard = any("hard" in pair for pair in pairs)
     for version, path in zip(VERSIONS, argv[2:]):
         try:
-            metrics[version] = score_versions(pairs, {version: load_jsonl(path)})[version]
+            answers = load_jsonl(path)
+            metrics[version] = score_versions(pairs, {version: answers})[version]
+            if hard:
+                traps[version] = score_by_trap(pairs, answers)
         except ValueError as error:
             sys.exit(f"STOP: {path}: {error}")
     if len(metrics) == 1:
         print(json.dumps(metrics["as_is"], indent=2))
     else:
         print(side_by_side(metrics))
+    for version, by_trap in traps.items():
+        print(f"\nPer trap, {version}:")
+        print(trap_table(by_trap))
 
 
 if __name__ == "__main__":
