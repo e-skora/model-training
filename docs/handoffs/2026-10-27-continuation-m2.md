@@ -3,11 +3,11 @@
 **Where:** the Cowork project "Fine Tuning and RL training", **new chat**.
 **Folders:** `~/code/model-training` must be connected. Also connect `~/code/Aeverum-Auditer` if an Aeverum handoff needs reading; read only.
 
-Copy everything below the line into that chat, then paste Claude Code's M2-04 report under it.
+Copy everything below the line into that chat. Nothing else is needed: Elias already pasted M2-04 into Claude Code, and this session reads its results from disk.
 
 ---
 
-This is a new session of the "Fine Tuning and RL training" project. We are in M2: improving the contradiction judge with reinforcement learning (GRPO). Claude Code has just finished, or is finishing, prompt M2-04. Its report is pasted below.
+This is a new session of the "Fine Tuning and RL training" project. We are in M2: improving the contradiction judge with reinforcement learning (GRPO). I already pasted prompt M2-04 into Claude Code on 2026-10-27; do not ask me to paste it or its report. Read its work from disk, on the branch `m2-04-pool-and-reward`. If it is not finished yet (no "M2-04 written" line in that branch's `STATE.md`), say so in one line and wait.
 
 **Open the session the usual way.**
 1. Read, in this order:
@@ -25,7 +25,7 @@ This is a new session of the "Fine Tuning and RL training" project. We are in M2
 - **M2 Step 1:** a 300-pair hard test set, frozen (SHA-256 in `STATE.md`).
 - **M2 Step 2:** v1's adapter at its worst, without dates, catches 134 of 150 contradictions (precision 0.94). 14 of its 16 misses are `unclear` dodges. The bar (D-041) is 139 of 150, with precision no more than 0.01 lower. Compare adapter with adapter only.
 - **M2 Step 3 part A:** `data/m2/train-hard.jsonl` (971 pairs) and `data/m2/valid-hard.jsonl` (97 pairs), after a blind review. The 32 disputed `unclear` pairs were dropped (D-045). The RL pool's `unclear` share is M1's 47 checked `unclear` pairs.
-- **M2-04 (in Claude Code):**
+- **M2-04 (already pasted into Claude Code; read its results from the branch):**
   - Part A: the reward function `src/judge/reward.py`, following the D-040 and D-046 tables.
   - Part B: the RL pool. v1 answers each candidate 8 times, and pairs whose rewards differ join the pool.
 - **Aeverum:** its direction reply was adopted as D-043. Far-apart pairs with no change shown stay contradictions (D-044, Elias). v2 must be frozen and pinned with five fingerprints before Aeverum's step 12, and step-12 results never steer training here. The Ollama server-log check happens in M2 Step 7.

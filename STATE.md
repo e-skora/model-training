@@ -38,7 +38,7 @@ Read this first in every session.
 
 - 2026-10-27: M2 Step 3 part A done. Blind review of 330 pairs by three separate agents (`reviews/M2-03-blind-review.md`): 199 of 200 sampled training pairs and 96 of 97 decided validation pairs agree; only 1 of 33 `unclear` pairs. The 32 disputed `unclear` pairs were moved to `data/m2/dropped-unclear.jsonl` (D-045). Final: `data/m2/train-hard.jsonl` 971 pairs, SHA-256 `8c2abddb...a856`; `data/m2/valid-hard.jsonl` 97 pairs, SHA-256 `dd29c90d...b384`. Merged to `main` by Claude in Cowork.
 ## Next single action
-Claude Code is running prompt M2-04 (pasted 2026-10-27, branch `m2-04-pool-and-reward`). Elias: when it reports back, start a new chat in this Cowork project with `docs/handoffs/2026-10-27-continuation-m2.md` and paste Claude Code's report there.
+Claude Code is running prompt M2-04 (pasted 2026-10-27, branch `m2-04-pool-and-reward`). Elias: start a new chat in this Cowork project with `docs/handoffs/2026-10-27-continuation-m2.md`. That session reads M2-04's results from disk; nothing to paste but the continuation.
 
 ## Frozen files
 - `data/m1/test.jsonl`, 200 pairs, SHA-256 `6e2a08323f445477f9600e371f1074ad3e2b41ef97d7072d6734ef481f6e574b`, frozen 2026-10-22. Never edit it and never train on it.
