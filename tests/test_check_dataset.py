@@ -136,3 +136,69 @@ def test_files_without_hard_tags_keep_the_old_distinct_from_rule(tmp_path):
     result = run(write(tmp_path, "train.jsonl", GOOD), "--distinct-from", write(tmp_path, "valid.jsonl", other))
     assert result.returncode == 0, result.stdout + result.stderr
     assert "Traps:" not in result.stdout
+
+
+UNCLEAR_HARD = HARD + [GOOD[2] | {"hard": "true_unclear"}]
+
+
+def test_true_unclear_tag_passes_on_unclear(tmp_path):
+    result = run(write(tmp_path, "hard.jsonl", UNCLEAR_HARD))
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "true_unclear (unclear): 1 / 0 / 1" in result.stdout
+
+
+def test_true_unclear_tag_on_a_contradiction_fails(tmp_path):
+    bad = HARD[1:] + [GOOD[0] | {"hard": "true_unclear"}]
+    result = run(write(tmp_path, "hard.jsonl", bad))
+    assert result.returncode != 0
+    assert "hard 'true_unclear' does not fit label 'contradiction' with type None" in result.stderr
+
+
+PROVENANCE = {"source": "synthetic", "label_by": "claude-code"}
+
+
+def test_source_and_label_by_on_every_line_pass(tmp_path):
+    result = run(write(tmp_path, "hard.jsonl", [p | PROVENANCE for p in UNCLEAR_HARD]))
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "Provenance: every pair has source 'synthetic', label_by 'claude-code'" in result.stdout
+
+
+def test_files_without_source_or_label_by_print_no_provenance(tmp_path):
+    result = run(write(tmp_path, "hard.jsonl", UNCLEAR_HARD))
+    assert result.returncode == 0 and "Provenance" not in result.stdout
+
+
+def test_label_by_missing_on_one_line_fails(tmp_path):
+    bad = [p | PROVENANCE for p in HARD[:2]] + [HARD[2] | {"source": "synthetic"}]
+    result = run(write(tmp_path, "hard.jsonl", bad))
+    assert result.returncode != 0 and "line 3: missing field 'label_by'" in result.stderr
+
+
+def test_source_alone_on_one_line_makes_every_line_need_both(tmp_path):
+    bad = [HARD[0] | {"source": "synthetic"}] + HARD[1:]
+    result = run(write(tmp_path, "hard.jsonl", bad))
+    assert result.returncode != 0 and "line 1: missing field 'label_by'" in result.stderr
+
+
+def test_unknown_source_or_label_by_value_fails(tmp_path):
+    bad = [p | PROVENANCE for p in HARD[:2]] + [HARD[2] | PROVENANCE | {"label_by": "claude"}]
+    result = run(write(tmp_path, "hard.jsonl", bad))
+    assert result.returncode != 0 and "label_by 'claude' is not one of ('claude-code',)" in result.stderr
+    bad = [HARD[0] | PROVENANCE | {"source": "verdict"}] + [p | PROVENANCE for p in HARD[1:]]
+    result = run(write(tmp_path, "hard.jsonl", bad))
+    assert result.returncode != 0 and "source 'verdict' is not one of ('synthetic',)" in result.stderr
+
+
+def test_against_takes_several_test_sets_and_walls_off_each(tmp_path):
+    first = write(tmp_path, "test.jsonl", TEST)
+    second = write(tmp_path, "test-hard.jsonl", [pair("h-1", "Nim Oduya", "Nim grows chillies.", "Nim hates chillies.")])
+    result = run(write(tmp_path, "train.jsonl", GOOD), "--against", first, "--against", second)
+    assert result.returncode != 0 and "name 'Oduya' belongs to a person in" in result.stderr and "test-hard.jsonl" in result.stderr
+    near = [pair("x-9", "Pim Lund", "Pim grows chillies on the balcony.", "Pim hates chillies on the balcony.")]
+    second = write(tmp_path, "test-hard.jsonl", [pair("h-1", "Nim Rask", "Nim grows chillies on the balcony.", "Nim loves chillies on the balcony.")])
+    result = run(write(tmp_path, "train.jsonl", near), "--against", first, "--against", second)
+    assert result.returncode != 0 and "near copy" in result.stderr and "h-1" in result.stderr
+    result = run(write(tmp_path, "train.jsonl", GOOD[1:]), "--against", first, "--against",
+                 write(tmp_path, "test-hard.jsonl", [pair("h-1", "Nim Rask", "Nim grows chillies.", "Nim hates chillies.")]))
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert result.stdout.count("Wall: no names of the 2 name words in") == 2
