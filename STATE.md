@@ -4,7 +4,7 @@ Read this first in every session.
 
 - **Phase:** 2, reinforcement learning (RL).
 - **Active milestone:** M2, judge v2 with reinforcement learning (GRPO), measured on a new hard test set (D-036). Spec: `milestones/M2-rl-judge/SPEC.md`. M1 (done 2026-10-23): `milestones/M1-contradiction-judge/SPEC.md`.
-- **Updated:** 2026-10-27 (M2 Step 3 part A written; waiting for the blind review)
+- **Updated:** 2026-10-27 (M2 Step 3 part A done; prompt M2-04 ready)
 
 ## Done
 - 2026-10-21: Step 1. Repo created with control files (Claude, from Cowork).
@@ -36,8 +36,9 @@ Read this first in every session.
 - 2026-10-27: M2 Step 2 done. Rescored independently by Claude in Cowork on the Mac (v1 on the Mac, v1 adapter, Qwen3-8B: every precision, recall and `unclear` count matches the summary); hard test set SHA-256 unchanged; 155 tests pass. Merged to `main`. The M2 comparison is adapter with adapter: v1's worst case is recall 0.89 (134/150), precision 0.94 (134/142), both without dates; the bar is 139/150.
 - 2026-10-27: M2 Step 3 part A written, waiting for the blind review by Claude in Cowork (Claude Code, prompt M2-03, branch `m2-03-training-pairs`, pushed, not merged). `data/m2/train-hard.jsonl` 1,000 pairs (contradiction 470, update 160, compatible_detail 170, merely_related 170, unclear 30) and `data/m2/valid-hard.jsonl` 100 pairs (47, 16, 17, 17, 3), trap counts as fixed in the prompt; every row has `source` "synthetic" and `label_by` "claude-code" (D-043). Written by 11 helper agents from one brief (`data/m2/train-writing-brief.md`) in batches of about 26; Claude Code reread every batch and compared all pairs across writers: 59 pairs fixed or replaced (57 in the final files), mostly ideas repeated across writers; no decidable label changed. `unclear` double-check (D-030): a blind judge kept 5 of 66 in round 1, then 51 of 60 new ones written to its lessons; 33 of the 56 agreed pairs chosen, at most 3 per kind of missing fact. Validation draw and order seed 20261027. SHA-256: train `e3069a5f...25814aa`, valid `a93ab3c6...52261a`. `scripts/check_dataset.py` now accepts the `true_unclear` trap (only on `unclear`), checks `source` and `label_by` on every line, and takes several `--against` files; both required checker commands print PASS. Neither file is ever used to score the final model. 163 tests pass. Hard test set never opened; SHA-256 unchanged. No GPU or Modal use. Details: `data/m2/README.md`.
 
+- 2026-10-27: M2 Step 3 part A done. Blind review of 330 pairs by three separate agents (`reviews/M2-03-blind-review.md`): 199 of 200 sampled training pairs and 96 of 97 decided validation pairs agree; only 1 of 33 `unclear` pairs. The 32 disputed `unclear` pairs were moved to `data/m2/dropped-unclear.jsonl` (D-045). Final: `data/m2/train-hard.jsonl` 971 pairs, SHA-256 `8c2abddb...a856`; `data/m2/valid-hard.jsonl` 97 pairs, SHA-256 `dd29c90d...b384`. Merged to `main` by Claude in Cowork.
 ## Next single action
-Claude in Cowork: blind review of a sample of `data/m2/train-hard.jsonl` and `data/m2/valid-hard.jsonl` on branch `m2-03-training-pairs`, then merge. Nothing for Elias. Optional: post `docs/posts/m1-linkedin-draft.md`.
+Elias: paste `prompts/M2-04-pool-and-reward.md` into Claude Code (desktop Code panel), new session, folder `~/code/model-training`, branch picker `main`, worktree box unchecked. Optional: post `docs/posts/m1-linkedin-draft.md`.
 
 ## Frozen files
 - `data/m1/test.jsonl`, 200 pairs, SHA-256 `6e2a08323f445477f9600e371f1074ad3e2b41ef97d7072d6734ef481f6e574b`, frozen 2026-10-22. Never edit it and never train on it.

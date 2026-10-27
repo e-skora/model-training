@@ -4,7 +4,9 @@
 
 It is used only to score models. **It is never used for training**, and no model has been run on it yet.
 
-**Status:** written and checked by Claude Code on 2026-10-26. Not frozen yet. A separate agent reviews it blind first (D-042); then Claude in Cowork freezes it and records its fingerprint in `STATE.md`.
+**Status:** frozen 2026-10-26 after a blind review (`reviews/M2-01-blind-review.md`); fingerprint in `STATE.md`.
+
+**Training and validation files, final (2026-10-27, D-045):** `train-hard.jsonl` 971 pairs (1 `unclear`), `valid-hard.jsonl` 97 pairs (0 `unclear`). The 32 `unclear` pairs the blind review disputed were moved to `dropped-unclear.jsonl`. The counts in the sections below are as first written. Details: `reviews/M2-03-blind-review.md`.
 
 SHA-256 as written: `d9e8e5f3a53369981d11c835a0a4bf68b9b105ae0c8dd78b2d02df967645ff82`
 
