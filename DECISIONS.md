@@ -116,3 +116,34 @@ Elias's answer, "aa", to two questions: (1) publish the three Hugging Face repos
 
 ### D-035 (2026-10-26, Elias): How Elias is described on the public cards
 "instead of 'learning to fine tune open models' make it 'experimenting with fine tuning different types of models', (and give a link to my linkedin ...) - please write it so its still humble and names me but makes it a little more impressive, like im not some amateur". The two model cards now say: Made by Elias Skora (linked to https://www.linkedin.com/in/eliassskora/), an AI systems builder who experiments with fine-tuning different types of models. Uploaded to both Hugging Face model repos on 2026-10-26.
+
+### D-036 (2026-10-26, Elias): M2 is RL on the same judge, with a harder test set first
+"go", answering Claude's top suggestion in the Cowork project chat. The suggestion: make M2 reinforcement learning (GRPO) on the M1 judge with Unsloth on Modal, and build a harder test set first, because the M1 test set is too easy to show a real gain. Tinker (the same job on another service, compared side by side) and Together AI come after M2. This confirms D-015 and adds the hard test set. Spec: `milestones/M2-rl-judge/SPEC.md`.
+
+### D-037 (2026-10-26, Default): RL starts from v1, on the same base model
+GRPO starts from v1 (the epoch-2 adapter on `unsloth/Qwen3-4B-Instruct-2507-unsloth-bnb-4bit`, D-031) and keeps training that adapter.
+- **Why start from v1:** RL can only reward right answers the model already sometimes gives.
+- **Why keep the base:** Unsloth's docs say its fast answer engine (vLLM) does not support Qwen3.5 (https://unsloth.ai/docs/get-started/reinforcement-learning-rl-guide).
+- **Not decided here:** Tinker retired Qwen3-4B-Instruct-2507 on 2026-06-12 (https://tinker-docs.thinkingmachines.ai/tinker/model-deprecations/index.md), and Together AI does not offer it (https://docs.together.ai/docs/fine-tuning/supported-models.md). Moving to Qwen3.5-4B is decided when the Tinker milestone is planned.
+
+### D-038 (2026-10-26, Default): The hard test set
+- **Size:** 300 pairs: 150 `contradiction`, 50 `update`, 50 `compatible_detail`, 50 `merely_related`. No `unclear` right answers, the same as M1.
+- **Trap tags:** every pair has a `hard` tag naming its trap (list in prompt M2-01), so scores can be read per trap.
+- **Text alone decides:** every pair can be decided from its text, so the no-dates version keeps one right answer.
+- **Why 300:** with 150 contradictions, one pair moves recall by about 0.007 instead of 0.01, and the traps aim at v1's known weak spots.
+
+### D-039 (2026-10-26, Default): Hard by design, not by filtering
+The hard test set is written to fit trap categories. It is never picked by which pairs v1 gets wrong. Why: a test built from one model's failures makes that model look worse, and makes any retrained model look better by luck. The training pool may be filtered by v1's answers (SPEC Step 3), because that is how GRPO finds pairs to learn from.
+
+### D-040 (2026-10-26, Default): Reward starting values and two answer styles
+- **Reward table:** in `milestones/M2-rl-judge/SPEC.md`. A false alarm costs more than a miss, an honest `unclear` costs less than a wrong answer, and broken JSON costs the most. The values are fixed before training, and a change comes only from validation results, logged here.
+- **Style A (main):** keeps v1's answer format exactly, so Aeverum can swap the model in with nothing else changing.
+- **Style B (stretch):** adds a short `steps` field before the label, so the model reasons first. It is decided after Style A's full run.
+- **No thinking mode:** Qwen3-4B-Instruct-2507 has none ("This model supports only non-thinking mode", https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507), so reasoning must live in the answer.
+
+### D-041 (2026-10-26, Default): M2 "Done means", and an honest no-gain result
+- **The bar:** v2 must raise worst-case recall on the frozen hard test set by at least 0.03, with worst-case precision no more than 0.01 lower. It must stay within 0.02 of v1 on the M1 test set, with 0 invalid answers.
+- **If it misses:** M2 still ends with a written note on what RL did and did not change, and v2 is not published as better.
+
+### D-042 (2026-10-26, Default): A blind agent review checks the hard test set
+A separate agent judges a sample blind (it answers before it sees the labels), as for the M1 training set (D-028), instead of Elias spot-checking 20 pairs as he did for the M1 test set (D-020). Why: the 2026-10-26 close-out lesson found that blind reviews caught real problems three times, and the lesson says to keep them for every dataset. Elias can ask for a spot-check as well at any time.

@@ -106,3 +106,11 @@ Plain meanings. Add a term the first time it shows up.
 - **Apache 2.0:** a license for software and models: anyone may use, change and sell it, if they keep the license notice. Qwen3-4B uses it, so our models do too.
 - **Pre-publish check:** `scripts/prepublish_check.py`. Before anything goes public, it looks for secrets, model files in git, em dashes, personal data and numbers in the cards that do not match the results. It changes nothing; it only reports.
 - **Round half up:** rounding where an exact half goes up, so 0.965 becomes 0.97. Python's usual rounding of decimals can give 0.96 instead, because 0.965 is stored as a hair less than 0.965.
+- **GRPO (Group Relative Policy Optimization):** a reinforcement learning method. For each question the model writes a group of answers, each answer is scored, and the model is pushed toward the answers that scored above the group's average.
+- **Reward:** the points a program gives one answer during reinforcement learning.
+- **Reward function:** the small program that gives the points.
+- **Reward hacking:** when the model finds a cheap way to score points without doing the real job, for example always giving the safest answer.
+- **Hard test set:** a test set written on purpose from tricky cases (traps), so that real gains show up and are not lost in luck.
+- **Trap:** one kind of tricky case, such as a contradiction a reader could explain away. Each hard test pair is tagged with its trap.
+- **Temperature:** how much randomness the model uses when it picks words. 0 always picks the most likely word (the same answer every time); 1 lets it vary, which RL needs so its answers differ.
+- **Thinking mode:** some models write their reasoning before the answer. Qwen3-4B-Instruct-2507 has no thinking mode.

@@ -2,9 +2,9 @@
 
 Read this first in every session.
 
-- **Phase:** 1, fine-tuning (supervised).
-- **Active milestone:** none (M1 done 2026-10-23; M2 next). M1 was the Memory contradiction judge. Spec: `milestones/M1-contradiction-judge/SPEC.md`.
-- **Updated:** 2026-10-23 (M1 published)
+- **Phase:** 2, reinforcement learning (RL).
+- **Active milestone:** M2, judge v2 with reinforcement learning (GRPO), measured on a new hard test set (D-036). Spec: `milestones/M2-rl-judge/SPEC.md`. M1 (done 2026-10-23): `milestones/M1-contradiction-judge/SPEC.md`.
+- **Updated:** 2026-10-26 (M2 planned)
 
 ## Done
 - 2026-10-21: Step 1. Repo created with control files (Claude, from Cowork).
@@ -29,14 +29,16 @@ Read this first in every session.
 
 - 2026-10-23: Step 9 prepared, nothing public (Claude Code, prompt M1-09, branch `m1-09-publish-prep`, pushed, not merged). New private Hugging Face dataset repo `eskora/memory-contradiction-pairs` (commit `b92da22ad06fb6191032bfb4b360c01d29bc24ce`): `train.jsonl`, `valid.jsonl`, `test.jsonl`, byte for byte the files in `data/m1/`, with the dataset card (license CC BY 4.0, D-033). Model cards uploaded to the private GGUF repo (commit `ae588bbc01ce92178f4e88048117e91f5138cbe7`) and LoRA repo (commit `4561c799b743b64895450b5640b2f74915347567`). The cards live in `hf/`; `scripts/publish_hf.py` uploads them and refuses any repo that is not private; each upload is recorded in `hf/published.json`. The GGUF card's Python example was run, as written, against `m1-judge:v1` on the Mac and printed the recorded test answer. GitHub `README.md` rewritten: status, results, the three Hugging Face links, layout, roadmap. New `scripts/prepublish_check.py` (reports only, changes nothing) passed on everything, in git and on Hugging Face; output in `hf/prepublish-check.txt`. Public cards and README do not name Aeverum (D-033). Fixed while preparing: `data/m1/README.md` now opens with the final counts (1,522 and 99, D-030) and the glossary says 99. 122 tests pass. No GPU or Modal use.
 - 2026-10-23: Step 9 done. Published by Claude in Cowork on Elias's go-ahead (D-034): Hugging Face `eskora/m1-contradiction-judge-qwen3-4b-gguf`, `eskora/m1-contradiction-judge-qwen3-4b-lora` and dataset `eskora/memory-contradiction-pairs` are public; GitHub `e-skora/model-training` is public with an Apache 2.0 LICENSE. All four checked without a login (HTTP 200). Step 10: "why it works" note in LESSONS.md; LinkedIn draft has its links. **M1 is done** except Elias posting.
+- 2026-10-26: Next phase explored (Claude in Cowork, checked against current docs: Tinker, Together AI, Unsloth RL guide, Modal pricing). Elias chose M2 ("go", D-036): RL (GRPO) on the same judge with Unsloth on Modal, with a harder test set first. Defaults D-037 to D-042 logged. Spec `milestones/M2-rl-judge/SPEC.md`; first prompt `prompts/M2-01-hard-test-set.md`.
 
 ## Next single action
-Elias: start a new chat in this Cowork project with `docs/handoffs/2026-10-26-continuation-next-phase.md` to explore what the next phase is. Optional: post `docs/posts/m1-linkedin-draft.md`.
+Elias: paste `prompts/M2-01-hard-test-set.md` into Claude Code (desktop Code panel), new session, folder `~/code/model-training`, branch picker `main`, worktree box unchecked. Optional: post `docs/posts/m1-linkedin-draft.md`.
 
 ## Frozen files
 - `data/m1/test.jsonl`, 200 pairs, SHA-256 `6e2a08323f445477f9600e371f1074ad3e2b41ef97d7072d6734ef481f6e574b`, frozen 2026-10-22. Never edit it and never train on it.
 
 ## Open items
+- Update for Aeverum: Elias said "maybe make an update for aeverum, later" (2026-10-26). Aeverum's last news from here is the 2026-10-22 update (trained, not yet on the Mac or public). Aeverum is at step 10; step 12 is the judge benchmark. To send: v1 on the Mac and public, its fingerprints, `docs/run-judge-on-mac.md`, M2 plan, and two questions that set M2's reward (how step 12 scores `unclear`; whether the judge will see dates).
 - Aeverum step-12 preparation notes (from `~/code/Aeverum-Auditer/.handoffs/2026-10-22-model-training-update-reply.md`, SHA-256 `125e1742b5db0dd5e4093bebc55dc5495d099f2b6de0a169dc71f7174d9a2a55`; not requirements): (1) GGUF SHA-256 and Ollama digest: recorded; (2) exact prompt text and SHA-256, input and output: `docs/run-judge-on-mac.md`; (3) no memory text in logs: our runner logs none, Ollama server log not checked; (4) how `unclear` counts in scoring: Aeverum has not defined it; (5) no dates promised, so no-dates recall is the worst case (0.94 for the GGUF): a target for M2.
 - Closed 2026-10-22: Unsloth pins. Unsloth 2025.7.8 could not load Qwen3-4B-Instruct-2507 or Phi-4-mini-instruct ("not supported in your current Unsloth version"). Pins moved to Unsloth 2026.10.7, transformers 5.17.0, trl 1.15.0, torch 2.14.1, now in one place, `src/judge/modal_image.py`. `scripts/hello_gpu.py` reran on them and works. Details: `LESSONS.md`.
 - Settled 2026-10-22 by D-023 (train Qwen3-4B to beat the untrained Qwen3-8B). Background: the untrained Qwen3-8B already passes Aeverum's bar on our test set (precision 0.96, recall 0.94 against 0.85 and 0.80). "Done means" item 1 also needs the fine-tuned model to beat the base model, so training must beat 0.96 and 0.94. The clearest room to improve is the type (66% right). Worth deciding, before Step 6, whether this goal still fits or the training set should aim at the hard cases and types.

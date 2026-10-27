@@ -146,3 +146,12 @@ The model card's Python example was copied out of the card and run against the r
 - **Blind agent reviews replaced Elias's spot-checks (D-028).** A second agent that answers before it sees the labels found real problems three times (shortcut patterns, fake `unclear` pairs twice). Keep it for every dataset.
 - **Reviews only after a real change.** Codex reviewed the code-heavy steps (5 and 7) and found real gaps both times. Fixes that only add safeguards, covered by offline tests, were checked by Claude in Cowork, without a second Codex round.
 - **A made-up bar can block a good result.** The 97% agreement bar in Step 8 was a guess. What decides whether to ship a file is how well the file itself scores (D-032).
+
+## 2026-10-26: Mistake: said our base model has a thinking mode
+While exploring the next phase, Claude in Cowork told Elias in chat that the judge could "think first" by turning on Qwen's thinking mode. Qwen3-4B-Instruct-2507 has none: its model card says "This model supports only non-thinking mode". This was caught before anything was built. M2 handles it with a `steps` field in the answer instead (D-040). Lesson: check the exact model's card before suggesting a feature of its family.
+
+## 2026-10-26: Lesson: RL learns nothing from pairs the model always gets right
+In GRPO, each answer is scored against the group's average. If every answer to a pair is right, every score is the same, and nothing changes. v1 already gets most M1 training pairs right, so M2 needs new hard training pairs, kept only where v1's answers disagree (SPEC Step 3).
+
+## 2026-10-26: Lesson: a test set can wear out
+When a model scores 0.94 to 0.98 on a test set with 100 contradictions, a real gain of a few pairs looks like luck. Before trying to improve a model, check that the test can still show the improvement. For M2, that meant a new hard test set (D-038).
