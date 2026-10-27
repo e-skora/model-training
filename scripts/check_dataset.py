@@ -18,11 +18,19 @@ Quality checks on the file itself (the test-set lessons in LESSONS.md):
   of them start with the same REASON_OPENING words (the person's names
   count as one word, "NAME").
 
+Trap tags (M2): when any pair has a `hard` field, every pair must have one,
+it must be one of HARD_TAGS, and it must fit the pair's label and type.
+The checker then also prints, per trap, how many pairs, how many with a
+change word and how many on the same day.
+
 Walls between files:
 - `--against <test.jsonl>`: no name of a test person appears anywhere in
   the file, and no pair is a near copy of a test pair;
 - `--distinct-from <other.jsonl>`: no pair repeats or nearly copies a pair
-  of the other file (for train and valid).
+  of the other file (for train and valid). For a file with trap tags (M2),
+  no name of a person in the other file may appear either. M1's own files
+  keep the old rule: M1 train and valid share 7 name words, and M1 is
+  frozen and published.
 A near copy shares more than NEAR_COPY of its words with the other pair:
 the words of both memories, without the person's name, counted as
 shared / all different words of the two pairs together.
@@ -30,6 +38,7 @@ shared / all different words of the two pairs together.
 Run from the repo folder:
     uv run python scripts/check_dataset.py data/m1/test.jsonl
     uv run python scripts/check_dataset.py data/m1/train.jsonl --against data/m1/test.jsonl --distinct-from data/m1/valid.jsonl
+    uv run python scripts/check_dataset.py data/m2/test-hard.jsonl --against data/m1/test.jsonl --distinct-from data/m1/train.jsonl --distinct-from data/m1/valid.jsonl
 """
 
 import argparse
@@ -57,6 +66,20 @@ MIN_GROUP = 20  # quality shares are only checked for groups this big
 REASON_OPENING = 3  # words that make up the start of a reason
 REASON_MAX = 3  # times one start may be used in any REASON_WINDOW unclear reasons
 REASON_WINDOW = 100
+# M2 trap tags and the (label, type) each one may have (prompt M2-01).
+CONTRADICTION = {("contradiction", None)}
+HARD_TAGS = {
+    "explain_away": CONTRADICTION,
+    "paraphrase": CONTRADICTION,
+    "small_difference": CONTRADICTION,
+    "change_word_contradiction": CONTRADICTION,
+    "far_apart_no_change": CONTRADICTION,
+    "indirect_update": {("non_contradiction", "update")},
+    "update_with_overlap": {("non_contradiction", "update")},
+    "looks_like_clash": {("non_contradiction", "compatible_detail")},
+    "near_identical": {("non_contradiction", "compatible_detail"), ("non_contradiction", "merely_related")},
+    "rule5_bait": {("non_contradiction", "merely_related")},
+}
 
 
 def fail(line_no, message):
@@ -190,18 +213,39 @@ def check_quality(labels, types, changed, same_day):
             fail(None, f"{same_day[name]} of {count} {name} pairs are same-day; need about half (35% to 65%)")
 
 
-def check_against(pairs, test_path):
-    """The walls against the frozen test set: no test person's name, no near copy of a test pair."""
-    test_pairs = [pair for _, pair in read_pairs(test_path)]
-    names = {token for pair in test_pairs for token in pair["person"].split() if token[:1].isupper()}
+def check_hard(pairs):
+    """If any pair has a trap tag, every pair needs one that is known and fits its label and type."""
+    if not any("hard" in pair for _, pair in pairs):
+        return False
+    for line_no, pair in pairs:
+        if "hard" not in pair:
+            fail(line_no, "missing field 'hard'; when one pair has a trap tag, every pair needs one")
+        tag = pair["hard"]
+        if tag not in HARD_TAGS:
+            fail(line_no, f"hard {tag!r} is not one of {tuple(HARD_TAGS)}")
+        if (pair["label"], pair["type"]) not in HARD_TAGS[tag]:
+            fail(line_no, f"hard {tag!r} does not fit label {pair['label']!r} with type {pair['type']!r}")
+    return True
+
+
+def check_names(pairs, other_pairs, other_path):
+    """No name word of a person in the other file appears anywhere in this file. Returns how many name words."""
+    names = {token for pair in other_pairs for token in pair["person"].split() if token[:1].isupper()}
     name_pattern = re.compile(r"(?<!\w)(" + "|".join(sorted(map(re.escape, names), key=len, reverse=True)) + r")(?!\w)")
     for line_no, pair in pairs:
         for text in (pair["person"], pair["a"]["text"], pair["b"]["text"], pair["reason"]):
             match = name_pattern.search(text)
             if match:
-                fail(line_no, f"name {match.group(1)!r} belongs to a person in {test_path}: {text}")
-    check_near_copies(pairs, test_pairs, test_path)
+                fail(line_no, f"name {match.group(1)!r} belongs to a person in {other_path}: {text}")
     return len(names)
+
+
+def check_against(pairs, test_path):
+    """The walls against the frozen test set: no test person's name, no near copy of a test pair."""
+    test_pairs = [pair for _, pair in read_pairs(test_path)]
+    names = check_names(pairs, test_pairs, test_path)
+    check_near_copies(pairs, test_pairs, test_path)
+    return names
 
 
 def check_near_copies(pairs, other_pairs, other_path):
@@ -268,13 +312,19 @@ def main():
     check_quality(labels, types, changed, same_day)
     check_templates(pairs)
     check_reasons(pairs)
+    hard = check_hard(pairs)
     walls = []
     if args.against:
         names = check_against(pairs, args.against)
         walls.append(f"no names of the {names} name words in {args.against}, no near copies of its pairs")
     for other_path in args.distinct_from:
-        check_near_copies(pairs, [pair for _, pair in read_pairs(other_path)], other_path)
-        walls.append(f"no repeated or near-copied pairs from {other_path}")
+        other_pairs = [pair for _, pair in read_pairs(other_path)]
+        check_near_copies(pairs, other_pairs, other_path)
+        if hard:
+            names = check_names(pairs, other_pairs, other_path)
+            walls.append(f"no names of the {names} name words in {other_path}, no repeated or near-copied pairs")
+        else:
+            walls.append(f"no repeated or near-copied pairs from {other_path}")
 
     total = sum(labels.values())
     print(f"File: {path}")
@@ -289,6 +339,18 @@ def main():
     print("Pairs with a change word (" + ", ".join(CHANGE_WORD_LIST) + ") / same day:")
     for name, count in groups:
         print(f"  {name}: {changed[name]} of {count} / {same_day[name]} of {count}")
+    if hard:
+        traps = Counter((pair["hard"], group(pair)) for _, pair in pairs)
+        trap_changed = Counter((pair["hard"], group(pair)) for _, pair in pairs
+                               if any(CHANGE_WORDS.search(pair[which]["text"]) for which in ("a", "b")))
+        trap_same_day = Counter((pair["hard"], group(pair)) for _, pair in pairs
+                                if pair["a"]["written_at"] == pair["b"]["written_at"])
+        print("Traps: pairs / with a change word / same day:")
+        for tag in HARD_TAGS:
+            for name in ("contradiction", *TYPES):
+                key = (tag, name)
+                if traps[key]:
+                    print(f"  {tag} ({name}): {traps[key]} / {trap_changed[key]} / {trap_same_day[key]}")
     print(f"Sentence patterns: none used more than 3 times in any block of {BLOCK} pairs")
     print(f"Unclear reasons: no start of {REASON_OPENING} words used more than {REASON_MAX} times in any {REASON_WINDOW}")
     for wall in walls:
