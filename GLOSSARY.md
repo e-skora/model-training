@@ -120,3 +120,6 @@ Plain meanings. Add a term the first time it shows up.
 - **Worst case (a score):** the lowest of a model's three scores on the as is, swapped and no-dates versions of a test set. M2's bar is set on it, because Aeverum may send pairs in any order and without dates.
 - **`unclear` dodge:** an `unclear` answer on a pair the text does settle, usually with a made-up way out ("fear of dogs can be mild or strong"). It counts as a miss on a real contradiction.
 - **Wall time:** how long a run took from start to finish as seen from the Mac, including waiting for a GPU and starting the container. Modal bills the time the container loads and answers, so wall time is an upper bound on the cost.
+- **Provenance fields (`source`, `label_by`):** two fields on every new data row that say where it came from (`synthetic` means made up) and who set its label (`claude-code`), so a later model can mix made-up and real-verdict rows knowingly.
+- **`true_unclear`:** the trap tag for a training pair whose right answer really is `unclear`: one fact that decides it is missing, and both readings are equally natural.
+- **Mixed-in pairs (in a blind review):** ordinary pairs with known labels, hidden among the pairs being tested, so the judge cannot guess which are which, and so you can check that the judge is not simply giving one answer to everything.

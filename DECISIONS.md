@@ -165,3 +165,22 @@ Aeverum's operator answered the update (`.handoffs/2026-10-26-model-training-dir
 "use recommendation." The question: two memories written months apart disagree, and nothing in their words shows a change (for example "Lindiwe has a pet parrot" in March and "Lindiwe has no pets" in November). Is that a contradiction or an update? It stays a **contradiction**, by reading rule 1, as in the frozen hard test set (trap `far_apart_no_change`, 25 pairs).
 - **Why:** nothing in the text shows a change, and without dates the judge cannot tell either way, so a flag lets Elias decide. It also matches Aeverum's "same moment" reading for favourites.
 - **The known risk:** Aeverum's update reading rests on write times (direction reply, point 6). If Elias's Aeverum labels call such pairs updates, the judge will raise false alarms there at step 12. That is settled in Aeverum's label review before step 12, not here.
+
+### D-045 (2026-10-27, Default): Drop the disputed M2 `unclear` pairs; reuse M1's checked ones
+The blind review of M2 Step 3 (`reviews/M2-03-blind-review.md`) agreed with 199 of 200 sampled training pairs and 96 of 97 decided validation pairs, but with only 1 of the 33 `unclear` pairs. Its judges called the other 32 decidable, mostly "X never does A" followed by an event that may or may not be A, where one reading is more natural.
+- **What was done:** as in D-030, the 32 were dropped, not relabelled, and kept in `data/m2/dropped-unclear.jsonl`.
+- **Why:** `unclear` pairs a careful reader can decide would reward dodging, and dodging is v1's main miss.
+- **Where `unclear` comes from instead:** the RL pool's `unclear` share is M1's 47 `unclear` training pairs, which two blind reviews already agreed on (D-030). They get `source` and `label_by` fields when added (D-043).
+- **The pattern:** this is the third time AI-written `unclear` pairs drifted toward dodging (see LESSONS 2026-10-22).
+
+### D-046 (2026-10-27, Default): Reward on `unclear` pairs, and how the RL pool is chosen
+- **Reward when the right answer is `unclear`** (the D-040 table left this open):
+  - `unclear` scores +1.0;
+  - `non_contradiction` scores 0;
+  - `contradiction` scores -1.5, because it claims a sure clash that the text does not support (a false alarm).
+- **The RL pool, chosen by a rule fixed before any answer is seen:**
+  1. v1 (the adapter) answers each candidate pair 8 times with some randomness (temperature 1.0).
+  2. A pair joins the pool if its 8 rewards are not all the same. Only then can GRPO learn from it.
+  3. Pairs where all 8 answers are right are added at 20% of the number of mixed pairs, chosen with a fixed seed, so v1 does not forget them.
+  4. Pairs where all 8 answers are wrong in the same way are listed for Claude in Cowork to check for a wrong label, and are not trained on until checked.
+- **The candidates:** `data/m2/train-hard.jsonl` (971) plus M1's 47 `unclear` training pairs (D-045). Never the frozen test sets, and never the validation files.

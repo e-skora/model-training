@@ -19,13 +19,17 @@ Quality checks on the file itself (the test-set lessons in LESSONS.md):
   count as one word, "NAME").
 
 Trap tags (M2): when any pair has a `hard` field, every pair must have one,
-it must be one of HARD_TAGS, and it must fit the pair's label and type.
-The checker then also prints, per trap, how many pairs, how many with a
-change word and how many on the same day.
+it must be one of HARD_TAGS, and it must fit the pair's label and type
+(`true_unclear` only on `unclear`). The checker then also prints, per trap,
+how many pairs, how many with a change word and how many on the same day.
+
+Provenance (D-043): when any pair has `source` or `label_by`, every pair
+must have both, with a value from PROVENANCE.
 
 Walls between files:
-- `--against <test.jsonl>`: no name of a test person appears anywhere in
-  the file, and no pair is a near copy of a test pair;
+- `--against <test.jsonl>` (may be given more than once): no name of a
+  test person appears anywhere in the file, and no pair is a near copy of
+  a test pair;
 - `--distinct-from <other.jsonl>`: no pair repeats or nearly copies a pair
   of the other file (for train and valid). For a file with trap tags (M2),
   no name of a person in the other file may appear either. M1's own files
@@ -39,6 +43,7 @@ Run from the repo folder:
     uv run python scripts/check_dataset.py data/m1/test.jsonl
     uv run python scripts/check_dataset.py data/m1/train.jsonl --against data/m1/test.jsonl --distinct-from data/m1/valid.jsonl
     uv run python scripts/check_dataset.py data/m2/test-hard.jsonl --against data/m1/test.jsonl --distinct-from data/m1/train.jsonl --distinct-from data/m1/valid.jsonl
+    uv run python scripts/check_dataset.py data/m2/train-hard.jsonl --against data/m2/test-hard.jsonl --against data/m1/test.jsonl --distinct-from data/m1/train.jsonl --distinct-from data/m1/valid.jsonl --distinct-from data/m2/valid-hard.jsonl
 """
 
 import argparse
@@ -79,7 +84,10 @@ HARD_TAGS = {
     "looks_like_clash": {("non_contradiction", "compatible_detail")},
     "near_identical": {("non_contradiction", "compatible_detail"), ("non_contradiction", "merely_related")},
     "rule5_bait": {("non_contradiction", "merely_related")},
+    "true_unclear": {("unclear", None)},
 }
+# Where a row came from and who labelled it (D-043), with the allowed values.
+PROVENANCE = {"source": ("synthetic",), "label_by": ("claude-code",)}
 
 
 def fail(line_no, message):
@@ -228,6 +236,19 @@ def check_hard(pairs):
     return True
 
 
+def check_provenance(pairs):
+    """If any pair has source or label_by, every pair needs both, with an allowed value."""
+    if not any(field in pair for _, pair in pairs for field in PROVENANCE):
+        return False
+    for line_no, pair in pairs:
+        for field, allowed in PROVENANCE.items():
+            if field not in pair:
+                fail(line_no, f"missing field {field!r}; when one pair has source or label_by, every pair needs both")
+            if pair[field] not in allowed:
+                fail(line_no, f"{field} {pair[field]!r} is not one of {allowed}")
+    return True
+
+
 def check_names(pairs, other_pairs, other_path):
     """No name word of a person in the other file appears anywhere in this file. Returns how many name words."""
     names = {token for pair in other_pairs for token in pair["person"].split() if token[:1].isupper()}
@@ -264,7 +285,7 @@ def check_near_copies(pairs, other_pairs, other_path):
 def main():
     parser = argparse.ArgumentParser(description="Check a memory-pair dataset file (JSONL).")
     parser.add_argument("path")
-    parser.add_argument("--against", help="the frozen test set: no shared names, no near copies")
+    parser.add_argument("--against", action="append", default=[], help="a frozen test set: no shared names, no near copies")
     parser.add_argument("--distinct-from", action="append", default=[], help="another set: no repeated or near-copied pairs")
     args = parser.parse_args()
     path = args.path
@@ -313,10 +334,11 @@ def main():
     check_templates(pairs)
     check_reasons(pairs)
     hard = check_hard(pairs)
+    provenance = check_provenance(pairs)
     walls = []
-    if args.against:
-        names = check_against(pairs, args.against)
-        walls.append(f"no names of the {names} name words in {args.against}, no near copies of its pairs")
+    for test_path in args.against:
+        names = check_against(pairs, test_path)
+        walls.append(f"no names of the {names} name words in {test_path}, no near copies of its pairs")
     for other_path in args.distinct_from:
         other_pairs = [pair for _, pair in read_pairs(other_path)]
         check_near_copies(pairs, other_pairs, other_path)
@@ -347,10 +369,12 @@ def main():
                                 if pair["a"]["written_at"] == pair["b"]["written_at"])
         print("Traps: pairs / with a change word / same day:")
         for tag in HARD_TAGS:
-            for name in ("contradiction", *TYPES):
+            for name in ("contradiction", *TYPES, "unclear"):
                 key = (tag, name)
                 if traps[key]:
                     print(f"  {tag} ({name}): {traps[key]} / {trap_changed[key]} / {trap_same_day[key]}")
+    if provenance:
+        print("Provenance: every pair has " + ", ".join(f"{f} {v[0]!r}" for f, v in PROVENANCE.items()))
     print(f"Sentence patterns: none used more than 3 times in any block of {BLOCK} pairs")
     print(f"Unclear reasons: no start of {REASON_OPENING} words used more than {REASON_MAX} times in any {REASON_WINDOW}")
     for wall in walls:
