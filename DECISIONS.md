@@ -160,3 +160,8 @@ Aeverum's operator answered the update (`.handoffs/2026-10-26-model-training-dir
 - **New data rows carry `source` and `label_by`** (for example `"source": "synthetic"`, `"label_by": "claude"`), so a later model can mix made-up and verdict-based examples knowingly. Whether that mixing is allowed is Elias's decision, and it would also need an Aeverum product and Source change.
 - **The Ollama server-log check** (no memory text in logs) must be settled before the judge runs on real memories. It is done in M2 Step 7.
 - **Fixed:** `docs/run-judge-on-mac.md` said the Hugging Face repo is private; it is public.
+
+### D-044 (2026-10-26, Elias): Far-apart pairs with no change shown stay contradictions
+"use recommendation." The question: two memories written months apart disagree, and nothing in their words shows a change (for example "Lindiwe has a pet parrot" in March and "Lindiwe has no pets" in November). Is that a contradiction or an update? It stays a **contradiction**, by reading rule 1, as in the frozen hard test set (trap `far_apart_no_change`, 25 pairs).
+- **Why:** nothing in the text shows a change, and without dates the judge cannot tell either way, so a flag lets Elias decide. It also matches Aeverum's "same moment" reading for favourites.
+- **The known risk:** Aeverum's update reading rests on write times (direction reply, point 6). If Elias's Aeverum labels call such pairs updates, the judge will raise false alarms there at step 12. That is settled in Aeverum's label review before step 12, not here.
