@@ -367,6 +367,18 @@ def summary_text(pairs_by_id, judged, pool, wrong, meta, pool_sha, samples_rows,
     return "\n".join(lines)
 
 
+def check_sampled_ids(ids, expected):
+    """Stop unless every expected candidate was sampled exactly once and nothing else was."""
+    from collections import Counter
+
+    repeated = sorted(pair_id for pair_id, n in Counter(ids).items() if n > 1)
+    missing = sorted(set(expected) - set(ids))
+    unknown = sorted(set(ids) - set(expected))
+    if repeated or missing or unknown:
+        raise SystemExit(f"STOP: the samples do not match the candidates: repeated {repeated}, "
+                         f"missing {missing}, not expected {unknown}")
+
+
 def choose_pool(samples_path, pool_path, wrong_path, summary_path, billed=None):
     """Score every saved answer, apply judge.pool's rule, and write the pool, the always-wrong list and the summary.
 
@@ -376,7 +388,8 @@ def choose_pool(samples_path, pool_path, wrong_path, summary_path, billed=None):
     import json
     from pathlib import Path
 
-    from judge.pool import choose, judge_samples, show
+    from judge.pool import KEEP_SEED, SAMPLES, SHOW_SEED, choose, judge_samples, show
+    from judge.prompt import prompt_sha256
     from judge.reward import reward_sha256
 
     samples_path = Path(samples_path)
@@ -384,16 +397,23 @@ def choose_pool(samples_path, pool_path, wrong_path, summary_path, billed=None):
     check_free([Path(pool_path), Path(wrong_path), Path(summary_path)])
     if meta["reward_sha256"] != reward_sha256():
         raise SystemExit("STOP: the reward changed since sampling")
+    if meta["prompt_sha256"] != prompt_sha256():
+        raise SystemExit("STOP: the prompt changed since sampling")
+    rules = {"show_seed": SHOW_SEED, "keep_seed": KEEP_SEED, "samples_per_pair": SAMPLES}
+    changed = sorted(key for key, value in rules.items() if meta[key] != value)
+    if changed:
+        raise SystemExit(f"STOP: judge.pool's {', '.join(changed)} changed since sampling")
     pairs, data_sha = load_candidates()
     if data_sha != meta["data_sha256"]:
         raise SystemExit("STOP: a candidate file changed since sampling")
-    shown = {s["id"]: s for s in show(pairs)}
+    shown_list = show(pairs, SHOW_SEED)
+    shown = {s["id"]: s for s in shown_list}
     pairs_by_id = {pair["id"]: pair for pair in pairs}
 
     with open(samples_path, encoding="utf-8") as f:
         samples_rows = [json.loads(line) for line in f if line.strip()]
-    if not meta["smoke"] and len(samples_rows) != len(pairs):
-        raise SystemExit(f"STOP: {len(samples_rows)} sampled pairs, {len(pairs)} candidates")
+    check_sampled_ids([row["id"] for row in samples_rows],
+                      [s["id"] for s in shown_list[:SMOKE_PAIRS if meta["smoke"] else None]])
     judged = []
     for row in samples_rows:
         if (row["swapped"], row["dates"]) != (shown[row["id"]]["swapped"], shown[row["id"]]["dates"]):

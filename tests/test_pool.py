@@ -292,3 +292,64 @@ def test_split_and_merge_parts_keep_every_answer_in_order():
     assert [s for (*_, s) in seen] == [3407, 3408, 3409, 3410] and result["torch_seed"] == [3407, 3408, 3409, 3410]
     assert result["load_seconds"] == 300.0 and result["answer_seconds"] == 400.0 and result["parts"] == 4
     assert result["peak_vram_gib"] == 19.0  # seed 3409 gives 10 + 9
+
+
+def sampled_repo(fake_repo):
+    """The fake repo with a saved full run, as choose_pool reads it."""
+    run, _ = fake_run(lambda pair_id: [ans("contradiction")] * 4 + [ans("unclear")] * 4)
+    script.sample(False, "results/m2/pool", run)
+    return fake_repo / "results/m2/pool/v1-samples.jsonl"
+
+
+def choose_stops(fake_repo, samples):
+    with pytest.raises(SystemExit) as stop:
+        script.choose_pool(samples, "out/p.jsonl", "out/w.jsonl", "out/s.md")
+    assert not (fake_repo / "out").exists()  # stopped before writing anything
+    return str(stop.value)
+
+
+# Codex review M2-04, finding 2: samples made with another prompt or other pool settings are refused.
+def test_choose_stops_if_the_prompt_changed(fake_repo, monkeypatch):
+    import judge.prompt
+
+    samples = sampled_repo(fake_repo)
+    monkeypatch.setattr(judge.prompt, "SYSTEM_MESSAGE", judge.prompt.SYSTEM_MESSAGE + " Be brief.")
+    assert "prompt changed" in choose_stops(fake_repo, samples)
+
+
+@pytest.mark.parametrize("name", ["SHOW_SEED", "KEEP_SEED", "SAMPLES"])
+def test_choose_stops_if_a_pool_setting_changed(fake_repo, monkeypatch, name):
+    import judge.pool
+
+    samples = sampled_repo(fake_repo)
+    monkeypatch.setattr(judge.pool, name, getattr(judge.pool, name) + 1)
+    assert "changed since sampling" in choose_stops(fake_repo, samples)
+
+
+# Codex review M2-04, finding 3: every candidate sampled exactly once, nothing else.
+def rewrite_samples(samples, change):
+    rows = [json.loads(line) for line in samples.read_text().splitlines()]
+    samples.write_text("".join(json.dumps(row) + "\n" for row in change(rows)))
+
+
+def test_choose_stops_on_a_repeated_id_that_hides_a_missing_one(fake_repo):
+    samples = sampled_repo(fake_repo)
+    rewrite_samples(samples, lambda rows: [rows[0], rows[0]] + rows[2:])  # same row count as before
+    message = choose_stops(fake_repo, samples)
+    assert "repeated ['tr2-0001']" in message and "missing ['tr2-0002']" in message
+
+
+def test_choose_stops_on_a_missing_or_unknown_id(fake_repo):
+    samples = sampled_repo(fake_repo)
+    rewrite_samples(samples, lambda rows: rows[:-1])
+    assert "missing ['tr-0001']" in choose_stops(fake_repo, samples)
+    rewrite_samples(samples, lambda rows: rows + [{**rows[0], "id": "tr2-9999"}])
+    assert "not expected ['tr2-9999']" in choose_stops(fake_repo, samples)
+
+
+def test_a_smoke_run_must_hold_exactly_the_smoke_ids(fake_repo):
+    run, _ = fake_run(lambda pair_id: [ans("contradiction")] * 4 + [ans("unclear")] * 4)
+    script.sample(True, "scratch", run)
+    samples = fake_repo / "scratch/v1-samples-smoke.jsonl"
+    rewrite_samples(samples, lambda rows: rows[1:] + [{**rows[0], "id": "tr2-0020"}])
+    assert "missing" in choose_stops(fake_repo, samples)
