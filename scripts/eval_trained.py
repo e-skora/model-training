@@ -1,4 +1,4 @@
-"""M1 Step 7 Part B: answer the frozen test set with the trained judge (base model plus adapter).
+"""M1 Step 7 Part B: answer a frozen test set with the trained judge (base model plus adapter).
 
 The adapter is loaded from the private Hugging Face repo at the exact commit
 `scripts/train.py --stage upload` recorded in results/m1/trained-v1/train.meta.json,
@@ -12,11 +12,13 @@ The test set is the final exam: it is read once, for the one real run.
 Run from the repo folder:
     uv run modal run scripts/eval_trained.py --smoke --out /some/scratch/folder   # 8 validation pairs, not the test set
     uv run modal run scripts/eval_trained.py                                      # the one test-set run
+    uv run modal run scripts/eval_trained.py --test data/m2/test-hard.jsonl --out results/m2/baseline/trained-v1
+--test names another frozen file (default: the M1 test set); it is checked against STATE.md the same way.
 Answers go to <out>/qwen3-4b-trained-v1.<version>.jsonl, settings to <out>/qwen3-4b-trained-v1.meta.json.
 A smoke run uses the name qwen3-4b-trained-v1-smoke instead, so it can never write over the final files.
 Before anything runs, the script stops if one of its output files already exists, or if the recorded
 upload is not the adapter the validation set chose.
-Score them with `uv run python -m judge.score data/m1/test.jsonl <as_is> <swapped> <no_dates>`.
+Score them with `uv run python -m judge.score <test file> <as_is> <swapped> <no_dates>`.
 """
 
 import modal
@@ -106,7 +108,7 @@ def evaluate(smoke, out, answer, train_meta_path=TRAIN_META, test_path=TEST_PATH
     import time
     from pathlib import Path
 
-    from judge.frozen import FrozenFileError, frozen_entries, load_frozen
+    from judge.frozen import FrozenFileError, frozen_entries, frozen_key, load_frozen
     from judge.prompt import build_messages, prompt_sha256
     from judge.score import VERSIONS, derive
     from judge.train_data import load_pairs
@@ -121,7 +123,7 @@ def evaluate(smoke, out, answer, train_meta_path=TRAIN_META, test_path=TEST_PATH
         pairs, source = load_pairs(valid_path)[:8], str(valid_path)
     else:
         try:
-            pairs, source = load_frozen(test_path, state_path), str(test_path)
+            pairs, source = load_frozen(test_path, state_path), frozen_key(test_path, state_path)
         except FrozenFileError as error:
             raise SystemExit(f"STOP: {error}")
 
@@ -166,5 +168,5 @@ def evaluate(smoke, out, answer, train_meta_path=TRAIN_META, test_path=TEST_PATH
 
 
 @app.local_entrypoint()
-def main(smoke: bool = False, out: str = OUT):
-    evaluate(smoke, out, answer_pairs.remote)
+def main(smoke: bool = False, out: str = OUT, test: str = TEST_PATH):
+    evaluate(smoke, out, answer_pairs.remote, test_path=test)

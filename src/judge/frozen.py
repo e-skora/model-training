@@ -32,15 +32,21 @@ def frozen_entries(state_path):
     return entries
 
 
+def frozen_key(path, state_path=None):
+    """The repo path STATE.md would list `path` under, such as "data/m2/test-hard.jsonl"."""
+    state_path = Path(state_path) if state_path else REPO / "STATE.md"
+    try:
+        return Path(path).resolve().relative_to(state_path.resolve().parent).as_posix()
+    except ValueError:
+        raise FrozenFileError(f"{path} is outside the repo folder of {state_path}") from None
+
+
 def load_frozen(path, state_path=None):
     """Check the file against STATE.md, then read it as JSONL from the same bytes."""
     state_path = Path(state_path) if state_path else REPO / "STATE.md"
     if not state_path.is_file():
         raise FrozenFileError(f"{state_path} not found, so the frozen fingerprint cannot be checked")
-    try:
-        key = Path(path).resolve().relative_to(state_path.resolve().parent).as_posix()
-    except ValueError:
-        raise FrozenFileError(f"{path} is outside the repo folder of {state_path}") from None
+    key = frozen_key(path, state_path)
     expected = frozen_entries(state_path).get(key)
     if expected is None:
         raise FrozenFileError(f"{key} is not listed under 'Frozen files' in {state_path}")

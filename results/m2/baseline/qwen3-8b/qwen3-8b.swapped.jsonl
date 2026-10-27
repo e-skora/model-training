@@ -1,0 +1,300 @@
+{"id": "h-001", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories state Mulugeta's coffee preference at the same time but disagree.\"}"}
+{"id": "h-002", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory B states Jelle lives in Rotterdam, while Memory A says she sold the Rotterdam flat, implying she no longer lives there.\"}"}
+{"id": "h-003", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories describe compatible details about Bisola's coffee drinking habit.\"}"}
+{"id": "h-004", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states Keanu grew up in Seattle, while Memory B states he lived on Maui since birth.\"}"}
+{"id": "h-005", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories state the same fact at the same time but disagree.\"}"}
+{"id": "h-006", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories state the same fact but disagree on the breed of the dog.\"}"}
+{"id": "h-007", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both describe the same fact with different levels of detail.\"}"}
+{"id": "h-008", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories agree on the location and job but provide different levels of detail.\"}"}
+{"id": "h-009", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states Seda's company moved to Levent, contradicting Memory B which says her office is in Kadıköy.\"}"}
+{"id": "h-010", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories describe the piano's color and type but provide conflicting details.\"}"}
+{"id": "h-011", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Different days and locations describe the same activity.\"}"}
+{"id": "h-012", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory B states Loïc works as a chef in Nice, while Memory A says he switched to teaching cooking classes after March 2026, contradicting the current status in Memory B.\"}"}
+{"id": "h-013", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory B states there is no television, contradicting Memory A.\"}"}
+{"id": "h-014", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A and B disagree on the model of the car replaced.\"}"}
+{"id": "h-015", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states Zuberi was born in Mombasa, while Memory B states Arusha.\"}"}
+{"id": "h-016", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories mention Anouk riding a horse named Storm, with Memory A adding detail about the horse's color.\"}"}
+{"id": "h-017", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Memory B is updated by Memory A with new information about Gethin's job status.\"}"}
+{"id": "h-018", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both describe different work shifts on different days.\"}"}
+{"id": "h-019", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Eating a doughnut implies consuming sugar.\"}"}
+{"id": "h-020", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories state Shadi's son plays an instrument but disagree on which one.\"}"}
+{"id": "h-021", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory B states Oliwia works as a waitress in Gdańsk, while Memory A says she stopped waitressing there and now manages the café, indicating a contradiction.\"}"}
+{"id": "h-022", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A and Memory B describe opposite traits of Tuuli.\"}"}
+{"id": "h-023", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories describe the same fact with different details.\"}"}
+{"id": "h-024", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Different times of day and locations are described.\"}"}
+{"id": "h-025", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories describe compatible details about Wojciech playing football with old schoolmates.\"}"}
+{"id": "h-026", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories state Vasiliki's current residence as different places.\"}"}
+{"id": "h-027", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Memory B is more general and compatible with the detail in Memory A\"}"}
+{"id": "h-028", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory B states Lindiwe has a pet parrot, while Memory A states she has no pets.\"}"}
+{"id": "h-029", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Memory B updates the best friend detail from Memory A.\"}"}
+{"id": "h-030", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states Aperahama switched to Tauranga this season, while Memory B states he still plays in Hamilton.\"}"}
+{"id": "h-031", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states Tomoya has never been fishing, while Memory B states he is a member of the fishing club, implying he has been fishing.\"}"}
+{"id": "h-032", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory B states Bára stopped drinking coffee, contradicting Memory A.\"}"}
+{"id": "h-033", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories state current facts about Mateusz's car that disagree.\"}"}
+{"id": "h-034", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both describe different days of practice.\"}"}
+{"id": "h-035", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states fish as favourite dinner, while Memory B states vegetarianism and no fish.\"}"}
+{"id": "h-036", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A describes a change in hair style and color, while Memory B states the current state, creating a contradiction.\"}"}
+{"id": "h-037", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory B states Asel is single, contradicting Memory A which mentions she got married.\"}"}
+{"id": "h-038", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states Binta has four brothers, while Memory B states she has three.\"}"}
+{"id": "h-039", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory B states Mariela teaches piano, contradicting Memory A that she doesn't play any instrument.\"}"}
+{"id": "h-040", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Memory B is a general statement updated by Memory A with specific details.\"}"}
+{"id": "h-041", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both mention selling bánh mì and coffee, with Memory A adding iced coffee as a detail.\"}"}
+{"id": "h-042", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories state Olamide's residence at different times but contradict each other.\"}"}
+{"id": "h-043", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory B describes a change that contradicts Memory A.\"}"}
+{"id": "h-044", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories state Lukáš's current support, but disagree.\"}"}
+{"id": "h-045", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Memory B is a general statement, Memory A provides specific detail.\"}"}
+{"id": "h-046", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory B describes a change that contradicts Memory A.\"}"}
+{"id": "h-047", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A contradicts Memory B about Rafaela's car color and model.\"}"}
+{"id": "h-048", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories state conflicting facts about Dariush's eyesight at the same time.\"}"}
+{"id": "h-049", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories describe different locations and seasons.\"}"}
+{"id": "h-050", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories state Mehrdad's profession in Tehran but disagree.\"}"}
+{"id": "h-051", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories describe visits to the grandparents in Daegu at different times.\"}"}
+{"id": "h-052", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states Mingyu lives alone in Shanghai, while Memory B states Mingyu lives with both parents in Hangzhou.\"}"}
+{"id": "h-053", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories claim Jiayi's hometown but state different cities.\"}"}
+{"id": "h-054", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A says summer is best, Memory B says cold is preferred.\"}"}
+{"id": "h-055", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"A seven-storey building's seventh floor is the top floor.\"}"}
+{"id": "h-056", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states Dušan drinks beer, while Memory B states he doesn't drink alcohol.\"}"}
+{"id": "h-057", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories state opposite instrument switches at the same age.\"}"}
+{"id": "h-058", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Memory B is an update about their engagement before the wedding in Memory A.\"}"}
+{"id": "h-059", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories state the same fact but disagree on the location.\"}"}
+{"id": "h-060", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A describes a steel-string acoustic, while Memory B describes a nylon-string classical.\"}"}
+{"id": "h-061", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states Dzifa closed the shop in Keta and opened a bigger one in Accra, contradicting Memory B which says she still has a small shop in Keta.\"}"}
+{"id": "h-062", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A and Memory B describe conflicting shift times.\"}"}
+{"id": "h-063", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Memory B is updated by Memory A.\"}"}
+{"id": "h-064", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories state conflicting first and later places of residence.\"}"}
+{"id": "h-065", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories state the same fact at the same time but disagree\"}"}
+{"id": "h-066", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states Kalle left the church choir, while Memory B states he still sings in it.\"}"}
+{"id": "h-067", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories state the same fact at the same time but disagree.\"}"}
+{"id": "h-068", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states pomegranate juice is the favourite drink after giving up alcohol, contradicting Memory B's claim of red wine.\"}"}
+{"id": "h-069", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states the car is silver Honda, while Memory B says it is red Toyota.\"}"}
+{"id": "h-070", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A claims Gergő has never been injured, while Memory B states he was injured in 2020.\"}"}
+{"id": "h-071", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states fluency in French while Memory B states only Sesotho and English.\"}"}
+{"id": "h-072", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both describe Edem's running distance with different units.\"}"}
+{"id": "h-073", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories claim different birthplaces for Ffion.\"}"}
+{"id": "h-074", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both describe a view of the sea from different locations.\"}"}
+{"id": "h-075", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories describe different aspects of Irmak's living situation.\"}"}
+{"id": "h-076", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states Khadija cycles to the market, contradicting Memory B which says she has never learned to ride a bicycle.\"}"}
+{"id": "h-077", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states Anfisa left the job in April, while Memory B states she works there in January.\"}"}
+{"id": "h-078", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories state conflicting preferences about coriander on the same date.\"}"}
+{"id": "h-079", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories state Cerys's preference towards spicy food but contradict each other.\"}"}
+{"id": "h-080", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A contradicts Memory B by stating Sigrid ate a steak, which conflicts with her being a vegetarian since 2018.\"}"}
+{"id": "h-081", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories describe different mountains climbed in the same month.\"}"}
+{"id": "h-082", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Memory B is updated in Memory A with a change in favourite season\"}"}
+{"id": "h-083", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Memory B is updated in Memory A with a change in residence\"}"}
+{"id": "h-084", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory B states Eero has no driving licence, contradicting Memory A where he drives.\"}"}
+{"id": "h-085", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory B states the bike is red, while Memory A says it was stolen and replaced with a blue bike.\"}"}
+{"id": "h-086", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states the dog is a dachshund, while Memory B states it is a golden retriever.\"}"}
+{"id": "h-087", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states Mamadou eats peanut butter, while Memory B states he is allergic to peanuts.\"}"}
+{"id": "h-088", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories state the same fact but disagree on the location.\"}"}
+{"id": "h-089", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Memory B provides a general fact, while Memory A adds detail about the children attending the same school.\"}"}
+{"id": "h-090", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory B states Fikirte plays volleyball, contradicting Memory A which says she does not play any sport.\"}"}
+{"id": "h-091", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories claim Kayode eats at different locations at the same time.\"}"}
+{"id": "h-092", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory B contradicts Memory A by stating Shun is colour-blind, which would prevent him from sorting tomatoes by colour as described in Memory A.\"}"}
+{"id": "h-093", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories claim Armen grew up in different cities.\"}"}
+{"id": "h-094", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Memory B is an update to Memory A\"}"}
+{"id": "h-095", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"A favourite meal contradicts being a vegan.\"}"}
+{"id": "h-096", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Different dietary changes on the same topic.\"}"}
+{"id": "h-097", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states Aiyana retired in June 2025, while Memory B states she teaches in February 2025.\"}"}
+{"id": "h-098", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories state Jiho's favourite season but disagree.\"}"}
+{"id": "h-099", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Memory B is updated in Memory A with a specific type of tomato.\"}"}
+{"id": "h-100", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory B states Rémi drives a manual car, contradicting Memory A.\"}"}
+{"id": "h-101", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states Inès graduated from Bordeaux and started a job, while Memory B says she is a student there.\"}"}
+{"id": "h-102", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory B states Bakyt is a taxi driver in Bishkek, while Memory A states he stopped driving a taxi and now runs a guesthouse, indicating a contradiction.\"}"}
+{"id": "h-103", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both describe Sohel reading the newspaper at breakfast, with Memory B being more general and Memory A adding detail about the tablet.\"}"}
+{"id": "h-104", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories describe current hair length but contradict each other.\"}"}
+{"id": "h-105", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states Freja drinks coffee, while Memory B states she prefers tea and never drinks coffee.\"}"}
+{"id": "h-106", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories describe different animals kept behind the summer house.\"}"}
+{"id": "h-107", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states Bilawal has no interest in cricket, while Memory B states he is the captain of the office cricket team.\"}"}
+{"id": "h-108", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories describe different days and times for football.\"}"}
+{"id": "h-109", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states running is favourite, while Memory B says jogging is boring.\"}"}
+{"id": "h-110", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories state Kacper's football support but disagree.\"}"}
+{"id": "h-111", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories describe Simba as a dog but with conflicting breeds and colors.\"}"}
+{"id": "h-112", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states her hair is blonde now, while Memory B states it is black.\"}"}
+{"id": "h-113", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states a change in car ownership after Memory B\"}"}
+{"id": "h-114", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Memory B is updated by Memory A.\"}"}
+{"id": "h-115", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states Levon works on skyscrapers, while Memory B says he is afraid of heights and never goes above the second floor.\"}"}
+{"id": "h-116", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories state Citlalli's favourite colour at the same time but disagree.\"}"}
+{"id": "h-117", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states Tadhg drinks coffee black now, contradicting Memory B which says he drinks coffee with milk.\"}"}
+{"id": "h-118", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A and Memory B state conflicting dates for the same fact.\"}"}
+{"id": "h-119", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states she has never lived outside Paris, but Memory B says she moved to Lyon in 2020.\"}"}
+{"id": "h-120", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states Joris stopped eating meat at thirty, while Memory B states he did so at eighteen.\"}"}
+{"id": "h-121", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories describe different activities related to motorbikes in Hue.\"}"}
+{"id": "h-122", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A and B disagree on the location of the flat sold.\"}"}
+{"id": "h-123", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories claim a different person teaches at the primary school.\"}"}
+{"id": "h-124", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both describe swimming at the pool, with different details.\"}"}
+{"id": "h-125", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Memory B is a general statement updated by Memory A with specific details.\"}"}
+{"id": "h-126", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states he has never smoked, while Memory B says he stopped smoking three years ago.\"}"}
+{"id": "h-127", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states Aigul has no children, while Memory B states she has a daughter.\"}"}
+{"id": "h-128", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states Putri owns a car, while Memory B states she doesn't.\"}"}
+{"id": "h-129", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Memory B is updated by Memory A.\"}"}
+{"id": "h-130", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories state an allergy to peanuts but refer to different people.\"}"}
+{"id": "h-131", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Memory B is updated by Memory A.\"}"}
+{"id": "h-132", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories state Hayun's favourite drink at the same time but disagree.\"}"}
+{"id": "h-133", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories state Yemisi works at different places at the same time.\"}"}
+{"id": "h-134", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories state Kahiau works full time but in different locations.\"}"}
+{"id": "h-135", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories state the opening time but disagree.\"}"}
+{"id": "h-136", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory B states Amaru replaced the roof, while Memory A says he never touched it.\"}"}
+{"id": "h-137", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Memory B is updated in Memory A with additional detail about walking to work.\"}"}
+{"id": "h-138", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Different family members mentioned\"}"}
+{"id": "h-139", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories claim Saule's eldest son has different names.\"}"}
+{"id": "h-140", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory B states Aled is a member of the rugby club, while Memory A says he left after an injury.\"}"}
+{"id": "h-141", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Memory B is an update to Memory A\"}"}
+{"id": "h-142", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Volunteering with puppies contradicts being terrified of dogs.\"}"}
+{"id": "h-143", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A and Memory B state conflicting facts about Fernanda's reading habits and book ownership.\"}"}
+{"id": "h-144", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Memory B is updated in Memory A with additional detail about Kiwi's actions.\"}"}
+{"id": "h-145", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states Golnaz began eating fish again, contradicting Memory B which states she is a vegetarian.\"}"}
+{"id": "h-146", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories state the number of cats Mathis has but give different numbers.\"}"}
+{"id": "h-147", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both describe different conditions for Ayanda's commuting method.\"}"}
+{"id": "h-148", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states Thao uses the right hand, while Memory B states Thao is left-handed.\"}"}
+{"id": "h-149", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A mentions a spaniel, while Memory B states Tereza has only a tortoise.\"}"}
+{"id": "h-150", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Both memories mention a wedding in December but refer to different family members.\"}"}
+{"id": "h-151", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories describe the cost of the bike with compatible details.\"}"}
+{"id": "h-152", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories describe Riccardo's sleeping arrangement but provide conflicting details.\"}"}
+{"id": "h-153", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories state conflicting blood types for the same person at different times.\"}"}
+{"id": "h-154", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states the pizzeria was opened in 2016, while Memory B claims ownership since 2012.\"}"}
+{"id": "h-155", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories describe Yayra having a son and a daughter, with Memory A adding detail about the children being twins.\"}"}
+{"id": "h-156", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states Bea is the youngest child, while Memory B states Migo is the youngest child.\"}"}
+{"id": "h-157", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states she gave back the Kharkiv keys, contradicting Memory B which says she still rents there.\"}"}
+{"id": "h-158", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Memory B is updated in Memory A with a change in favourite food.\"}"}
+{"id": "h-159", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories state the same fact but disagree.\"}"}
+{"id": "h-160", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A and Memory B state conflicting facts about Nimali's farming activity.\"}"}
+{"id": "h-161", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories state Fenna's eye color at different times but contradict each other.\"}"}
+{"id": "h-162", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories state Awa's feelings about cats but disagree.\"}"}
+{"id": "h-163", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories state opposing facts about Vadim's smoking habits.\"}"}
+{"id": "h-164", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories can be true together.\"}"}
+{"id": "h-165", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A and Memory B state conflicting professions for Sacnite.\"}"}
+{"id": "h-166", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Different activities on different days\"}"}
+{"id": "h-167", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states Yarema spends holidays on the beach in Odesa, while Memory B states Yarema dislikes the sea and prefers mountain holidays.\"}"}
+{"id": "h-168", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories describe the same fact with different details.\"}"}
+{"id": "h-169", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states Aisling switched to nursing in 2018, while Memory B states she switched from nursing to teaching in 2018.\"}"}
+{"id": "h-170", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states the house is dark green, contradicting Memory B's statement that it is white.\"}"}
+{"id": "h-171", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories claim the wedding was in 2018 and 2019 respectively.\"}"}
+{"id": "h-172", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories state conflicting facts about Qiang's facial hair at the same time.\"}"}
+{"id": "h-173", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both describe the same event with compatible details.\"}"}
+{"id": "h-174", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories describe Bethlehem's home as having different characteristics.\"}"}
+{"id": "h-175", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories state Morag teaches yoga on different days in different locations on the same day.\"}"}
+{"id": "h-176", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories describe Moritz's hair as straight and black vs. short, curly and red.\"}"}
+{"id": "h-177", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory B states Cormac smokes daily, while Memory A says he quit smoking with help.\"}"}
+{"id": "h-178", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory B states Ixchel is an early riser, while Memory A says she rarely gets out of bed before ten, contradicting each other.\"}"}
+{"id": "h-179", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both describe different days of flower selling.\"}"}
+{"id": "h-180", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Memory B is a general statement that is supported by Memory A.\"}"}
+{"id": "h-181", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both describe the same fact with slight variation.\"}"}
+{"id": "h-182", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories describe Aditya's flat as being in opposite states.\"}"}
+{"id": "h-183", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory B describes a change that contradicts Memory A.\"}"}
+{"id": "h-184", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Memory B is a general statement confirmed by Memory A.\"}"}
+{"id": "h-185", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories describe Lison's brother's relationship with the cello without contradiction.\"}"}
+{"id": "h-186", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories describe Nafula's location, with Memory B providing a broader context.\"}"}
+{"id": "h-187", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states Kostas was in Italy, while Memory B claims he has never left Greece.\"}"}
+{"id": "h-188", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Memory B provides background context while Memory A specifies a current location.\"}"}
+{"id": "h-189", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states twenty tables while Memory B states twelve tables, contradicting each other.\"}"}
+{"id": "h-190", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories claim Gael has a ticket for a match on different days, but they cannot both be true.\"}"}
+{"id": "h-191", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Memory B provides additional detail about Solomiya's family structure.\"}"}
+{"id": "h-192", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Different actions on different furniture\"}"}
+{"id": "h-193", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Different times and locations of study.\"}"}
+{"id": "h-194", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states Leni bought an electric Fiat, contradicting Memory B's statement about the old blue Golf.\"}"}
+{"id": "h-195", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories state Jannik's current method of commuting to the office, but they disagree.\"}"}
+{"id": "h-196", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories claim Nabil's grandmother was born in different cities on the same day.\"}"}
+{"id": "h-197", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories describe the same activity with slight variation in detail.\"}"}
+{"id": "h-198", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both describe the distance from Stockholm to Ylva's cabin with different levels of detail.\"}"}
+{"id": "h-199", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory B states Tolu drives a Toyota Camry, while Memory A says Tolu bought a Kia after the Camry was written off.\"}"}
+{"id": "h-200", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states Bassam sleeps deeply, while Memory B states he is a light sleeper.\"}"}
+{"id": "h-201", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory B contradicts Memory A by stating Kristine has worked as a nurse, while Memory A says she has never had a job outside the family shop.\"}"}
+{"id": "h-202", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories state Abla's favourite food at the same time but disagree.\"}"}
+{"id": "h-203", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states Rostislav moved out of Kazan and now lives in Moscow, while Memory B states he still lives with both parents in Kazan.\"}"}
+{"id": "h-204", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states Kekoa swims laps, while Memory B states Kekoa cannot swim.\"}"}
+{"id": "h-205", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories state opposite paths of study for Júlia.\"}"}
+{"id": "h-206", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states Somto had a brother, while Memory B states he was an only child.\"}"}
+{"id": "h-207", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories refer to the same location with different names.\"}"}
+{"id": "h-208", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories claim Dauren replaced the kitchen floor with different materials.\"}"}
+{"id": "h-209", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories describe the view from Alonso's bedroom window as conflicting.\"}"}
+{"id": "h-210", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories describe Feven singing in a choir on Sundays, with Memory B being more general and Memory A specifying the type of choir.\"}"}
+{"id": "h-211", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories agree on the main fact and add minor details.\"}"}
+{"id": "h-212", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A and B describe different months for the same event.\"}"}
+{"id": "h-213", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory B states Awino is single, while Memory A states she is married.\"}"}
+{"id": "h-214", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A refers to father-in-law, Memory B refers to father.\"}"}
+{"id": "h-215", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Different facts about Zodwa's activities in Pretoria.\"}"}
+{"id": "h-216", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory B states Themba lives with two flatmates in Soweto, while Memory A says Themba has the Soweto flat alone.\"}"}
+{"id": "h-217", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states Minjun fills up petrol, while Memory B states the car is electric and never needs petrol.\"}"}
+{"id": "h-218", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states Pooja is not allergic to anything, contradicting Memory B which says she is allergic to cats.\"}"}
+{"id": "h-219", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A implies Eoin has a smartphone with internet, contradicting Memory B.\"}"}
+{"id": "h-220", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Memory B is updated by Memory A with more detail.\"}"}
+{"id": "h-221", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory B states Mylene has two children, while Memory A states she has none.\"}"}
+{"id": "h-222", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories describe the bike's location as different.\"}"}
+{"id": "h-223", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory B contradicts Memory A.\"}"}
+{"id": "h-224", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories describe different items Oona knits for the family.\"}"}
+{"id": "h-225", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory B states Ilaria plays tennis, while Memory A says she took up swimming after an operation that ended her tennis.\"}"}
+{"id": "h-226", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory B states Rizwan has a beard, while Memory A says he shaved it off before the wedding, which contradicts the earlier statement.\"}"}
+{"id": "h-227", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory B is an update that contradicts Memory A.\"}"}
+{"id": "h-228", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both describe the same horse with compatible details.\"}"}
+{"id": "h-229", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states Xiaoyu makes dumplings, contradicting Memory B which says she has never learned to cook.\"}"}
+{"id": "h-230", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"A details the age, B states the general category.\"}"}
+{"id": "h-231", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states Sumaq lives in Arequipa, while Memory B states Sumaq lives in Cusco.\"}"}
+{"id": "h-232", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both describe Dilshan's gym routine without contradiction.\"}"}
+{"id": "h-233", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states Duc goes scuba diving in deep water, contradicting Memory B's claim of a fear of deep water.\"}"}
+{"id": "h-234", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both describe Ngoc's water intake in different units but agree on the total amount.\"}"}
+{"id": "h-235", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Memory B is updated by Memory A.\"}"}
+{"id": "h-236", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories claim Rodel has lived in different cities since 2015, which cannot be true at the same time.\"}"}
+{"id": "h-237", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A and Memory B directly contradict each other.\"}"}
+{"id": "h-238", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Memory A describes a change from Memory B\"}"}
+{"id": "h-239", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states Cem performs karaoke, contradicting Memory B's claim of shyness.\"}"}
+{"id": "h-240", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories state Wiktoria's current residence but contradict each other.\"}"}
+{"id": "h-241", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories state a current favourite band but disagree.\"}"}
+{"id": "h-242", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Different training days and locations.\"}"}
+{"id": "h-243", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories describe the same fact with different levels of detail.\"}"}
+{"id": "h-244", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories state the wedding anniversary date but provide conflicting dates.\"}"}
+{"id": "h-245", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories state the same fact but give different addresses.\"}"}
+{"id": "h-246", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both describe different days of the week for Cristóbal's cooking.\"}"}
+{"id": "h-247", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory B describes a change in location after Memory A, but both cannot be true at the same time.\"}"}
+{"id": "h-248", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory B states full-time remote work, contradicting Memory A's office commute.\"}"}
+{"id": "h-249", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Memory A describes a change from Yogyakarta to Semarang\"}"}
+{"id": "h-250", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories agree on the fact that Bartek stopped eating sugar in January.\"}"}
+{"id": "h-251", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both describe different times of day for different drinks.\"}"}
+{"id": "h-252", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories state the same fact but disagree.\"}"}
+{"id": "h-253", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both describe different seasons and modes of transport.\"}"}
+{"id": "h-254", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory B states Kinga is an only child, while Memory A states she has two younger brothers.\"}"}
+{"id": "h-255", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories describe the front door color as different.\"}"}
+{"id": "h-256", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Memory B provides a general description, while Memory A adds specific detail.\"}"}
+{"id": "h-257", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A and Memory B state conflicting birth years for Auma.\"}"}
+{"id": "h-258", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory B states the motorbike is red Honda Wave, while Memory A says it is now black Yamaha.\"}"}
+{"id": "h-259", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory B states the flat is on the ground floor, contradicting Memory A which describes climbing stairs.\"}"}
+{"id": "h-260", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories describe Pieter's residence as being on a different type of property.\"}"}
+{"id": "h-261", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states there is a garden, while Memory B denies its existence.\"}"}
+{"id": "h-262", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A and Memory B state conflicting instruments learned by Arsalan as a child.\"}"}
+{"id": "h-263", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories state the sister lives in Nakuru, with Memory A specifying 'older sister'.\"}"}
+{"id": "h-264", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Weight in pounds and kilograms cannot both be accurate without conversion\"}"}
+{"id": "h-265", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Two memories state conflicting height measurements for the same person at the same time.\"}"}
+{"id": "h-266", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A and B state conflicting employment places.\"}"}
+{"id": "h-267", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states Nayra is the shortest, while Memory B states she is the tallest.\"}"}
+{"id": "h-268", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states Odhiambo traded the old Nokia for a smartphone, contradicting Memory B which says he still has the old Nokia.\"}"}
+{"id": "h-269", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Different days and locations, no clash.\"}"}
+{"id": "h-270", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both describe the truck's age in compatible ways.\"}"}
+{"id": "h-271", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states the fence is metal, while Memory B states it is wood.\"}"}
+{"id": "h-272", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both describe the same commute time with different phrasing.\"}"}
+{"id": "h-273", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Memory B is updated by Memory A.\"}"}
+{"id": "h-274", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories claim Budi moved to different cities in the same year.\"}"}
+{"id": "h-275", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories provide compatible details about Ayan's origin.\"}"}
+{"id": "h-276", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories state the size of the flat but in different units and give different values.\"}"}
+{"id": "h-277", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states Ferenc wears a gold watch, while Memory B says he has a cheap digital one.\"}"}
+{"id": "h-278", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory B implies Huda has a driving licence, contradicting Memory A.\"}"}
+{"id": "h-279", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories describe Yasaman's painting in oil but focus on different subjects.\"}"}
+{"id": "h-280", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states Venla is no longer a vegetarian, contradicting Memory B.\"}"}
+{"id": "h-281", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Different days and locations, no clash.\"}"}
+{"id": "h-282", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A and Memory B contradict each other on Guadalupe's preference for sweet things.\"}"}
+{"id": "h-283", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states Danylo was replaced in the summer, contradicting Memory B which says he is still the coach.\"}"}
+{"id": "h-284", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories mention a cat named Mishti, with Memory A adding detail about the cat's color.\"}"}
+{"id": "h-285", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states Spyros sold the boat and opened a taverna, contradicting Memory B which says he is a fisherman.\"}"}
+{"id": "h-286", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories state the same fact but disagree\"}"}
+{"id": "h-287", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Araba cannot both buy and sell kenkey at the same market at the same time.\"}"}
+{"id": "h-288", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories state the car color differently at the same time.\"}"}
+{"id": "h-289", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories describe compatible details about Hyunwoo's activity involving vinyl records.\"}"}
+{"id": "h-290", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Memory B is updated in Memory A with a transfer to Seoul\"}"}
+{"id": "h-291", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories state the same fact but disagree.\"}"}
+{"id": "h-292", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A states a change from jasmine to oolong, while Memory B claims jasmine is still the favourite.\"}"}
+{"id": "h-293", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Memory B is updated in Memory A with a specific location.\"}"}
+{"id": "h-294", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"Memory B is a general statement updated by Memory A with specific platform information.\"}"}
+{"id": "h-295", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory A and Memory B state conflicting professions for Larissa's mother.\"}"}
+{"id": "h-296", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories refer to the same person and are compatible.\"}"}
+{"id": "h-297", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories describe different changes in Dapo's tea habits.\"}"}
+{"id": "h-298", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Memory B states Karan works at an IT firm in Pune, while Memory A says he resigned from it in March.\"}"}
+{"id": "h-299", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Both memories state the same fact but disagree on the location.\"}"}
+{"id": "h-300", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both memories describe different days and locations without conflict.\"}"}
