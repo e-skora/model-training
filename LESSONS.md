@@ -163,3 +163,19 @@ In the M2 hard test set, many updates say when the change happened ("Asel got ma
 ## 2026-10-26: Lesson: the name wall catches ordinary capitalised words too
 The checker's name wall rejects any word that matches a name in the M1 files, wherever it appears. In the M2 hard set it caught place and pet names ("Ho", "Rosario", "Paolo", "Thabo"), a mountain ("Ben" in Ben Nevis), and even "Cherry" at the start of a reason. Widening the wall to M1's training and validation files also showed that those two files share 7 name words, so the wider wall applies to M2 files only; M1 is frozen and published.
 **Lesson:** before checking, list every capitalised word in the new texts and test it against the names to avoid, not only the people's names.
+
+## 2026-10-26: Lesson: on the hard set, v1's misses are mostly `unclear` dodges
+On the frozen hard test set, v1 (the adapter) missed 16 of 150 contradictions at its worst, and 14 of those 16 were `unclear` answers, not wrong labels. They cluster in two traps, paraphrase and far_apart_no_change, where the clash needs one step of everyday sense ("terrified of dogs" and "cuddles puppies"). The reasons invent a way out ("fear can be mild or strong"), the same habit M1 found in 8 of its 12 `unclear` answers. Its false alarms come from a swapped word read as a clash ("oud" and "piano") and the same thing said two ways ("Bheki" and "Bhekizizwe").
+**Lesson:** a hard test set shows which habit to train away. Here it is the dodge, which the M2 reward already prices at -0.5 (D-040). Results: `results/m2/baseline/summary.md`.
+
+## 2026-10-26: Lesson: two forms of the same model differ by a few pairs
+v1 on the Mac (the GGUF) and v1 as the adapter on Modal are the same trained model, yet on the hard set their worst-case recall differs by 4 pairs (138 and 134 of 150). The M2 bar asks for 5 more pairs.
+**Lesson:** compare v2 with v1 in the same form (adapter with adapter, or GGUF with GGUF), never across forms, or the merge-and-squeeze wobble can look like a gain or a loss.
+
+## 2026-10-26: Lesson: when GPU jobs start together, wall time can be three times the work
+Three Modal jobs started within a few minutes of each other. Each did 7 to 11 minutes of loading and answering, but the last one took 25.8 minutes from start to finish, because it waited for an L4. Modal bills while a container loads and answers (https://modal.com/pricing), so the bill sits between the two numbers.
+**Lesson:** log both the time inside the function and the wall time, and give the cost as a range, rather than pricing wall time as if it were all GPU work.
+
+## 2026-10-26: Mistake: three numbers in the first summary draft were off
+The first draft of `results/m2/baseline/summary.md` said 9 `unclear` pairs where the scorer showed 8, gave the drop from the M1 test set as 0.03 to 0.04 when it was 0.01 to 0.05, and stated a precision floor unclearly. A line-by-line check against the scorer output caught all three before the file was saved.
+**Lesson:** after writing a results summary, check every number in it against the printed scorer output, one by one, before saving.

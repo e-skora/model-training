@@ -117,3 +117,6 @@ Plain meanings. Add a term the first time it shows up.
 - **Name wall:** a check that no person's name from one data file appears anywhere in another, so a test set never shares people with the data a model trained on.
 - **Blind review:** a second reviewer answers each pair before seeing its label, then compares. It catches wrong or unclear labels that the writer would read past.
 - **Per-trap score:** precision, recall and `unclear` counted for each trap on its own, so you can see which kinds of tricky case a model gets wrong.
+- **Worst case (a score):** the lowest of a model's three scores on the as is, swapped and no-dates versions of a test set. M2's bar is set on it, because Aeverum may send pairs in any order and without dates.
+- **`unclear` dodge:** an `unclear` answer on a pair the text does settle, usually with a made-up way out ("fear of dogs can be mild or strong"). It counts as a miss on a real contradiction.
+- **Wall time:** how long a run took from start to finish as seen from the Mac, including waiting for a GPU and starting the container. Modal bills the time the container loads and answers, so wall time is an upper bound on the cost.
