@@ -123,3 +123,11 @@ Plain meanings. Add a term the first time it shows up.
 - **Provenance fields (`source`, `label_by`):** two fields on every new data row that say where it came from (`synthetic` means made up) and who set its label (`claude-code`), so a later model can mix made-up and real-verdict rows knowingly.
 - **`true_unclear`:** the trap tag for a training pair whose right answer really is `unclear`: one fact that decides it is missing, and both readings are equally natural.
 - **Mixed-in pairs (in a blind review):** ordinary pairs with known labels, hidden among the pairs being tested, so the judge cannot guess which are which, and so you can check that the judge is not simply giving one answer to everything.
+- **RL pool:** the pairs GRPO trains on. M2 keeps a pair only if v1's 8 tries at it score differently, plus a few pairs v1 always gets right (D-046). File: `data/m2/rl-pool.jsonl`.
+- **Mixed pair:** a pair where the model's 8 tries got different points. Only these teach GRPO something, because GRPO learns from the difference between tries.
+- **Always right / always wrong (a pair):** all 8 tries got the same points, with the right label every time, or with the same wrong answer every time. An always-wrong pair may have a wrong label, so it is checked before any training.
+- **Sampled accuracy:** the share of a model's random tries (temperature 1.0) that give the right label. It is lower than the greedy score, because random tries sometimes pick a less likely answer.
+- **Reward fingerprint:** `judge.reward.reward_sha256()`, a SHA-256 of the reward table and the code that applies it. Any change to a number or a rule gives a new fingerprint, so a training run can record exactly which reward it used.
+- **num_return_sequences:** a setting that makes the model write several answers to the same prompt in one go. The pool sampling uses 8.
+- **top_p, top_k:** two settings that limit which words the model may pick from when it answers with randomness. `top_p` 1.0 and `top_k` 0 mean no limit, so only the temperature shapes the randomness; these are TRL's GRPO defaults.
+- **Out of memory (GPU):** the graphics card ran out of room for the numbers it holds while answering. Writing fewer answers at once fixes it.
