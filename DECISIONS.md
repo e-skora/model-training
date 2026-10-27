@@ -184,3 +184,9 @@ The blind review of M2 Step 3 (`reviews/M2-03-blind-review.md`) agreed with 199 
   3. Pairs where all 8 answers are right are added at 20% of the number of mixed pairs, chosen with a fixed seed, so v1 does not forget them.
   4. Pairs where all 8 answers are wrong in the same way are listed for Claude in Cowork to check for a wrong label, and are not trained on until checked.
 - **The candidates:** `data/m2/train-hard.jsonl` (971) plus M1's 47 `unclear` training pairs (D-045). Never the frozen test sets, and never the validation files.
+
+### D-047 (2026-10-27, Default): The always-wrong pairs after the blind review
+- **Review:** `reviews/M2-04-always-wrong-review.md`. Two blind agents agreed with the file on 8 of the 9 always-wrong pairs and on all 11 control pairs.
+- **tr-1527** (M1 `unclear`, "gets up early" / "alarm at half past seven") is disputed: both agents call it compatible_detail. It is dropped from RL use, not relabelled (as D-030, D-045), and never joins the pool. `data/m1/train.jsonl` is published and is not edited.
+- **The other 8** have right labels; v1 is wrong on them. They stay out of the pool, because 8 equal rewards give GRPO nothing to learn from, and are kept as a watch list.
+- **The pool is unchanged:** 314 pairs, SHA-256 `2c5c3bf2...dac4e77`.

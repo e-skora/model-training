@@ -4,7 +4,7 @@ Read this first in every session.
 
 - **Phase:** 2, reinforcement learning (RL).
 - **Active milestone:** M2, judge v2 with reinforcement learning (GRPO), measured on a new hard test set (D-036). Spec: `milestones/M2-rl-judge/SPEC.md`. M1 (done 2026-10-23): `milestones/M1-contradiction-judge/SPEC.md`.
-- **Updated:** 2026-10-27 (M2 Step 4 and Step 3 part B written; waiting for reviews)
+- **Updated:** 2026-10-27 (M2-04 checked; Codex review of the reward function next)
 
 ## Done
 - 2026-10-21: Step 1. Repo created with control files (Claude, from Cowork).
@@ -38,8 +38,9 @@ Read this first in every session.
 
 - 2026-10-27: M2 Step 3 part A done. Blind review of 330 pairs by three separate agents (`reviews/M2-03-blind-review.md`): 199 of 200 sampled training pairs and 96 of 97 decided validation pairs agree; only 1 of 33 `unclear` pairs. The 32 disputed `unclear` pairs were moved to `data/m2/dropped-unclear.jsonl` (D-045). Final: `data/m2/train-hard.jsonl` 971 pairs, SHA-256 `8c2abddb...a856`; `data/m2/valid-hard.jsonl` 97 pairs, SHA-256 `dd29c90d...b384`. Merged to `main` by Claude in Cowork.
 - 2026-10-27: M2 Step 4 and Step 3 part B written, waiting for the Codex review of the reward function and the check by Claude in Cowork (Claude Code, prompt M2-04, branch `m2-04-pool-and-reward`, pushed, not merged). Step 4: `src/judge/reward.py` holds the D-040/D-046 table (invalid -2.0; right label +1.0, right type +0.25 more; false alarm -1.5; miss -1.0; `unclear` on a decided pair -0.5; on an `unclear` pair: `unclear` +1.0, non_contradiction 0, contradiction -1.5), read with the strict parser; reward fingerprint `a369e730...b0c70c`; `GRPOReward` is the TRL 1.15.0 reward function and logs the share of each answer kind per call. Step 3 part B: v1 (epoch-2) answered all 1,018 candidates (971 M2 hard training pairs and M1's 47 `unclear` training pairs) 8 times at temperature 1.0 on Modal L4s. 262 mixed, 747 always right, 9 always wrong; pool = the 262 mixed plus 52 always right (seed 2026102705) = 314 pairs, `data/m2/rl-pool.jsonl` SHA-256 `2c5c3bf2...dac4e77`. The 9 always-wrong pairs are in `data/m2/rl-pool-always-wrong.jsonl` for a label check. v1's sampled accuracy 90%; `unclear` on decidable pairs 6%; paraphrase is the weakest trap (70%, 27% `unclear`). GPU: three runs, $0.86 billed in all. Summary: `results/m2/pool/summary.md`. Note for Step 5: the pool was sampled with TRL's defaults (top_p 1.0, top_k off); Unsloth's GRPO notebook adds min_p 0.1, so train with the same sampling or recheck. 240 tests pass. Hard test set and M1 test set never opened.
+- 2026-10-27: M2-04 checked by Claude in Cowork (`reviews/M2-04-always-wrong-review.md`): 240 tests pass on the Mac; reward table matches SPEC, D-040 and D-046; all 8,144 sampled answers rescored with an independent copy of the table, all 323 stored reward lists match; pool rule and counts confirmed (262 mixed + 52 always right = 314; 9 always wrong). Blind review of the 9 always-wrong pairs by two separate agents, with 11 control pairs: 8 labels right (v1 is wrong on them), tr-1527 (M1 `unclear`) disputed and dropped from RL use (D-047). Pool unchanged. Codex review prompt written: `prompts/M2-04-codex-review.md`.
 ## Next single action
-Claude in Cowork: have Codex review `src/judge/reward.py` (branch `m2-04-pool-and-reward`), and check the pool, starting with the 9 always-wrong labels. Elias: start a new chat in this Cowork project with `docs/handoffs/2026-10-27-continuation-m2.md` and paste Claude Code's M2-04 report there.
+Elias: paste `prompts/M2-04-codex-review.md` into Codex (ChatGPT desktop app, new session, folder `~/code/model-training`, branch `m2-04-pool-and-reward`). When it has written `reviews/M2-04-codex-review.md`, tell Claude in Cowork.
 
 ## Frozen files
 - `data/m1/test.jsonl`, 200 pairs, SHA-256 `6e2a08323f445477f9600e371f1074ad3e2b41ef97d7072d6734ef481f6e574b`, frozen 2026-10-22. Never edit it and never train on it.
