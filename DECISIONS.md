@@ -113,3 +113,6 @@ Elias's answer, "aa", to two questions: (1) publish the three Hugging Face repos
 
 ### D-034 (2026-10-23, Elias): Go public, GitHub included as it is
 "yes and a", answering two questions: publish the three Hugging Face repos (yes), and make the GitHub repo public as it is, including the internal files that name Aeverum (option A). The code is under Apache 2.0 (`LICENSE`, the canonical text from apache.org), the same license as the base model. The dataset stays CC BY 4.0 (D-033).
+
+### D-035 (2026-10-26, Elias): How Elias is described on the public cards
+"instead of 'learning to fine tune open models' make it 'experimenting with fine tuning different types of models', (and give a link to my linkedin ...) - please write it so its still humble and names me but makes it a little more impressive, like im not some amateur". The two model cards now say: Made by Elias Skora (linked to https://www.linkedin.com/in/eliassskora/), an AI systems builder who experiments with fine-tuning different types of models. Uploaded to both Hugging Face model repos on 2026-10-26.

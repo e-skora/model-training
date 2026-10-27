@@ -19,7 +19,7 @@ tags:
 
 # Memory contradiction judge (Qwen3-4B, LoRA adapter)
 
-The training add-on (a LoRA adapter) that turns Qwen3-4B-Instruct-2507 into a judge: it reads two memories about a person and says whether they contradict each other, with a one-sentence reason. Made by Elias Skora while learning to fine-tune open language models, as the contradiction checker for a personal memory app.
+The training add-on (a LoRA adapter) that turns Qwen3-4B-Instruct-2507 into a judge: it reads two memories about a person and says whether they contradict each other, with a one-sentence reason. Made by [Elias Skora](https://www.linkedin.com/in/eliassskora/), an AI systems builder who experiments with fine-tuning different types of models, as the contradiction checker for a personal memory app he is building.
 
 **Most people want the ready-to-run file instead:** [eskora/m1-contradiction-judge-qwen3-4b-gguf](https://huggingface.co/eskora/m1-contradiction-judge-qwen3-4b-gguf), one 2.5 GB file for Ollama on a laptop. This repo is for running the model on a GPU with Python, or for training it further. The data is in [eskora/memory-contradiction-pairs](https://huggingface.co/datasets/eskora/memory-contradiction-pairs) and the code in [github.com/e-skora/model-training](https://github.com/e-skora/model-training).
 

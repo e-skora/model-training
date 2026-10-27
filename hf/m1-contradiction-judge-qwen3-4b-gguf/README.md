@@ -20,7 +20,7 @@ tags:
 
 A small model that reads two memories about a person and says whether they contradict each other, with a one-sentence reason. It is Qwen3-4B-Instruct-2507, fine-tuned for this one job, in a single 2.5 GB file that runs on a laptop with Ollama.
 
-It was built as the contradiction checker for a personal memory app: the app compares stored memories and shows the clashes to a person to review. Made by Elias Skora while learning to fine-tune open language models.
+It was built as the contradiction checker for a personal memory app: the app compares stored memories and shows the clashes to a person to review. Made by [Elias Skora](https://www.linkedin.com/in/eliassskora/), an AI systems builder who experiments with fine-tuning different types of models, and publishes each one with its data, code and full results.
 
 This repo holds the ready-to-run file. The training add-on is in [eskora/m1-contradiction-judge-qwen3-4b-lora](https://huggingface.co/eskora/m1-contradiction-judge-qwen3-4b-lora), the data in [eskora/memory-contradiction-pairs](https://huggingface.co/datasets/eskora/memory-contradiction-pairs), and the code in [github.com/e-skora/model-training](https://github.com/e-skora/model-training).
 
