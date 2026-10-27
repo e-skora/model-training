@@ -88,3 +88,51 @@ def test_unclear_reasons_with_one_start_four_times_fail(tmp_path):
     assert result.returncode != 0 and "4 of 4 unclear reasons in a row start 'NAME case depends'" in result.stderr
     result = run(write(tmp_path, "train.jsonl", bad[:3]))
     assert result.returncode == 0, result.stdout + result.stderr
+
+
+HARD = [
+    GOOD[0] | {"hard": "explain_away"},
+    GOOD[1] | {"hard": "indirect_update"},
+    pair("x-4", "Oro Banda", "Oro swims on Tuesdays.", "Oro swims on Fridays.", "non_contradiction", "merely_related")
+    | {"hard": "rule5_bait"},
+]
+
+
+def test_hard_tags_pass_and_print_counts_per_trap(tmp_path):
+    result = run(write(tmp_path, "hard.jsonl", HARD))
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "explain_away (contradiction): 1 / 0 / 1" in result.stdout
+    assert "indirect_update (update): 1 / 1 / 0" in result.stdout
+    assert "rule5_bait (merely_related): 1 / 0 / 1" in result.stdout
+
+
+def test_one_pair_without_a_hard_tag_fails(tmp_path):
+    bad = HARD[:2] + [{k: v for k, v in HARD[2].items() if k != "hard"}]
+    result = run(write(tmp_path, "hard.jsonl", bad))
+    assert result.returncode != 0 and "line 3: missing field 'hard'" in result.stderr
+
+
+def test_unknown_hard_tag_fails(tmp_path):
+    bad = HARD[:2] + [HARD[2] | {"hard": "sneaky"}]
+    result = run(write(tmp_path, "hard.jsonl", bad))
+    assert result.returncode != 0 and "hard 'sneaky' is not one of" in result.stderr
+
+
+def test_hard_tag_that_does_not_fit_its_label_and_type_fails(tmp_path):
+    bad = HARD[:2] + [HARD[2] | {"hard": "looks_like_clash"}]
+    result = run(write(tmp_path, "hard.jsonl", bad))
+    assert result.returncode != 0
+    assert "hard 'looks_like_clash' does not fit label 'non_contradiction' with type 'merely_related'" in result.stderr
+
+
+def test_name_wall_covers_distinct_from_files_for_tagged_files(tmp_path):
+    other = [pair("v-1", "Kel Oduya", "Kel paints fences.", "Kel sells paint.", "non_contradiction", "merely_related")]
+    result = run(write(tmp_path, "hard.jsonl", HARD), "--distinct-from", write(tmp_path, "valid.jsonl", other))
+    assert result.returncode != 0 and "name 'Oduya' belongs to a person in" in result.stderr
+
+
+def test_files_without_hard_tags_keep_the_old_distinct_from_rule(tmp_path):
+    other = [pair("v-1", "Kel Oduya", "Kel paints fences.", "Kel sells paint.", "non_contradiction", "merely_related")]
+    result = run(write(tmp_path, "train.jsonl", GOOD), "--distinct-from", write(tmp_path, "valid.jsonl", other))
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "Traps:" not in result.stdout

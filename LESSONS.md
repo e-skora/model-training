@@ -155,3 +155,11 @@ In GRPO, each answer is scored against the group's average. If every answer to a
 
 ## 2026-10-26: Lesson: a test set can wear out
 When a model scores 0.94 to 0.98 on a test set with 100 contradictions, a real gain of a few pairs looks like luck. Before trying to improve a model, check that the test can still show the improvement. For M2, that meant a new hard test set (D-038).
+
+## 2026-10-26: Lesson: a time word in a memory must fit the memory's dates
+In the M2 hard test set, many updates say when the change happened ("Asel got married in Almaty in September"). Random dates would sometimes put memory a after that September, so the dated version would read as a contradiction, not an update. Claude Code caught this before running any check and gave each such update a date window: memory a before the named time, memory b after it. The same goes for contradictions that say "since January": if the two memories are a year apart, the two Januaries differ and both can be true, so that pair was set to the same day.
+**Lesson:** when dates are drawn by a program, read every time word in the text ("in March", "last year", "since January") and make the dates agree with it. Check the dated and the undated reading of each pair.
+
+## 2026-10-26: Lesson: the name wall catches ordinary capitalised words too
+The checker's name wall rejects any word that matches a name in the M1 files, wherever it appears. In the M2 hard set it caught place and pet names ("Ho", "Rosario", "Paolo", "Thabo"), a mountain ("Ben" in Ben Nevis), and even "Cherry" at the start of a reason. Widening the wall to M1's training and validation files also showed that those two files share 7 name words, so the wider wall applies to M2 files only; M1 is frozen and published.
+**Lesson:** before checking, list every capitalised word in the new texts and test it against the names to avoid, not only the people's names.

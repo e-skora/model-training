@@ -12,8 +12,10 @@ from judge.score import (
     load_jsonl,
     parse_answer,
     score,
+    score_by_trap,
     score_versions,
     side_by_side,
+    trap_table,
 )
 
 
@@ -341,3 +343,85 @@ def test_prompt_sha256_is_fixed_and_changes_with_the_prompt(monkeypatch):
     assert len(first) == 64 and first == prompt_sha256()
     monkeypatch.setattr(prompt_module, "SYSTEM_MESSAGE", SYSTEM_MESSAGE + " ")
     assert prompt_module.prompt_sha256() != first
+
+
+# M2 hard test set: per-trap scoring. Tiny made-up pairs, no files.
+HARD_PAIRS = [
+    pair("h1", "contradiction") | {"hard": "explain_away"},
+    pair("h2", "contradiction") | {"hard": "explain_away"},
+    pair("h3", "contradiction") | {"hard": "paraphrase"},
+    pair("h4", "non_contradiction", "merely_related") | {"hard": "rule5_bait"},
+    pair("h5", "non_contradiction", "merely_related") | {"hard": "near_identical"},
+    pair("h6", "non_contradiction", "compatible_detail") | {"hard": "near_identical"},
+]
+HARD_ANSWERS = [
+    said("h1", "contradiction"),
+    said("h2", "unclear"),
+    {"id": "h3", "raw": "not json"},
+    said("h4", "contradiction"),
+    said("h5", "non_contradiction", "merely_related"),
+    said("h6", "non_contradiction", "compatible_detail"),
+]
+
+
+def test_score_by_trap_reports_precision_recall_and_unclear_per_trap():
+    traps = score_by_trap(HARD_PAIRS, HARD_ANSWERS)
+    assert list(traps) == ["explain_away (contradiction)", "paraphrase (contradiction)", "rule5_bait (merely_related)",
+                           "near_identical (merely_related)", "near_identical (compatible_detail)"]
+    explain = traps["explain_away (contradiction)"]
+    assert (explain["pairs"], explain["precision"], explain["recall"], explain["unclear"]) == (2, 1.0, 0.5, 1)
+    paraphrase = traps["paraphrase (contradiction)"]
+    assert (paraphrase["precision"], paraphrase["recall"], paraphrase["invalid"]) == (None, 0.0, 1)
+    bait = traps["rule5_bait (merely_related)"]  # a false alarm: precision 0, no recall to speak of
+    assert (bait["precision"], bait["recall"], bait["accuracy"]) == (0.0, None, 0.0)
+    assert traps["near_identical (compatible_detail)"]["accuracy"] == 1.0
+    table = trap_table(traps)
+    assert "explain_away (contradiction)" in table and "unclear" in table.splitlines()[0]
+
+
+def test_score_by_trap_needs_a_tag_on_every_pair_and_known_ids():
+    untagged = HARD_PAIRS[:2] + [pair("h9", "contradiction")]
+    with pytest.raises(ValueError, match="without a 'hard' tag"):
+        score_by_trap(untagged, [])
+    with pytest.raises(ValueError, match="not in the test set"):
+        score_by_trap(HARD_PAIRS, [said("zz", "contradiction")])
+
+
+def test_rows_carry_the_trap_only_for_tagged_pairs():
+    _, rows = score(HARD_PAIRS, HARD_ANSWERS)
+    assert rows[0]["hard"] == "explain_away"
+    _, m1_rows = score(PAIRS, [])
+    assert all("hard" not in row for row in m1_rows)
+
+
+def test_trap_tag_never_reaches_the_model():
+    tagged = HARD_PAIRS[0]
+    plain = {k: v for k, v in tagged.items() if k != "hard"}
+    for dates in (True, False):
+        assert build_messages(tagged, dates) == build_messages(plain, dates)
+        assert "explain_away" not in json.dumps(build_messages(tagged, dates))
+
+
+# The M1 saved answers, rescored with today's code, give exactly the numbers
+# recorded in STATE.md and the M1 summaries. Reads repo files; writes nothing.
+M1_RESCORE = {
+    # file: (precision, recall, accuracy, unclear, invalid)
+    "gguf-v1/m1-judge-v1.as_is.jsonl": (0.9795918367346939, 0.96, 0.965, 2, 0),
+    "gguf-v1/m1-judge-v1.swapped.jsonl": (0.9411764705882353, 0.96, 0.95, 2, 0),
+    "gguf-v1/m1-judge-v1.no_dates.jsonl": (0.9791666666666666, 0.94, 0.96, 1, 0),
+    "trained-v1/qwen3-4b-trained-v1.as_is.jsonl": (0.9895833333333334, 0.95, 0.965, 3, 0),
+    "trained-v1/qwen3-4b-trained-v1.swapped.jsonl": (0.9504950495049505, 0.96, 0.94, 6, 0),
+    "trained-v1/qwen3-4b-trained-v1.no_dates.jsonl": (0.9782608695652174, 0.9, 0.94, 3, 0),
+    "baseline/qwen3-8b.jsonl": (0.9591836734693877, 0.94, 0.95, 0, 0),
+}
+
+
+@pytest.mark.parametrize("name", sorted(M1_RESCORE))
+def test_m1_saved_answers_rescore_to_the_same_numbers(name):
+    from pathlib import Path
+
+    from judge.frozen import load_frozen
+
+    repo = Path(__file__).resolve().parents[1]
+    metrics, _ = score(load_frozen(repo / "data/m1/test.jsonl"), load_jsonl(repo / "results/m1" / name))
+    assert (metrics["precision"], metrics["recall"], metrics["accuracy"], metrics["unclear"], metrics["invalid"]) == M1_RESCORE[name]

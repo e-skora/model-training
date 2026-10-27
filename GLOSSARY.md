@@ -114,3 +114,6 @@ Plain meanings. Add a term the first time it shows up.
 - **Trap:** one kind of tricky case, such as a contradiction a reader could explain away. Each hard test pair is tagged with its trap.
 - **Temperature:** how much randomness the model uses when it picks words. 0 always picks the most likely word (the same answer every time); 1 lets it vary, which RL needs so its answers differ.
 - **Thinking mode:** some models write their reasoning before the answer. Qwen3-4B-Instruct-2507 has no thinking mode.
+- **Name wall:** a check that no person's name from one data file appears anywhere in another, so a test set never shares people with the data a model trained on.
+- **Blind review:** a second reviewer answers each pair before seeing its label, then compares. It catches wrong or unclear labels that the writer would read past.
+- **Per-trap score:** precision, recall and `unclear` counted for each trap on its own, so you can see which kinds of tricky case a model gets wrong.
