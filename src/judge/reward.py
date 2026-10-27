@@ -12,6 +12,7 @@ This file imports no GPU libraries, so tests run it on the Mac.
 import hashlib
 import inspect
 import json
+import re
 
 from judge.prompt import LABELS
 from judge.score import format_problem, parse_answer
@@ -64,18 +65,59 @@ def reward(raw_answer, gold_label, gold_type):
     return REWARD["right_label"]
 
 
+def describe(value):
+    """A value the reward rules use, as JSON: source text for code, pattern and flags for a regex."""
+    if isinstance(value, re.Pattern):
+        return {"pattern": value.pattern, "flags": value.flags}
+    if inspect.isfunction(value) or inspect.isclass(value):
+        try:
+            return inspect.getsource(value)
+        except (OSError, TypeError):  # a built-in, such as dict
+            return repr(value)
+    if isinstance(value, (str, int, float, bool, type(None), list, tuple, dict)):
+        return value
+    raise TypeError(f"the reward fingerprint cannot describe {value!r}")
+
+
+def rule_parts(*roots):
+    """Every function, class and constant the roots use, found by following the names in their code.
+
+    Each function's module-level names are followed (modules such as `json`
+    are skipped), so a helper or constant added later is fingerprinted
+    without anyone listing it.
+    """
+    parts, seen, todo = {}, set(), list(roots)
+    while todo:
+        fn = todo.pop()
+        if fn in seen:
+            continue
+        seen.add(fn)
+        parts[f"{fn.__module__}.{fn.__qualname__}"] = describe(fn)
+        codes = [fn.__code__]
+        while codes:
+            code = codes.pop()
+            codes += [c for c in code.co_consts if inspect.iscode(c)]
+            for name in code.co_names:
+                if name not in fn.__globals__:
+                    continue  # a built-in or an attribute name
+                value = fn.__globals__[name]
+                if inspect.isfunction(value):
+                    todo.append(value)
+                elif not inspect.ismodule(value):
+                    parts[f"{fn.__globals__['__name__']}.{name}"] = describe(value)
+    return parts
+
+
 def reward_sha256():
     """SHA-256 of the reward table and the code that applies it, the way `prompt_sha256()` fingerprints the prompt.
 
-    The rules are the source text of `reward`, `read_answer` and the scorer's
-    `parse_answer` and `format_problem`, so a change to a value, a rule or
-    what counts as valid gives a new fingerprint.
+    It covers everything `reward` and `completion_text` use, followed name by
+    name: the table, the scorer's reader (`parse_answer`, `format_problem`)
+    with its helpers, labels, types and code-fence pattern. So a change to a
+    value, a rule, what counts as valid, or how a completion is read gives a
+    new fingerprint. Comments inside that code change it too (harmless).
     """
-    rules = {
-        "table": REWARD,
-        "labels": list(LABELS),
-        "code": [inspect.getsource(f) for f in (reward, read_answer, parse_answer, format_problem)],
-    }
+    rules = rule_parts(reward, completion_text)
     return hashlib.sha256(json.dumps(rules, sort_keys=True).encode("utf-8")).hexdigest()
 
 

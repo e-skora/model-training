@@ -1,10 +1,12 @@
 """Tests for judge.reward with made-up answers. No GPU, no network, no files."""
 
 import json
+import re
 
 import pytest
 
 import judge.reward as reward_module
+import judge.score as score_module
 from judge.reward import REWARD, GRPOReward, reward, reward_sha256
 
 
@@ -128,3 +130,38 @@ def test_fingerprint_is_stable_and_changes_with_a_value(monkeypatch):
         assert reward_sha256() != before, key
         monkeypatch.undo()
     assert reward_sha256() == before
+
+
+# Codex review M2-04, finding 1: each change below alters what earns points, and before the fix
+# the fingerprint stayed the same for all of them. (name, replacement, answer, right label, right type)
+READER_CHANGES = [
+    ("TYPES", ("compatible_detail", "merely_related"), ans("non_contradiction", "update"), "non_contradiction", "update"),
+    ("no_repeated_fields", dict, '{"label": "contradiction", "label": "contradiction", "type": null, "reason": "r"}',
+     "contradiction", None),
+    ("reject_constant", lambda name: None, '{"label": "contradiction", "type": NaN, "reason": "r"}', "contradiction", None),
+    ("FENCE", re.compile(r"\A~~~[a-zA-Z]*\s*\n(.*?)\n?~~~\Z", re.DOTALL), "~~~json\n" + ans("contradiction") + "\n~~~",
+     "contradiction", None),
+]
+
+
+@pytest.mark.parametrize("name, replacement, raw, gold_label, gold_type", READER_CHANGES)
+def test_fingerprint_changes_with_the_answer_reader(monkeypatch, name, replacement, raw, gold_label, gold_type):
+    before_sha, before_points = reward_sha256(), reward(raw, gold_label, gold_type)
+    monkeypatch.setattr(score_module, name, replacement)
+    assert reward(raw, gold_label, gold_type) != before_points  # the change matters to the reward
+    assert reward_sha256() != before_sha
+
+
+def test_fingerprint_changes_with_how_a_completion_is_read(monkeypatch):
+    before = reward_sha256()
+    monkeypatch.setattr(reward_module, "completion_text", lambda completion: completion[-1]["content"])
+    assert reward_sha256() != before
+
+
+def test_fingerprint_covers_the_whole_reader():
+    parts = reward_module.rule_parts(reward, reward_module.completion_text)
+    for name in ("REWARD", "LABELS", "reward", "read_answer", "completion_text"):
+        assert f"judge.reward.{name}" in parts
+    for name in ("parse_answer", "format_problem", "reject_constant", "no_repeated_fields", "RepeatedField",
+                 "FENCE", "LABELS", "TYPES"):
+        assert f"judge.score.{name}" in parts
