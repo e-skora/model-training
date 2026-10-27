@@ -147,3 +147,16 @@ The hard test set is written to fit trap categories. It is never picked by which
 
 ### D-042 (2026-10-26, Default): A blind agent review checks the hard test set
 A separate agent judges a sample blind (it answers before it sees the labels), as for the M1 training set (D-028), instead of Elias spot-checking 20 pairs as he did for the M1 test set (D-020). Why: the 2026-10-26 close-out lesson found that blind reviews caught real problems three times, and the lesson says to keep them for every dataset. Elias can ask for a spot-check as well at any time.
+
+### D-043 (2026-10-26, Default): What Aeverum's direction reply changes here
+Aeverum's operator answered the update (`.handoffs/2026-10-26-model-training-direction-reply.md`, SHA-256 `9dce39e447ddf3311f6ff0399a6aa1265b9fb1b704453d9d2873201aae28eb17`; copy in `docs/handoffs/2026-10-26-aeverum-direction-reply.md`). It is information only. Most of what M2 asked is "not set yet" on Aeverum's side. Adopted here:
+- **Style A stays the main line** (D-040). If Style B is ever offered, its `steps` text must never reach a log.
+- **All three versions stay** (as written, swapped, no dates), because Aeverum has not promised dates.
+- **The bar is unchanged** (precision 0.85, recall 0.80). The 1.5-to-1 cost of a false alarm against a miss stays this project's own assumption; only Elias can set one for Aeverum.
+- **`unclear` keeps a small cost on decidable pairs** and is never pushed to zero, because Aeverum prefers "not sure" over false certainty.
+- **`type` is kept**, though Aeverum's step 12 scores only the label.
+- **Frozen before step 12.** Every candidate is frozen and pinned before Aeverum's step 12 measures it. Step-12 results never steer training here unless Elias decides so, so Aeverum's benchmark never becomes training data.
+- **Every candidate published with five pins:** GGUF SHA-256, Ollama digest, prompt SHA-256, Ollama version, and a download link where the file's SHA-256 can be checked.
+- **New data rows carry `source` and `label_by`** (for example `"source": "synthetic"`, `"label_by": "claude"`), so a later model can mix made-up and verdict-based examples knowingly. Whether that mixing is allowed is Elias's decision, and it would also need an Aeverum product and Source change.
+- **The Ollama server-log check** (no memory text in logs) must be settled before the judge runs on real memories. It is done in M2 Step 7.
+- **Fixed:** `docs/run-judge-on-mac.md` said the Hugging Face repo is private; it is public.

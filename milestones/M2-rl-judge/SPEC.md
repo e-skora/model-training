@@ -68,6 +68,7 @@ So Step 3:
 3. Have a separate agent review a sample blind.
 4. Have v1 answer each training pair 8 times with some randomness (temperature 1). Keep the pairs where its answers disagree, plus a small share it always gets right, so it does not forget them.
 5. Shuffle the order and remove dates for training examples as in M1 (D-026).
+6. Every new row carries `source` and `label_by` (D-043).
 
 ## Steps
 
@@ -79,8 +80,8 @@ So Step 3:
 | 4 | Reward function and its tests (no GPU) | Claude Code; Codex reviews |
 | 5 | GRPO trial run, then full run from v1. Pick the checkpoint on validation by a rule written first | Claude Code; Codex reviews the training code |
 | 6 | Score v2 once on the hard test set and on the M1 test set (as is, swapped, no dates) | Claude Code |
-| 7 | GGUF for the Mac: `m2-judge:v2` in Ollama | Claude Code |
-| 8 | Publish to Hugging Face; write the "what RL changed" note; draft the LinkedIn post | Claude Code, then Claude in Cowork, then Elias edits |
+| 7 | GGUF for the Mac: `m2-judge:v2` in Ollama. Check that Ollama's own server log holds no memory text (D-043) | Claude Code |
+| 8 | Publish to Hugging Face with the five pins (D-043); freeze v2 for Aeverum's step 12; write the "what RL changed" note; draft the LinkedIn post | Claude Code, then Claude in Cowork, then Elias edits |
 
 ## Done means (D-041)
 1. **v2 beats v1 on the frozen hard test set.** Its worst-case recall goes up by at least 0.03 (5 pairs). Worst-case means the lowest of the three versions. Its worst-case precision is no more than 0.01 lower.
@@ -114,4 +115,4 @@ The M1 points still hold:
 - it runs in Ollama;
 - precision matters most.
 
-Aeverum's step-12 benchmark decides whether it uses v1 or v2. Nothing here reads Aeverum's benchmark or its held-back test pairs.
+Aeverum's step-12 benchmark decides whether it uses v1 or v2. Nothing here reads Aeverum's benchmark or its held-back test pairs. v2 is frozen and pinned before step 12 measures it, and step-12 results never steer training here unless Elias decides so (D-043, from Aeverum's direction reply).

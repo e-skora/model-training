@@ -2,13 +2,13 @@
 
 The trained judge (M1 v1) is one file, a GGUF, that Ollama runs on the Mac. GGUF is the single-file model format llama.cpp and Ollama use. This page shows how to set it up from scratch and how a program (such as Aeverum's harness) asks it about two memories.
 
-What you need: Ollama (0.24.0 was used), the Hugging Face command `hf` logged in as `eskora` (the repo is private), and this repo at `~/code/model-training`.
+What you need: Ollama (0.24.0 was used), the Hugging Face command `hf` (the repo is public since 2026-10-23, so no login is needed: https://huggingface.co/eskora/m1-contradiction-judge-qwen3-4b-gguf), and this repo at `~/code/model-training`.
 
 ## The file
 
 | | |
 |---|---|
-| Hugging Face repo (private) | `eskora/m1-contradiction-judge-qwen3-4b-gguf` |
+| Hugging Face repo (public) | `eskora/m1-contradiction-judge-qwen3-4b-gguf` |
 | File | `m1-contradiction-judge-qwen3-4b-Q4_K_M.gguf` |
 | SHA-256 | `b6d930ce83c06512d12da2549b219edda8506e57404007acd877de29308172a9` |
 | Size | 2,497,280,320 bytes (2.5 GB) |
