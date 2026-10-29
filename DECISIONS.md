@@ -190,3 +190,9 @@ The blind review of M2 Step 3 (`reviews/M2-03-blind-review.md`) agreed with 199 
 - **tr-1527** (M1 `unclear`, "gets up early" / "alarm at half past seven") is disputed: both agents call it compatible_detail. It is dropped from RL use, not relabelled (as D-030, D-045), and never joins the pool. `data/m1/train.jsonl` is published and is not edited.
 - **The other 8** have right labels; v1 is wrong on them. They stay out of the pool, because 8 equal rewards give GRPO nothing to learn from, and are kept as a watch list.
 - **The pool is unchanged:** 314 pairs, SHA-256 `2c5c3bf2...dac4e77`.
+
+### D-048 (2026-10-29, Default): The reward fingerprint covers whole source files
+- **Why:** Codex's second review (`reviews/M2-04b-codex-review.md`) showed that following names inside functions still misses default values, captured values, helpers reached through a module, and the training wrapper `GRPOReward.__call__`. Each new form needs a new rule, so the name walk is replaced rather than extended.
+- **The rule:** the fingerprint is the SHA-256 of the full text of `src/judge/reward.py` and of every `judge` module it imports, followed through their imports (today `judge.score`, `judge.prompt`, `judge.frozen`), in a fixed order, with each file's path. The imports are read from the code itself, not from a hand-made list. If one of those files loads code in a way that cannot be followed (`importlib`, `__import__`, `exec`, `eval`), the fingerprint stops with an error instead of skipping it.
+- **What it does not cover:** Python itself and outside packages (such as `json` and `re`). Their versions stay in each run's environment record (`uv.lock`, the pinned image).
+- **The cost:** any edit to those files, even a comment, gives a new fingerprint. That means an offline recheck of the saved pool (no GPU), as in `results/m2/pool/reward-recheck.md`. This is accepted: a fingerprint that moves too often is safe; one that misses a change is not.
