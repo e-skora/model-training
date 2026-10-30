@@ -9,10 +9,10 @@ exactly what scoring means. The `reason` text earns nothing.
 This file imports no GPU libraries, so tests run it on the Mac.
 """
 
+import ast
 import hashlib
-import inspect
 import json
-import re
+from pathlib import Path
 
 from judge.prompt import LABELS
 from judge.score import format_problem, parse_answer
@@ -33,6 +33,10 @@ REWARD = {
 }
 
 ANSWER_KINDS = ("contradiction", "non_contradiction", "unclear", "invalid")
+
+# The folder that holds `judge`, and names that load code in a way reading imports cannot follow.
+SOURCE_ROOT = Path(__file__).resolve().parents[1]
+UNFOLLOWABLE = {"importlib", "builtins", "__builtins__", "__import__", "exec", "eval"}
 
 
 def read_answer(raw):
@@ -65,60 +69,104 @@ def reward(raw_answer, gold_label, gold_type):
     return REWARD["right_label"]
 
 
-def describe(value):
-    """A value the reward rules use, as JSON: source text for code, pattern and flags for a regex."""
-    if isinstance(value, re.Pattern):
-        return {"pattern": value.pattern, "flags": value.flags}
-    if inspect.isfunction(value) or inspect.isclass(value):
-        try:
-            return inspect.getsource(value)
-        except (OSError, TypeError):  # a built-in, such as dict
-            return repr(value)
-    if isinstance(value, (str, int, float, bool, type(None), list, tuple, dict)):
-        return value
-    raise TypeError(f"the reward fingerprint cannot describe {value!r}")
+class FingerprintError(Exception):
+    """The reward fingerprint cannot be sure which code it covers."""
 
 
-def rule_parts(*roots):
-    """Every function, class and constant the roots use, found by following the names in their code.
+def module_file(name):
+    """The source file of a dotted `judge` module name, or None when there is no such file."""
+    path = SOURCE_ROOT.joinpath(*name.split("."))
+    for candidate in (path / "__init__.py", path.with_suffix(".py")):
+        if candidate.is_file():
+            return candidate
+    return None
 
-    Each function's module-level names are followed (modules such as `json`
-    are skipped), so a helper or constant added later is fingerprinted
-    without anyone listing it.
+
+def imported_modules(path, text):
+    """The `judge` modules one file imports, read from its code. Stops on code it cannot follow."""
+    where = path.relative_to(SOURCE_ROOT)
+    package = where.parent.parts
+
+    def stop(why):
+        return FingerprintError(f"the reward fingerprint cannot follow {where.as_posix()}: {why}")
+
+    def check_import(name):
+        top = name.split(".")[0]
+        if top in UNFOLLOWABLE or (top != "judge" and module_file(top)):  # project code beside `judge`
+            raise stop(f"it imports {name}")
+
+    found = set()
+    for node in ast.walk(ast.parse(text, filename=str(path))):
+        name = node.id if isinstance(node, ast.Name) else node.attr if isinstance(node, ast.Attribute) else None
+        if name in UNFOLLOWABLE:
+            raise stop(f"it uses {name}")
+        # `judge.x` works without importing x, once any other file has imported it.
+        if isinstance(node, ast.Attribute) and isinstance(node.value, ast.Name) and node.value.id == "judge":
+            if module_file(f"judge.{node.attr}"):
+                found.add(f"judge.{node.attr}")
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                check_import(alias.name)
+                if alias.name == "judge":
+                    raise stop("`import judge` can reach any module, so import the modules by name")
+                if alias.name.startswith("judge."):
+                    found.add(alias.name)
+        elif isinstance(node, ast.ImportFrom):
+            if node.level > len(package):
+                raise stop("a relative import leaves the judge package")
+            start = package[:len(package) - node.level + 1] if node.level else ()
+            base = ".".join(start + tuple(filter(None, [node.module])))
+            check_import(base)
+            if base.split(".")[0] != "judge":
+                continue
+            found.add(base)
+            for alias in node.names:
+                if alias.name == "*":
+                    raise stop(f"`from {base} import *` hides what it imports")
+                if module_file(f"{base}.{alias.name}"):
+                    found.add(f"{base}.{alias.name}")
+    for name in list(found):
+        while "." in name:  # importing a.b.c runs a.b too
+            name = name.rpartition(".")[0]
+            found.add(name)
+    missing = sorted(name for name in found if module_file(name) is None)
+    if missing:
+        raise stop(f"no source file for {missing}")
+    return found
+
+
+def fingerprinted_files():
+    """The source files behind the reward: {path inside the source folder: full text}.
+
+    Starts from this file and `judge/__init__.py` (Python runs it on any `judge`
+    import) and follows every `judge` import, so a new module needs no list.
     """
-    parts, seen, todo = {}, set(), list(roots)
+    files, todo = {}, ["judge", "judge.reward"]
     while todo:
-        fn = todo.pop()
-        if fn in seen:
-            continue
-        seen.add(fn)
-        parts[f"{fn.__module__}.{fn.__qualname__}"] = describe(fn)
-        codes = [fn.__code__]
-        while codes:
-            code = codes.pop()
-            codes += [c for c in code.co_consts if inspect.iscode(c)]
-            for name in code.co_names:
-                if name not in fn.__globals__:
-                    continue  # a built-in or an attribute name
-                value = fn.__globals__[name]
-                if inspect.isfunction(value):
-                    todo.append(value)
-                elif not inspect.ismodule(value):
-                    parts[f"{fn.__globals__['__name__']}.{name}"] = describe(value)
-    return parts
+        path = module_file(todo.pop())
+        key = path.relative_to(SOURCE_ROOT).as_posix()
+        if key not in files:
+            files[key] = path.read_bytes().decode("utf-8")
+            todo += imported_modules(path, files[key])
+    return files
 
 
 def reward_sha256():
-    """SHA-256 of the reward table and the code that applies it, the way `prompt_sha256()` fingerprints the prompt.
+    """SHA-256 of the full text of the source files behind the reward, with their paths, in sorted order (D-048).
 
-    It covers everything `reward` and `completion_text` use, followed name by
-    name: the table, the scorer's reader (`parse_answer`, `format_problem`)
-    with its helpers, labels, types and code-fence pattern. So a change to a
-    value, a rule, what counts as valid, or how a completion is read gives a
-    new fingerprint. Comments inside that code change it too (harmless).
+    It covers `fingerprinted_files()`: the table, the reader, how a completion
+    is read and the wrapper TRL calls. So any edit to those files gives a new
+    fingerprint, even a comment (then recheck the saved pool offline). Paths
+    start at the package, so the value is the same in any folder.
+
+    It does not cover Python or outside packages (`json`, `re`; their versions
+    are in `uv.lock` and the pinned image), data files or settings the code
+    might read, or changes made in memory while a program runs: it reads the
+    files on disk when called. It stops on the plain ways of loading code it
+    cannot follow (UNFOLLOWABLE, project code beside `judge`), but it is a check
+    against mistakes, not against someone hiding code on purpose.
     """
-    rules = rule_parts(reward, completion_text)
-    return hashlib.sha256(json.dumps(rules, sort_keys=True).encode("utf-8")).hexdigest()
+    return hashlib.sha256(json.dumps(fingerprinted_files(), sort_keys=True).encode("utf-8")).hexdigest()
 
 
 def completion_text(completion):
