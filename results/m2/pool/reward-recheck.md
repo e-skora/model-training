@@ -13,6 +13,7 @@ The rules themselves did not change. Only the way the fingerprint is worked out 
 | Recorded when the pool was sampled (`results/m2/pool/v1-samples.meta.json`) | `a369e730de69a4305f079697c647c0bc25332d6bf5510eae10207bef65b0c70c` |
 | The old method, run on today's code | `a369e730de69a4305f079697c647c0bc25332d6bf5510eae10207bef65b0c70c` (same: the rules are unchanged) |
 | The new method, today (`reward_sha256()`) | `92a043f18ac483f60aac7036375b3d98abfde4e6c82191d8303af7f70a8c3a53` |
+| The final method, whole source files (D-048), 2026-10-30 (`reward_sha256()`) | `4d64ca4c54a353e3cb60522cfd49ed5dd38a14ade5ec55f8e87a98ee15f8a42a` |
 
 Step 5 should record the new fingerprint, `92a043f1...c3a53`, and treat it as the same reward the pool was chosen with. The saved samples, their meta file and the pool keep the old one; they are not rewritten.
 
@@ -64,3 +65,33 @@ print(data_sha == meta["data_sha256"], len(rows), len({r["id"] for r in rows}), 
 print(sum(len(r["raw"]) for r in rows), len(stored), mismatch)
 print(hashlib.sha256(open("data/m2/rl-pool.jsonl", "rb").read()).hexdigest())
 ```
+
+## Update 2026-10-30: the final fingerprint (D-048)
+
+Written by Claude Code for `prompts/M2-04c-fingerprint-fixes.md`, after `reviews/M2-04b-codex-review.md`. No GPU, no Modal, no test set or validation file read.
+
+**Step 5 records the final fingerprint, `4d64ca4c...f8a42a`, and treats it as the same reward the pool was chosen with.** This replaces the `92a043f1...c3a53` named in the section above. The saved samples, their meta file and the pool keep `a369e730...`; they are not rewritten.
+
+The fingerprint is now the SHA-256 of the full text of these five files, each with its path:
+- `judge/__init__.py` (Python runs it on any `judge` import, so it counts too; the prompt expected the other four)
+- `judge/frozen.py`
+- `judge/prompt.py`
+- `judge/reward.py`
+- `judge/score.py`
+
+The reward rules did not change. The old method still gives `a369e730...`, because `reward`, `read_answer`, `parse_answer`, `format_problem`, the table and the labels are the same. So any later edit to one of these five files, even a comment, gives a new fingerprint and needs this recheck again (no GPU).
+
+### The check rerun with today's code, at commit `98a8d6f`
+
+The script above was run again, unchanged. Its third printed value is now the final fingerprint.
+
+| Check | Result |
+|---|---|
+| Fingerprint recorded at sampling, and the old method on today's code | `a369e730...b0c70c`, both the same |
+| Prompt fingerprint recorded at sampling equals today's | yes |
+| Pool settings recorded equal `judge.pool` (show seed, keep seed, answers per pair) | yes (2026102704, 2026102705, 8) |
+| Candidate files unchanged since sampling | yes |
+| Sample rows, different IDs, candidates | 1,018, 1,018, 1,018; the ID check passes |
+| Answers rescored | 8,144 |
+| Stored reward lists, answer counts and outcomes checked (314 pool + 9 always wrong) | 323, no difference |
+| `data/m2/rl-pool.jsonl` SHA-256 | `2c5c3bf2591c8376b72f15e0a34d223ec24fc366e45b781e4706dcaebdac4e77` (unchanged) |
