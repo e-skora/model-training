@@ -4,7 +4,7 @@ Read this first in every session.
 
 - **Phase:** 2, reinforcement learning (RL).
 - **Active milestone:** M2, judge v2 with reinforcement learning (GRPO), measured on a new hard test set (D-036). Spec: `milestones/M2-rl-judge/SPEC.md`. M1 (done 2026-10-23): `milestones/M1-contradiction-judge/SPEC.md`.
-- **Updated:** 2026-10-29 (second Codex review: fingerprint fixes next)
+- **Updated:** 2026-10-30 (fingerprint fixes done: Codex's third review next)
 
 ## Done
 - 2026-10-21: Step 1. Repo created with control files (Claude, from Cowork).
