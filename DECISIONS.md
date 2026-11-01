@@ -233,3 +233,12 @@ The blind review of M2 Step 3 (`reviews/M2-03-blind-review.md`) agreed with 199 
   - **must fix:** a bypass that ordinary, honest code could cause by accident;
   - **known limit:** a bypass that needs code written to fool the check. It is listed in the review and in `reviews/M2-04-fixes.md`, and does not block Step 5.
 - The D-052 allow-lists stay.
+
+### D-054 (2026-11-01, Default): How the D-052 allow-lists read the points they left open
+- **Why:** Claude Code built D-052 in `prompts/M2-04g-stops-allow-lists.md` and had to settle a few cases. Each took the stricter reading: a wrong stop is a clear error that takes a minute to fix, and a wrong pass is silent.
+- **The rule:**
+  - Any other binding of `re` stops, even in a file that never calls `re.compile`.
+  - `sys` follows the same rule as `re`: one plain `import sys` at the top of the file. So `import sys` inside a function stops, and so do the allowed reads in a file with a star import.
+  - Only reading passes: `sys.argv = []` and `del sys.exit` stop.
+  - The check is a full `ast` check, not `symtable`, because a stop must name a line. It counts every text field of the code as a binding unless it is known not to be one.
+  - The link check runs before the skip for cache files, so a link called `__pycache__` or `something.pyc` stops.

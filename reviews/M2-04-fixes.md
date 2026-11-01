@@ -96,3 +96,59 @@ Three tests cannot fail on the old code, because it never had that fault. I brok
 - Loaders not on the stop 1 list, such as `pkgutil`, and code hidden on purpose, such as building the word `eval` from pieces. This is a check against mistakes, not against sabotage.
 
 **Correction to the second-review section above.** Its "What is covered, exactly" and its list of stops describe the import walk, which is gone. They are kept as the record of that fix; this section replaces them.
+
+## Fourth review: fixes for `reviews/M2-04f-codex-review.md`
+
+Codex's fourth review (2026-11-01, CHANGES REQUIRED, three must-fix findings and one nice-to-have) found ways past the stops that the stop list did not expect. Done by Claude Code on branch `m2-04-pool-and-reward`, 2026-11-01, following D-052 and `prompts/M2-04g-stops-allow-lists.md`. No GPU, Modal or network use. I opened neither test set. `uv run pytest` does read the real `data/m1/test.jsonl`, through 4 older test functions (`test_every_fingerprint_in_the_cards_is_known`, `test_real_cards_pass` and `test_wrong_count_is_caught` in `tests/test_prepublish_check.py`, and `test_m1_saved_answers_rescore_to_the_same_numbers` in `tests/test_score.py`), and writes nothing to it. A log of the run shows no test opening `data/m2/test-hard.jsonl`. Tests: 523 pass with `uv run pytest` (377 before). No reward value, saved sample, pool row or summary changed. `src/judge/reward.py` is the only file under `src/` that changed.
+
+I agree with all four findings. Final fingerprint: `769f58fe9fd3cccd062725e25111bc86dc5c8d8f449c95795a3c1ff165d025e7`. It still covers 11 files.
+
+The stops on `sys`, `re`, `__path__` and links now say what may pass, and everything else stops. A list of what may pass is called an allow-list. A list of what may not pass is called a block-list. A block-list loses to any name it did not expect; an allow-list does not.
+
+| # | Finding | What changed | Tests that cover it (`tests/test_reward.py`) |
+|---|---|---|---|
+| 1 | `sys` under another name changed where imports look | `sys` has an allow-list. One plain `import sys` at the top of the file, then reading `sys.argv`, `sys.exit`, `sys.stdout` or `sys.stderr`. Anything else with that name stops, naming the file and line. | `test_sys_under_another_name_stops_with_an_error` (Codex's `runtime = sys` case, with the helper in `plugins/policy.py`), `test_sys_beyond_its_allow_list_stops_with_an_error` (14 forms, including `sys.meta_path`, `sys.modules`, and passing `sys` to a function), `test_an_allowed_sys_use_needs_a_plain_import`, `test_any_other_binding_of_sys_stops_with_an_error` (34 forms) |
+| 1, related | `__path__` changed where a package looks | Any use of `__path__` stops. | `test_a_change_to_a_package_s_import_folders_stops_with_an_error` (Codex's case), `test_any_use_of_path_stops_with_an_error` (6 forms) |
+| 2 | Resolving links first hid a linked `judge` folder | The path is no longer resolved. `src`, `src/judge` and `src/judge/reward.py` are checked first, as Python found them, each part on its own. A link on any of them stops. The check for links found inside `src/` stays. | `test_a_linked_judge_folder_stops_with_an_error` (Codex's layout: `strict/src/judge` and `loose/src/judge` both link to `external/src/judge`), `test_a_linked_src_folder_stops_with_an_error`, `test_a_linked_reward_file_stops_with_an_error` |
+| 3 | `re` could be taken by a `match` pattern or a star import | The name `re` may be bound once, by a plain `import re` at the top of the file. Any other binding stops. `re.compile` also needs no star import in the file. | `test_re_taken_by_a_match_pattern_stops_with_an_error`, `test_re_taken_by_a_star_import_stops_with_an_error` (both Codex's examples, both run for real first), `test_a_star_import_blocks_re_compile_and_sys`, `test_any_other_binding_of_re_stops_with_an_error` and `test_any_other_binding_of_re_stops_before_re_compile` (34 binding kinds each) |
+| 4 | A regular file named `__pycache__` was skipped | Only what sits inside a `__pycache__` folder is skipped. A file with that name is covered. | `test_a_regular_file_named_pycache_moves_the_fingerprint` (3 places), `test_cache_files_do_not_move_the_fingerprint` (kept) |
+
+**How `re` and `sys` are read.** With a full `ast` check, not `symtable`. `symtable` lists the names in each part of a file, but gives no line, and the stops must name a line. The check does not list the ways of binding a name. It looks at every text field of the code and counts each one as a binding, unless it is known not to be one: reading a name, an attribute such as `thing.re`, a keyword such as `print(re=1)`, a keyword in a `case` pattern, or the module in `from re import escape`. So a kind of syntax nobody listed stops; it does not slip by.
+
+**Choices I made where the prompt left room (D-054).**
+- Any other binding of `re` stops even in a file that never calls `re.compile`. D-052 says "of any kind", so I read it the strict way. The error points at the binding, so four older tests had their expected line changed (below).
+- `sys` follows the same rule as `re`: bound once, by a plain import at the top of the file. So `import sys` inside a function stops, and so does `sys.exit` in a file with a star import.
+- Only reading passes. `sys.argv = []` and `del sys.exit` stop.
+- `other.sys.meta_path` and `print(sys=1)` stop too: they are "any other use of the name".
+- The link check now runs before the skip for cache files, so a link called `__pycache__` or `something.pyc` stops. Before, it was skipped.
+
+**Today's code.** No file other than `reward.py` had to change. `score.py` and `frozen.py` pass, and so do the `sys.exit` and `sys.argv` lines in `format.py` and `score.py`. I tried the rules on today's `src/` in a scratch script before writing them, after the lesson of 2026-11-01.
+
+**Proof the tests work.** I ran the final tests with today's code, commit `61616b6`, before changing `reward.py`. 142 of the 341 tests in the file failed, and 199 passed. Of the 142:
+- 113 fail for the real reason: 110 do not stop at all, and in 3 the fingerprint does not move.
+- 29 fail for a small reason: the code stops, but on the `re.compile` line and not on the binding. 25 are new tests (`test_any_other_binding_of_re_stops_before_re_compile`). 4 are the older tests below.
+
+Of the 146 new tests, 138 fail on `61616b6`. The other 8 cannot fail there, because they check what must still pass: `test_today_s_code_passes_both_stops` and 7 cases of `test_what_the_allow_lists_let_pass`. I broke a scratch copy of the new code on purpose for each, and each failed:
+- `test_what_the_allow_lists_let_pass`: each of these breaks fails only that one case among the tests that check what may pass. Counting an attribute or keyword as a binding fails the `thing.re` case; counting a `case` keyword fails the `Thing(re=1)` case; counting the module in `from re import escape` fails that case; stopping on every star import fails the star import case.
+- The other 3 cases and `test_today_s_code_passes_both_stops`: with `SYS_ALLOWED` emptied, or with `re.compile` never allowed, they fail. So do most other tests, because today's own code then stops.
+- `test_words_in_strings_and_comments_do_not_stop`, which I extended with `sys`, `re` and `__path__`: when a string's text counts as a name, it fails. So do many other tests, because today's own text then stops.
+- `test_cache_files_do_not_move_the_fingerprint`: with the skip for `__pycache__` folders removed, the case that is not a `.pyc` file fails. The `.pyc` cases have their own skip.
+
+**Tests changed, not new.**
+- `test_compile_on_anything_but_python_s_re_stops_with_an_error`: 4 of its 5 expected lines changed, because the error now points at the binding, not at the `re.compile` line. These are the other 4 small failures.
+- `PROBE`, the code each fresh Python runs: its check that the copy was loaded no longer follows links. Otherwise it stopped the linked layouts before the fingerprint's own check, as Codex warned.
+
+**Nothing changed in the reward rules.** The offline recheck is in `results/m2/pool/reward-recheck.md`: the old method still gives `a369e730...`, all 8,144 saved answers rescore to the 323 stored reward lists, and the pool SHA-256 is unchanged.
+
+**What is covered, exactly.** Every file under `src/`, by path and bytes, in sorted order. Only `.pyc` files, folders called `__pycache__` and what is inside those folders are skipped.
+
+**What is not covered:**
+- Python itself and outside packages such as `json` and `re`. Their versions stay in `uv.lock` and the pinned image.
+- Data and settings files outside `src/`.
+- Changes made in memory while a program runs. Step 5 must not replace reward code in memory, and must not edit `src/` during a run.
+- Wrappers outside `src/`, such as Step 5's training script.
+- `.pyc` files. A `.pyc` left beside the source can be loaded with no `.py` file, and the fingerprint would not see it.
+- Loaders not on the stop list, such as `pkgutil`.
+- Code written to fool the check, which D-053 calls a known limit. The text of a string never counts as a name, so `getattr(thing, "__path__")` or building the word `eval` from pieces does not stop.
+
+**Correction to the third-review section above.** Its list of stops, and the line saying only `__pycache__` folders and `.pyc` files are skipped, are kept as the record of that fix. This section replaces them.
