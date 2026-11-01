@@ -216,3 +216,12 @@ The blind review of M2 Step 3 (`reviews/M2-03-blind-review.md`) agreed with 199 
 - **Why:** both are cases where the fingerprint would otherwise give an answer without having read what it claims to cover.
 - **A link under `src/` stops.** A link can point outside `src/`, and Python's folder walk does not go inside a linked folder, so the code behind it would be skipped without a word.
 - **`judge` outside a folder called `src` stops.** Modal 1.6.2 puts `judge` in `/root` by default (read from its installed `mount.py`), and an install puts it in `site-packages`. "The folder around `judge`" would then be the wrong folder. Take the fingerprint on the Mac, as `scripts/sample_pool.py` does.
+
+### D-052 (2026-11-01, Default): Stops after Codex's fourth review are allow-lists, not block-lists
+- **Why:** `reviews/M2-04f-codex-review.md` found three more bypasses of the D-049 to D-051 stops: `sys` given a new name (`runtime = sys`), a linked `judge` folder hidden by resolving links first, and `re` rebound by a `match` pattern or a star import. Each was a name the block-list did not expect.
+- **The rule from now on:** say what may pass, and stop everything else.
+  - **`sys`:** a file may only `import sys` plainly and use `sys.argv`, `sys.exit`, `sys.stdout` and `sys.stderr`. Any other use of the name `sys` (another attribute, an alias, passing it, assigning it) stops.
+  - **`re.compile` (D-050):** passes only when `re` is bound exactly once in the file, by a plain top-level `import re`, and the file has no star import. Any other binding of `re`, of any kind, stops.
+  - **`__path__`:** any use stops.
+  - **Links:** the path to `judge` and to `reward.py` is checked for links before it is resolved. A link anywhere on it stops.
+  - **`__pycache__`:** skipped only when it is a folder. A file with that name is covered.
