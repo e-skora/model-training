@@ -14,6 +14,7 @@ The rules themselves did not change. Only the way the fingerprint is worked out 
 | The old method, run on today's code | `a369e730de69a4305f079697c647c0bc25332d6bf5510eae10207bef65b0c70c` (same: the rules are unchanged) |
 | The new method, today (`reward_sha256()`) | `92a043f18ac483f60aac7036375b3d98abfde4e6c82191d8303af7f70a8c3a53` |
 | The final method, whole source files (D-048), 2026-10-30 (`reward_sha256()`) | `4d64ca4c54a353e3cb60522cfd49ed5dd38a14ade5ec55f8e87a98ee15f8a42a` |
+| The whole `src/` folder (D-049), 2026-11-01 (`reward_sha256()`) | `1ffce9909b4cef446921fd0ecd0185eebef4b881b1d3c1fb39648edad42c2381` |
 
 Step 5 should record the new fingerprint, `92a043f1...c3a53`, and treat it as the same reward the pool was chosen with. The saved samples, their meta file and the pool keep the old one; they are not rewritten.
 
@@ -88,6 +89,32 @@ The script above was run again, unchanged. Its third printed value is now the fi
 | Check | Result |
 |---|---|
 | Fingerprint recorded at sampling, and the old method on today's code | `a369e730...b0c70c`, both the same |
+| Prompt fingerprint recorded at sampling equals today's | yes |
+| Pool settings recorded equal `judge.pool` (show seed, keep seed, answers per pair) | yes (2026102704, 2026102705, 8) |
+| Candidate files unchanged since sampling | yes |
+| Sample rows, different IDs, candidates | 1,018, 1,018, 1,018; the ID check passes |
+| Answers rescored | 8,144 |
+| Stored reward lists, answer counts and outcomes checked (314 pool + 9 always wrong) | 323, no difference |
+| `data/m2/rl-pool.jsonl` SHA-256 | `2c5c3bf2591c8376b72f15e0a34d223ec24fc366e45b781e4706dcaebdac4e77` (unchanged) |
+
+## Update 2026-11-01: the fingerprint covers the whole `src/` folder (D-049)
+
+Written by Claude Code for `prompts/M2-04e-fingerprint-whole-src.md`, after `reviews/M2-04d-codex-review.md`. No GPU, no Modal, no network, no test set or validation file read.
+
+**Step 5 records the final fingerprint, `1ffce990...c2381`, and treats it as the same reward the pool was chosen with.** This replaces the `4d64ca4c...f8a42a` named in the section above. The saved samples, their meta file and the pool keep `a369e730...`; they are not rewritten.
+
+The fingerprint is now the SHA-256 of every file under `src/`, each path followed by its bytes, in sorted order. Today that is 11 files, all in `src/judge/`: `__init__.py`, `format.py`, `frozen.py`, `generate.py`, `load.py`, `modal_image.py`, `pool.py`, `prompt.py`, `reward.py`, `score.py`, `train_data.py`.
+
+The reward rules did not change. The old method still gives `a369e730...`, because `reward`, `read_answer`, `parse_answer`, `format_problem`, the table and the labels are the same. Any later edit to any file under `src/`, even a comment, gives a new fingerprint and needs this recheck again (no GPU).
+
+### The check rerun with today's code, at commit `b7069b8`
+
+The script above was run again, unchanged. Its third printed value is now the final fingerprint.
+
+| Check | Result |
+|---|---|
+| Fingerprint recorded at sampling, and the old method on today's code | `a369e730...b0c70c`, both the same |
+| Today's fingerprint | `1ffce9909b4cef446921fd0ecd0185eebef4b881b1d3c1fb39648edad42c2381` |
 | Prompt fingerprint recorded at sampling equals today's | yes |
 | Pool settings recorded equal `judge.pool` (show seed, keep seed, answers per pair) | yes (2026102704, 2026102705, 8) |
 | Candidate files unchanged since sampling | yes |

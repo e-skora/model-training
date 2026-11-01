@@ -205,3 +205,14 @@ The blind review of M2 Step 3 (`reviews/M2-03-blind-review.md`) agreed with 199 
   2. Any file under `src/` that imports a top-level name matching a `.py` file or a folder in the repo root, `scripts/` or `tests/` stops it too.
 - **Not covered, as before:** Python itself, outside packages (their versions are in `uv.lock` and the pinned Modal image), data and settings files, changes made in memory while a program runs, and a wrapper written outside `src/`.
 - **The cost:** an edit to any file under `src/`, not only the reward's, moves the fingerprint. That means an offline recheck of the saved pool (no GPU), as in `results/m2/pool/reward-recheck.md`. Accepted, for the same reason as D-048.
+
+### D-050 (2026-11-01, Elias): Stop 1 allows exactly `re.compile`
+- **Why:** D-049's stop 1 bans `compile`, even as an attribute. The target is Python's built-in `compile`, which can turn text into code. As written, the stop also blocked `re.compile` in `src/judge/score.py:26` and `src/judge/frozen.py:14`, which only builds a text pattern. The prompt said to report that, not loosen the rule.
+- **The ruling:** Elias: "Yes, allow re.compile".
+- **The rule:** `re.compile` passes only when the file has a plain `import re` and nothing else in the file uses the name `re`. Every other `compile` stops, including `from re import compile` and `import re as r`.
+- **Why not rewrite the two lines:** `parse_answer` would have to change, so the old-method check could no longer give `a369e730...`. That match is the proof that the reward rules did not change.
+
+### D-051 (2026-11-01, Default): Two more stops, so "every file under `src/`" stays true
+- **Why:** both are cases where the fingerprint would otherwise give an answer without having read what it claims to cover.
+- **A link under `src/` stops.** A link can point outside `src/`, and Python's folder walk does not go inside a linked folder, so the code behind it would be skipped without a word.
+- **`judge` outside a folder called `src` stops.** Modal 1.6.2 puts `judge` in `/root` by default (read from its installed `mount.py`), and an install puts it in `site-packages`. "The folder around `judge`" would then be the wrong folder. Take the fingerprint on the Mac, as `scripts/sample_pool.py` does.
