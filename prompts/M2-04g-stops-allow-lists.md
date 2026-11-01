@@ -53,7 +53,7 @@ Build every test in a temporary copy of `src/`, run in a fresh Python, never by 
 - Add a section for the fourth review to `reviews/M2-04-fixes.md`: each finding, what changed, which test covers it.
 - Make `STATE.md` and `GLOSSARY.md` say exactly what passes and what stops.
 - Add a lesson to `LESSONS.md`.
-- Write the Codex re-review prompt `prompts/M2-04h-codex-review.md` in the same shape as `prompts/M2-04f-codex-review.md`: read-only, new session, folder `~/code/model-training`, branch `m2-04-pool-and-reward`, writes only `reviews/M2-04h-codex-review.md`. It must ask Codex to retry all its fourth-review reproductions and to try to get past each allow-list.
+- Write the Codex re-review prompt `prompts/M2-04h-codex-review.md` in the same shape as `prompts/M2-04f-codex-review.md`: read-only, new session, folder `~/code/model-training`, branch `m2-04-pool-and-reward`, writes only `reviews/M2-04h-codex-review.md`. It must ask Codex to retry all its fourth-review reproductions and to try to get past each allow-list. It must also state D-053: the fingerprint is meant to catch honest changes, not code written on purpose to fool it; a bypass that ordinary, honest code could cause by accident is `must fix`; a bypass that needs code written to fool the check is a `known limit`, listed but not blocking Step 5.
 - Update `STATE.md`'s next action: Claude in Cowork checks `prompts/M2-04h-codex-review.md`, then Elias pastes it into Codex.
 - Run `uv run pytest` on the Mac. Commit in small steps and push the branch. Do not merge.
 

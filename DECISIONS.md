@@ -225,3 +225,11 @@ The blind review of M2 Step 3 (`reviews/M2-03-blind-review.md`) agreed with 199 
   - **`__path__`:** any use stops.
   - **Links:** the path to `judge` and to `reward.py` is checked for links before it is resolved. A link anywhere on it stops.
   - **`__pycache__`:** skipped only when it is a folder. A file with that name is covered.
+
+### D-053 (2026-11-01, Elias): What the reward fingerprint must withstand
+- **The question (Claude in Cowork):** Codex keeps finding tricks only someone deliberately trying to fool the fingerprint would write. Should the next review count deliberate tricks as known limits, and only block training for bypasses an ordinary edit could cause?
+- **Elias:** "yes".
+- **The rule:** the fingerprint exists to catch honest changes: an edit to the reward code, a helper, a setting, or a file someone forgot about. It is not a defence against code written on purpose to fool it. From the next Codex review (`prompts/M2-04h-codex-review.md`) on:
+  - **must fix:** a bypass that ordinary, honest code could cause by accident;
+  - **known limit:** a bypass that needs code written to fool the check. It is listed in the review and in `reviews/M2-04-fixes.md`, and does not block Step 5.
+- The D-052 allow-lists stay.
