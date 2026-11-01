@@ -33,10 +33,16 @@ REWARD = {
 
 ANSWER_KINDS = ("contradiction", "non_contradiction", "unclear", "invalid")
 
+# This file as Python found it, links not followed, so the fingerprint can check that path (D-052).
+THIS_FILE = Path(__file__).absolute()
 # The folder that holds `judge`, the repo around it, and the names that load code by name (D-049).
-SOURCE_ROOT = Path(__file__).resolve().parents[1]
+SOURCE_ROOT = THIS_FILE.parents[1]
 REPO_ROOT = SOURCE_ROOT.parent
 LOADERS = {"importlib", "runpy", "__import__", "exec", "eval", "compile", "builtins", "__builtins__"}
+# All a file under `src/` may do with `sys`, after one plain `import sys` (D-052).
+SYS_ALLOWED = {"argv", "exit", "stdout", "stderr"}
+# Code whose text fields name something without giving it a value.
+BINDS_NOTHING = (ast.Attribute, ast.keyword, ast.MatchClass, ast.ImportFrom)
 
 
 def read_answer(raw):
@@ -82,34 +88,53 @@ def outside_code_names():
     return names
 
 
-def gives_re_another_meaning(node):
-    """True when this code makes the name `re` mean something other than a plain `import re`."""
-    if isinstance(node, ast.Import):
-        return any(alias.asname == "re" for alias in node.names)
-    if isinstance(node, ast.ImportFrom):
-        return any((alias.asname or alias.name) == "re" for alias in node.names)
-    if isinstance(node, ast.Name):
-        return node.id == "re" and not isinstance(node.ctx, ast.Load)
-    if isinstance(node, ast.arg):
-        return node.arg == "re"
-    return isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.ExceptHandler)) and node.name == "re"
+def written_names(node):
+    """Every name written in this piece of code: each text field, with `a.b` cut to `a`. A string's text is not a name."""
+    if isinstance(node, ast.Constant):
+        return []
+    fields = (value if isinstance(value, list) else [value] for _, value in ast.iter_fields(node))
+    return [item.split(".")[0] for field in fields for item in field if isinstance(item, str)]
+
+
+def bound_names(node):
+    """The names this piece of code gives a value. A written name counts unless it is known not to, so new syntax stops."""
+    if isinstance(node, ast.alias):
+        return [node.asname or node.name.split(".")[0]]
+    if isinstance(node, BINDS_NOTHING) or (isinstance(node, ast.Name) and isinstance(node.ctx, ast.Load)):
+        return []
+    return written_names(node)
+
+
+def plain_import(tree, name):
+    """The first `import name` at the top of a file: the one binding of `sys` or `re` allowed there (D-052), or None."""
+    imports = [statement for statement in tree.body if isinstance(statement, ast.Import)]
+    return next((alias for statement in imports for alias in statement.names if alias.name == name and not alias.asname), None)
 
 
 def stop_problems(tree, outside):
-    """What in one parsed file breaks stop 1 or stop 2: a list of (line, why). Strings and comments do not count."""
+    """What in one parsed file breaks a stop: a list of (line, why). Strings and comments do not count."""
     nodes = list(ast.walk(tree))
-    imports = [alias for node in nodes if isinstance(node, ast.Import) for alias in node.names]
+    plain_re, plain_sys = plain_import(tree, "re"), plain_import(tree, "sys")
+    star_import = any(isinstance(node, ast.alias) and node.name == "*" for node in nodes)
+    other_re = [node for node in nodes if "re" in bound_names(node) and node is not plain_re]
     # `re.compile` builds a text pattern and loads no code (D-050). No other `compile` is allowed.
-    re_is_the_module = any(alias.name == "re" for alias in imports) and not any(map(gives_re_another_meaning, nodes))
-    sys_names = {"sys"} | {alias.asname for alias in imports if alias.name == "sys" and alias.asname}
-    problems = []
+    re_is_the_module = plain_re is not None and not star_import and not other_re
+    sys_reads = set()  # the `sys` in each allowed read such as `sys.argv`
+    if plain_sys is not None and not star_import:
+        sys_reads = {node.value for node in nodes
+                     if isinstance(node, ast.Attribute) and node.attr in SYS_ALLOWED and isinstance(node.ctx, ast.Load)}
+    problems = [(node.lineno, "it binds re in a way other than one plain top-level import") for node in other_re]
     for node in nodes:
+        if "__path__" in written_names(node):
+            problems.append((node.lineno, "it uses __path__"))
+        if "sys" in written_names(node) and node is not plain_sys and node not in sys_reads:
+            problems.append((node.lineno, "it uses sys, and only one plain top-level import and "
+                                          "reading sys.argv, sys.exit, sys.stdout or sys.stderr may pass"))
         name = node.id if isinstance(node, ast.Name) else node.attr if isinstance(node, ast.Attribute) else None
-        if isinstance(node, ast.Attribute) and isinstance(node.value, ast.Name):
-            if node.attr == "compile" and node.value.id == "re" and re_is_the_module:
-                continue
-            if node.attr == "path" and node.value.id in sys_names:
-                problems.append((node.lineno, "it touches sys.path"))
+        if isinstance(node, ast.Attribute) and node.attr == "compile" and isinstance(node.value, ast.Name) and node.value.id == "re":
+            if not re_is_the_module:
+                problems.append((node.lineno, "re.compile needs one plain top-level import re and no star import"))
+            continue
         if name in LOADERS:
             problems.append((node.lineno, f"it uses {name}"))
         if isinstance(node, ast.Import):
@@ -122,8 +147,6 @@ def stop_problems(tree, outside):
         for found in tops + names:
             if found in LOADERS:
                 problems.append((node.lineno, f"it imports {found}"))
-        if "sys" in tops and ("path" in names or "*" in names):
-            problems.append((node.lineno, "it imports sys.path"))
         for top in tops:
             if top in outside:
                 problems.append((node.lineno, f"it imports {top}, which is project code outside src/"))
@@ -132,17 +155,18 @@ def stop_problems(tree, outside):
 
 def fingerprinted_files():
     """Every file the fingerprint covers: {path inside `src/`: bytes}, sorted by path. Stops if a file breaks a stop."""
+    for path in (SOURCE_ROOT, THIS_FILE.parent, THIS_FILE):
+        if path.is_symlink():
+            raise FingerprintError(f"the reward fingerprint stops at {path}: a link would hide which folder is read")
     if SOURCE_ROOT.name != "src":
         raise FingerprintError(f"the reward fingerprint needs the repo's src folder, and judge is in {SOURCE_ROOT}")
     outside = outside_code_names()
     files = {}
     for path in SOURCE_ROOT.rglob("*"):
         key = path.relative_to(SOURCE_ROOT)
-        if "__pycache__" in key.parts or path.suffix == ".pyc":
-            continue
         if path.is_symlink():
             raise FingerprintError(f"the reward fingerprint stops at {key}: a link could point outside src/")
-        if not path.is_file():
+        if "__pycache__" in key.parent.parts or path.suffix == ".pyc" or not path.is_file():
             continue
         files[key.as_posix()] = path.read_bytes()
         if path.suffix == ".py":
@@ -160,25 +184,41 @@ def reward_sha256():
     the table, the reader, how a completion is read and the wrapper TRL calls
     all count, and so does a file the reward never uses. Any edit there, even
     a comment or a new file, gives a new fingerprint (then recheck the saved
-    pool offline). Only `__pycache__` folders and `.pyc` files are skipped.
+    pool offline). Only `.pyc` files, folders called `__pycache__` and what is
+    inside those folders are skipped; a file called `__pycache__` is covered.
     Paths start at `src/`, so the value is the same in any folder.
 
     It stops with an error rather than give a wrong answer, so code outside
-    `src/` cannot slip in unnoticed:
-    - Stop 1: a file loads code by name (LOADERS, with `re.compile` the only
-      use of `compile` allowed, D-050) or touches `sys.path`.
-    - Stop 2: a file imports a name that is a `.py` file or a folder in the
-      repo root, `scripts/` or `tests/`.
-    It also stops on a link under `src/`, and when `judge` is not in a folder
-    called `src` (on Modal or from an install, take the fingerprint on the Mac).
+    `src/` cannot slip in unnoticed. Most of these are allow-lists (D-052):
+    they say what may pass, and everything else stops. A full `ast` check
+    reads them, because it gives the line. Every text field of the code counts,
+    so a name in a new kind of syntax stops rather than slips by. `symtable`
+    is not used, because it gives no line for a name.
+    - `sys`: one plain `import sys` at the top of the file, then reading
+      `sys.argv`, `sys.exit`, `sys.stdout` or `sys.stderr`. Any other use of
+      the name stops, and so does any of those reads in a file with a star
+      import, because the star could bind `sys`.
+    - `re`: one plain `import re` at the top of the file is its only binding.
+      Any other binding stops, even in a file that never calls `re.compile`.
+    - `re.compile`, the only `compile` allowed (D-050): it also needs that
+      plain `import re` and no star import in the file.
+    - `__path__`: any use stops.
+    - Links: `src`, `src/judge` and `src/judge/reward.py` are checked as Python
+      found them, before anything else, and so is everything under `src/`,
+      skipped places included. Any link stops.
+    It also stops, as a block-list:
+    - a file loads code by name (LOADERS);
+    - a file imports a name that is a `.py` file or a folder in the repo root,
+      `scripts/` or `tests/`;
+    - `judge` is not in a folder called `src` (on Modal or from an install,
+      take the fingerprint on the Mac).
 
     Not covered: Python and outside packages (`json`, `re`; their versions are
     in `uv.lock` and the pinned image); data and settings files outside `src/`;
     changes made in memory while a program runs, because it reads the files on
     disk when called; wrappers outside `src/`, such as Step 5's script; and
-    `.pyc` files. The stops read the code for the plain ways of loading code
-    named above. They are a check against mistakes, not against someone hiding
-    code on purpose, and rarer loaders such as `pkgutil` are not on the list.
+    `.pyc` files. It catches honest changes, not code written to fool it
+    (D-053), and rarer loaders such as `pkgutil` are not on the list.
     """
     digest = hashlib.sha256()
     for key, data in fingerprinted_files().items():

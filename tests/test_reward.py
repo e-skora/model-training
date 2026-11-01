@@ -133,7 +133,7 @@ PROBE = """
 import json, os, sys
 sys.path.insert(0, sys.argv[1])
 import judge
-assert os.path.realpath(judge.__file__).startswith(os.path.realpath(sys.argv[1]) + os.sep)
+assert os.path.abspath(judge.__file__).startswith(os.path.abspath(sys.argv[1]) + os.sep)  # links not followed
 for name in sys.argv[3:]:  # modules another program would have loaded first
     __import__(name)
 from judge.reward import GRPOReward, reward, reward_sha256
@@ -417,10 +417,10 @@ def test_code_that_loads_code_by_name_stops_with_an_error(tmp_path, file, line):
 
 
 @pytest.mark.parametrize("text, line", [
-    ("import re\n\n\ndef later(re):\n    return re.compile('x')\n", 5),
-    ("import json as re\n\nre.compile('x')\n", 3),
-    ("import re\n\nre = None\nre.compile('x')\n", 4),
-    ("from other import re\n\nre.compile('x')\n", 3),
+    ("import re\n\n\ndef later(re):\n    return re.compile('x')\n", 4),
+    ("import json as re\n\nre.compile('x')\n", 1),
+    ("import re\n\nre = None\nre.compile('x')\n", 3),
+    ("from other import re\n\nre.compile('x')\n", 1),
     ("re.compile('x')\n", 1),  # no `import re` at all
 ])
 def test_compile_on_anything_but_python_s_re_stops_with_an_error(tmp_path, text, line):
@@ -565,10 +565,246 @@ def test_the_fingerprint_stops_when_the_package_is_not_in_a_src_folder(tmp_path)
     assert_stops(folder, "src folder", source="elsewhere")
 
 
+# Codex review M2-04f, finding 1: `sys` under another name changes where imports look (D-052).
+SYS_ALIAS = """import sys
+from pathlib import Path
+runtime = sys
+runtime.path.append(str(Path(__file__).resolve().parents[2] / "plugins"))
+"""
+
+
+def test_sys_under_another_name_stops_with_an_error(tmp_path):
+    folder = src_copy(tmp_path / "copy")
+    add_file(folder, "__init__.py", SYS_ALIAS)
+    add_anywhere(folder, "plugins/policy.py", LOOSE_MODULE)
+    use_reader(folder, "from policy import read_fields")
+    assert_stops(folder, "judge/__init__.py, line 3")
+
+
+# Anything done with `sys` that is not on its allow-list, in a file with a plain `import sys`.
+SYS_USES = [
+    "sys.meta_path.clear()",
+    "sys.path_hooks.clear()",
+    "sys.modules['judge'] = None",
+    "len(sys.modules)",
+    "sys.getrecursionlimit()",
+    "runtime = sys",
+    "print(sys)",
+    "[sys]",
+    "vars(sys)",
+    "sys.argv = []",
+    "sys.stdout = None",
+    "del sys.exit",
+    "other.sys.meta_path",
+    "print(sys=1)",
+]
+
+
+@pytest.mark.parametrize("line", SYS_USES)
+def test_sys_beyond_its_allow_list_stops_with_an_error(tmp_path, line):
+    folder = src_copy(tmp_path / "copy")
+    add_file(folder, "notes.py", f"import sys\n\n\ndef later():\n    {line}\n")
+    assert_stops(folder, "judge/notes.py, line 5")
+
+
+def test_an_allowed_sys_use_needs_a_plain_import(tmp_path):
+    folder = src_copy(tmp_path / "copy")
+    add_file(folder, "notes.py", "sys.exit(1)\n")
+    assert_stops(folder, "judge/notes.py, line 1")
+
+
+# Every way of giving a name a value: the code (NAME is `sys` or `re`) and the line in it that binds.
+BINDINGS = {
+    "assignment": ("NAME = None", 1),
+    "unpacking": ("first, NAME = 1, 2", 1),
+    "starred unpacking": ("first, *NAME = [1]", 1),
+    "augmented assignment": ("NAME += 1", 1),
+    "annotated assignment": ("NAME: int = 1", 1),
+    "annotation only": ("NAME: int", 1),
+    "for": ("for NAME in []:\n    pass", 1),
+    "with as": ("with open('x') as NAME:\n    pass", 1),
+    "except as": ("try:\n    pass\nexcept ValueError as NAME:\n    pass", 3),
+    "walrus": ("(NAME := 1)", 1),
+    "comprehension": ("[1 for NAME in []]", 1),
+    "match name": ("match 1:\n    case NAME:\n        pass", 2),
+    "match star": ("match []:\n    case [*NAME]:\n        pass", 2),
+    "match rest": ("match {}:\n    case {**NAME}:\n        pass", 2),
+    "match as": ("match 1:\n    case int() as NAME:\n        pass", 2),
+    "global": ("def later():\n    global NAME", 2),
+    # Python refuses `nonlocal` with no outer binding, so that outer binding is the first line to stop.
+    "nonlocal": ("def outer():\n    NAME = 1\n\n    def inner():\n        nonlocal NAME", 2),
+    "argument": ("def later(NAME):\n    pass", 1),
+    "keyword argument": ("def later(*, NAME=None):\n    pass", 1),
+    "star argument": ("def later(*NAME):\n    pass", 1),
+    "double star argument": ("def later(**NAME):\n    pass", 1),
+    "lambda": ("lambda NAME: 1", 1),
+    "def": ("def NAME():\n    pass", 1),
+    "async def": ("async def NAME():\n    pass", 1),
+    "class": ("class NAME:\n    pass", 1),
+    "type parameter": ("def later[NAME]():\n    pass", 1),
+    "type alias": ("type NAME = int", 1),
+    "import as": ("import json as NAME", 1),
+    "from import": ("from json import NAME", 1),
+    "from import as": ("from json import loads as NAME", 1),
+    "dotted import": ("import NAME.sub", 1),
+    "a second import": ("import NAME", 1),
+    "an import in a function": ("def later():\n    import NAME", 2),
+    "del": ("del NAME", 1),
+}
+
+
+def binding_file(name, code, then=""):
+    return f"import {name}\n\n{code.replace('NAME', name)}\n{then}"
+
+
+@pytest.mark.parametrize("kind", BINDINGS)
+def test_any_other_binding_of_re_stops_with_an_error(tmp_path, kind):
+    code, line = BINDINGS[kind]
+    folder = src_copy(tmp_path / "copy")
+    add_file(folder, "notes.py", binding_file("re", code))
+    assert_stops(folder, f"judge/notes.py, line {line + 2}")
+
+
+@pytest.mark.parametrize("kind", BINDINGS)
+def test_any_other_binding_of_re_stops_before_re_compile(tmp_path, kind):
+    code, line = BINDINGS[kind]
+    folder = src_copy(tmp_path / "copy")
+    add_file(folder, "notes.py", binding_file("re", code, "\nPATTERN = re.compile('x')\n"))
+    assert_stops(folder, f"judge/notes.py, line {line + 2}")
+
+
+@pytest.mark.parametrize("kind", BINDINGS)
+def test_any_other_binding_of_sys_stops_with_an_error(tmp_path, kind):
+    code, line = BINDINGS[kind]
+    folder = src_copy(tmp_path / "copy")
+    add_file(folder, "notes.py", binding_file("sys", code))
+    assert_stops(folder, f"judge/notes.py, line {line + 2}")
+
+
+# Codex review M2-04f, finding 3: both files run, and `re` is not Python's module when `compile` is called.
+WORKER = 'class Worker:\n    def compile(self, text):\n        return "not a regex"\n'
+
+
+def test_re_taken_by_a_match_pattern_stops_with_an_error(tmp_path):
+    folder = src_copy(tmp_path / "copy")
+    add_file(folder, "notes.py", f"import re\n\n\n{WORKER}\n\nmatch Worker():\n    case re:\n        RESULT = re.compile('x')\n")
+    assert_stops(folder, "judge/notes.py, line 10", first=["judge.notes"])
+
+
+def test_re_taken_by_a_star_import_stops_with_an_error(tmp_path):
+    folder = src_copy(tmp_path / "copy")
+    add_file(folder, "other.py", f"{WORKER}\n\nre = Worker()\n")
+    add_file(folder, "notes.py", "import re\nfrom judge.other import *\n\nRESULT = re.compile('x')\n")
+    assert_stops(folder, "judge/", first=["judge.notes"])
+
+
+@pytest.mark.parametrize("text", [
+    "import re\nfrom judge.prompt import *\n\nPATTERN = re.compile('x')\n",
+    "import sys\nfrom judge.prompt import *\n\nsys.exit(1)\n",
+])
+def test_a_star_import_blocks_re_compile_and_sys(tmp_path, text):
+    # The star import names nothing wrong here. It could bind `re` or `sys`, and the reader cannot tell.
+    folder = src_copy(tmp_path / "copy")
+    add_file(folder, "notes.py", text)
+    assert_stops(folder, "judge/notes.py, line 4")
+
+
+# Codex review M2-04f, finding 1, related: `__path__` is a package's own list of import folders.
+def test_a_change_to_a_package_s_import_folders_stops_with_an_error(tmp_path):
+    folder = src_copy(tmp_path / "copy")
+    add_file(folder, "__init__.py", 'from pathlib import Path\n__path__.append(str(Path(__file__).resolve().parents[2] / "plugins"))\n')
+    add_anywhere(folder, "plugins/policy.py", LOOSE_MODULE)
+    use_reader(folder, "from judge.policy import read_fields")
+    assert_stops(folder, "judge/__init__.py, line 2")
+
+
+@pytest.mark.parametrize("line", [
+    "__path__",
+    "judge.__path__",
+    "from judge import __path__",
+    "__path__ = []",
+    "def inner(__path__): pass",
+    "print(__path__=1)",
+])
+def test_any_use_of_path_stops_with_an_error(tmp_path, line):
+    folder = src_copy(tmp_path / "copy")
+    assert_stops(folder, add_later(folder, "frozen.py", line))
+
+
+# Codex review M2-04f, finding 2: two folders share one linked `judge`, and each has its own `policy.py` beside it.
+def test_a_linked_judge_folder_stops_with_an_error(tmp_path):
+    external = src_copy(tmp_path / "external")  # its parent is also called `src`
+    use_reader(external, "from policy import read_fields")
+    for name, source in (("strict", STRICT_MODULE), ("loose", LOOSE_MODULE)):
+        add_anywhere(tmp_path / name, "src/policy.py", source)
+        (tmp_path / name / "src" / "judge").symlink_to(external / "src" / "judge", target_is_directory=True)
+        assert_stops(tmp_path / name, f"{name}/src/judge", answer=REPEATED)
+
+
+def test_a_linked_src_folder_stops_with_an_error(tmp_path):
+    external = src_copy(tmp_path / "external")
+    (tmp_path / "copy").mkdir()
+    (tmp_path / "copy" / "src").symlink_to(external / "src", target_is_directory=True)
+    assert_stops(tmp_path / "copy", "copy/src")
+
+
+def test_a_linked_reward_file_stops_with_an_error(tmp_path):
+    external, folder = src_copy(tmp_path / "external"), src_copy(tmp_path / "copy")
+    file = folder / "src" / "judge" / "reward.py"
+    file.unlink()
+    file.symlink_to(external / "src" / "judge" / "reward.py")
+    assert_stops(folder, "src/judge/reward.py")
+
+
+# Codex review M2-04f, finding 4: only a folder called `__pycache__` is skipped.
+@pytest.mark.parametrize("file", ["__pycache__", "judge/__pycache__", "other/__pycache__"])
+def test_a_regular_file_named_pycache_moves_the_fingerprint(tmp_path, file):
+    before = probe(src_copy(tmp_path / "before"))["sha"]
+    after = src_copy(tmp_path / "after")
+    add_anywhere(after, f"src/{file}", "x\n")
+    assert probe(after)["sha"] != before
+
+
+@pytest.mark.parametrize("entry", ["__pycache__", "judge/__pycache__/link", "judge/link.pyc"])
+def test_a_link_in_a_skipped_place_stops_with_an_error(tmp_path, entry):
+    folder = src_copy(tmp_path / "copy")
+    add_anywhere(tmp_path, "outside/policy.py", LOOSE_MODULE)
+    link = folder / "src" / entry
+    link.parent.mkdir(parents=True, exist_ok=True)
+    link.symlink_to(tmp_path / "outside")
+    assert_stops(folder, entry)
+
+
+def test_today_s_code_passes_both_stops(tmp_path):
+    # Passes on the old code too; `reviews/M2-04-fixes.md` says how it was shown to catch a problem.
+    folder = src_copy(tmp_path / "copy")
+    for file, word in [("score.py", "re.compile"), ("frozen.py", "re.compile"), ("score.py", "sys.exit"),
+                       ("score.py", "sys.argv"), ("format.py", "sys.exit"), ("format.py", "sys.argv")]:
+        assert word in (folder / "src" / "judge" / file).read_text(encoding="utf-8")
+    assert len(probe(folder)["sha"]) == 64
+
+
+@pytest.mark.parametrize("text", [
+    "import sys\n\nsys.argv\nsys.exit\nsys.stdout.write('x')\nsys.stderr.write('x')\n",
+    "import re\n\nPATTERN = re.compile('x', re.DOTALL)\n",
+    "import json, re, sys\n\nPATTERN = re.compile('x')\nsys.exit(json.dumps(1))\n",
+    "import re\n\nthing.re = 1\nprint(re=1)\nPATTERN = re.compile('x')\n",  # neither one binds the name `re`
+    "import re\n\nmatch 1:\n    case Thing(re=1):\n        pass\n\nPATTERN = re.compile('x')\n",
+    "from re import escape\n",
+    "from judge.prompt import *\n",  # a star import alone blocks nothing
+])
+def test_what_the_allow_lists_let_pass(tmp_path, text):
+    # Passes on the old code too; `reviews/M2-04-fixes.md` says how it was shown to catch a problem.
+    folder = src_copy(tmp_path / "copy")
+    add_file(folder, "notes.py", text)
+    assert len(probe(folder)["sha"]) == 64
+
+
 def test_words_in_strings_and_comments_do_not_stop(tmp_path):
     # Passes on the old code too; `reviews/M2-04-fixes.md` says how it was shown to catch a problem.
     folder = src_copy(tmp_path / "copy")
-    add_file(folder, "notes.py", '"""importlib, runpy, compile."""\n# exec, eval, sys.path.insert\nWORDS = ["__import__", "builtins"]\n')
+    add_file(folder, "notes.py", '"""importlib, runpy, compile, sys, re, __path__."""\n# exec, eval, sys.path.insert, re = 1\n'
+                                 'WORDS = ["__import__", "builtins", "sys", "re", "__path__"]\n')
     assert len(probe(folder)["sha"]) == 64
 
 
