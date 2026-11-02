@@ -1,0 +1,52 @@
+{
+  "model": "unsloth/Qwen3-4B-Instruct-2507-unsloth-bnb-4bit + eskora/m1-contradiction-judge-qwen3-4b-lora",
+  "base_model": "unsloth/Qwen3-4B-Instruct-2507-unsloth-bnb-4bit",
+  "base_revision": "7744afa8566e264af1a92a806d8d9aae00cc7c78",
+  "adapter_repo": "eskora/m1-contradiction-judge-qwen3-4b-lora",
+  "adapter_revision": "1d9ebbf66e1a2abcad9932932bb7d810a38c59b9",
+  "adapter_checkpoint": "epoch-2",
+  "data_sha256": {
+    "data/m2/train-hard.jsonl": "8c2abddb93b21a0850c000c2919ee0bb11277ecf3b9e272d55cf9703110ca856",
+    "data/m1/train.jsonl": "a41de541d2a25c564009e232b2d75ccb714c5a668dcd30ef73004fae778231b1"
+  },
+  "candidates": 1018,
+  "sampled": 1018,
+  "smoke": false,
+  "samples_per_pair": 8,
+  "show_seed": 2026102704,
+  "keep_seed": 2026102705,
+  "prompt_sha256": "83d14d39a2115eb1f4d2d461581673090ec25d0a6f05d444cb2da8b756a2865c",
+  "reward_sha256": "a369e730de69a4305f079697c647c0bc25332d6bf5510eae10207bef65b0c70c",
+  "wall_seconds": 4327.0,
+  "cost_low": 0.69,
+  "cost_high": 3.84,
+  "loaded_model": "unsloth/Qwen3-4B-Instruct-2507-unsloth-bnb-4bit",
+  "load_seconds": 141.5,
+  "answer_seconds": 2973.4,
+  "gpu": "NVIDIA L4",
+  "peak_vram_gib": 19.37,
+  "unsloth": "2026.10.7",
+  "transformers": "5.17.0",
+  "peft": "0.21.2",
+  "torch_seed": [
+    3407,
+    3408,
+    3409,
+    3410
+  ],
+  "generation": {
+    "max_new_tokens": 256,
+    "do_sample": true,
+    "num_beams": 1,
+    "temperature": 1.0,
+    "top_p": 1.0,
+    "top_k": 0,
+    "num_return_sequences": 8
+  },
+  "chat_template_options": {
+    "tokenize": false,
+    "add_generation_prompt": true
+  },
+  "first_prompt_sha256": "705cf39f2efb9d4bbd0956a0980047fb3f44a281313751b287ab716ee8825eb2",
+  "parts": 4
+}

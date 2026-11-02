@@ -184,3 +184,61 @@ The blind review of M2 Step 3 (`reviews/M2-03-blind-review.md`) agreed with 199 
   3. Pairs where all 8 answers are right are added at 20% of the number of mixed pairs, chosen with a fixed seed, so v1 does not forget them.
   4. Pairs where all 8 answers are wrong in the same way are listed for Claude in Cowork to check for a wrong label, and are not trained on until checked.
 - **The candidates:** `data/m2/train-hard.jsonl` (971) plus M1's 47 `unclear` training pairs (D-045). Never the frozen test sets, and never the validation files.
+
+### D-047 (2026-10-27, Default): The always-wrong pairs after the blind review
+- **Review:** `reviews/M2-04-always-wrong-review.md`. Two blind agents agreed with the file on 8 of the 9 always-wrong pairs and on all 11 control pairs.
+- **tr-1527** (M1 `unclear`, "gets up early" / "alarm at half past seven") is disputed: both agents call it compatible_detail. It is dropped from RL use, not relabelled (as D-030, D-045), and never joins the pool. `data/m1/train.jsonl` is published and is not edited.
+- **The other 8** have right labels; v1 is wrong on them. They stay out of the pool, because 8 equal rewards give GRPO nothing to learn from, and are kept as a watch list.
+- **The pool is unchanged:** 314 pairs, SHA-256 `2c5c3bf2...dac4e77`.
+
+### D-048 (2026-10-29, Default): The reward fingerprint covers whole source files
+- **Why:** Codex's second review (`reviews/M2-04b-codex-review.md`) showed that following names inside functions still misses default values, captured values, helpers reached through a module, and the training wrapper `GRPOReward.__call__`. Each new form needs a new rule, so the name walk is replaced rather than extended.
+- **The rule:** the fingerprint is the SHA-256 of the full text of `src/judge/reward.py` and of every `judge` module it imports, followed through their imports (today `judge.score`, `judge.prompt`, `judge.frozen`), in a fixed order, with each file's path. The imports are read from the code itself, not from a hand-made list. If one of those files loads code in a way that cannot be followed (`importlib`, `__import__`, `exec`, `eval`), the fingerprint stops with an error instead of skipping it.
+- **What it does not cover:** Python itself and outside packages (such as `json` and `re`). Their versions stay in each run's environment record (`uv.lock`, the pinned image).
+- **The cost:** any edit to those files, even a comment, gives a new fingerprint. That means an offline recheck of the saved pool (no GPU), as in `results/m2/pool/reward-recheck.md`. This is accepted: a fingerprint that moves too often is safe; one that misses a change is not.
+
+### D-049 (2026-10-31, Default): The reward fingerprint covers the whole `src/` folder (replaces D-048's import walk)
+- **Why:** three Codex reviews in a row (`reviews/M2-04-codex-review.md`, `M2-04b`, `M2-04d`) each found a new way to reach code that the dependency tracing missed: helpers and constants, then default values and the training wrapper, then `runpy`, a folder without `__init__.py`, and a nested module already loaded. Tracing imports can always miss one more form. A fixed folder cannot.
+- **The rule:** `reward_sha256()` is the SHA-256 of every file under `src/` (each file's path relative to `src/`, then its bytes, in sorted order), skipping only `__pycache__` folders and `.pyc` files. No import tracing decides what is covered.
+- **Two stops, so code outside `src/` cannot slip in:**
+  1. Any file under `src/` that loads code by name (`importlib`, `runpy`, `__import__`, `exec`, `eval`, `compile`, `builtins`) or changes `sys.path` stops the fingerprint with an error.
+  2. Any file under `src/` that imports a top-level name matching a `.py` file or a folder in the repo root, `scripts/` or `tests/` stops it too.
+- **Not covered, as before:** Python itself, outside packages (their versions are in `uv.lock` and the pinned Modal image), data and settings files, changes made in memory while a program runs, and a wrapper written outside `src/`.
+- **The cost:** an edit to any file under `src/`, not only the reward's, moves the fingerprint. That means an offline recheck of the saved pool (no GPU), as in `results/m2/pool/reward-recheck.md`. Accepted, for the same reason as D-048.
+
+### D-050 (2026-11-01, Elias): Stop 1 allows exactly `re.compile`
+- **Why:** D-049's stop 1 bans `compile`, even as an attribute. The target is Python's built-in `compile`, which can turn text into code. As written, the stop also blocked `re.compile` in `src/judge/score.py:26` and `src/judge/frozen.py:14`, which only builds a text pattern. The prompt said to report that, not loosen the rule.
+- **The ruling:** Elias: "Yes, allow re.compile".
+- **The rule:** `re.compile` passes only when the file has a plain `import re` and nothing else in the file uses the name `re`. Every other `compile` stops, including `from re import compile` and `import re as r`.
+- **Why not rewrite the two lines:** `parse_answer` would have to change, so the old-method check could no longer give `a369e730...`. That match is the proof that the reward rules did not change.
+
+### D-051 (2026-11-01, Default): Two more stops, so "every file under `src/`" stays true
+- **Why:** both are cases where the fingerprint would otherwise give an answer without having read what it claims to cover.
+- **A link under `src/` stops.** A link can point outside `src/`, and Python's folder walk does not go inside a linked folder, so the code behind it would be skipped without a word.
+- **`judge` outside a folder called `src` stops.** Modal 1.6.2 puts `judge` in `/root` by default (read from its installed `mount.py`), and an install puts it in `site-packages`. "The folder around `judge`" would then be the wrong folder. Take the fingerprint on the Mac, as `scripts/sample_pool.py` does.
+
+### D-052 (2026-11-01, Default): Stops after Codex's fourth review are allow-lists, not block-lists
+- **Why:** `reviews/M2-04f-codex-review.md` found three more bypasses of the D-049 to D-051 stops: `sys` given a new name (`runtime = sys`), a linked `judge` folder hidden by resolving links first, and `re` rebound by a `match` pattern or a star import. Each was a name the block-list did not expect.
+- **The rule from now on:** say what may pass, and stop everything else.
+  - **`sys`:** a file may only `import sys` plainly and use `sys.argv`, `sys.exit`, `sys.stdout` and `sys.stderr`. Any other use of the name `sys` (another attribute, an alias, passing it, assigning it) stops.
+  - **`re.compile` (D-050):** passes only when `re` is bound exactly once in the file, by a plain top-level `import re`, and the file has no star import. Any other binding of `re`, of any kind, stops.
+  - **`__path__`:** any use stops.
+  - **Links:** the path to `judge` and to `reward.py` is checked for links before it is resolved. A link anywhere on it stops.
+  - **`__pycache__`:** skipped only when it is a folder. A file with that name is covered.
+
+### D-053 (2026-11-01, Elias): What the reward fingerprint must withstand
+- **The question (Claude in Cowork):** Codex keeps finding tricks only someone deliberately trying to fool the fingerprint would write. Should the next review count deliberate tricks as known limits, and only block training for bypasses an ordinary edit could cause?
+- **Elias:** "yes".
+- **The rule:** the fingerprint exists to catch honest changes: an edit to the reward code, a helper, a setting, or a file someone forgot about. It is not a defence against code written on purpose to fool it. From the next Codex review (`prompts/M2-04h-codex-review.md`) on:
+  - **must fix:** a bypass that ordinary, honest code could cause by accident;
+  - **known limit:** a bypass that needs code written to fool the check. It is listed in the review and in `reviews/M2-04-fixes.md`, and does not block Step 5.
+- The D-052 allow-lists stay.
+
+### D-054 (2026-11-01, Default): How the D-052 allow-lists read the points they left open
+- **Why:** Claude Code built D-052 in `prompts/M2-04g-stops-allow-lists.md` and had to settle a few cases. Each took the stricter reading: a wrong stop is a clear error that takes a minute to fix, and a wrong pass is silent.
+- **The rule:**
+  - Any other binding of `re` stops, even in a file that never calls `re.compile`.
+  - `sys` follows the same rule as `re`: one plain `import sys` at the top of the file. So `import sys` inside a function stops, and so do the allowed reads in a file with a star import.
+  - Only reading passes: `sys.argv = []` and `del sys.exit` stop.
+  - The check is a full `ast` check, not `symtable`, because a stop must name a line. It counts every text field of the code as a binding unless it is known not to be one.
+  - The link check runs before the skip for cache files, so a link called `__pycache__` or `something.pyc` stops.
