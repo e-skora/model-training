@@ -152,3 +152,11 @@ Of the 146 new tests, 138 fail on `61616b6`. The other 8 cannot fail there, beca
 - Code written to fool the check, which D-053 calls a known limit. The text of a string never counts as a name, so `getattr(thing, "__path__")` or building the word `eval` from pieces does not stop.
 
 **Correction to the third-review section above.** Its list of stops, and the line saying only `__pycache__` folders and `.pyc` files are skipped, are kept as the record of that fix. This section replaces them.
+
+## Fifth review: Codex ACCEPT (`reviews/M2-04h-codex-review.md`, 2026-11-01, at `0713ec2`)
+
+Recorded by Claude in Cowork. SHA-256 of the review: `469bc529b5fb856754a5b7c8b8161c8364bbcf7c057480384e042edc08ce900c`. No must-fix finding. 498 tests passed in Codex's sandbox, with 25 left out on purpose; all 8,144 saved answers rescore with zero differences; saved results unchanged; final fingerprint `769f58fe9fd3cccd062725e25111bc86dc5c8d8f449c95795a3c1ff165d025e7`.
+
+**Known limit (D-053), added to "What is not covered" above.** An allowed read can lead back to `sys` on purpose: `runtime = sys.exit.__self__` then `runtime.path.append(...)` passes the stops and changes points without moving the fingerprint. It needs code written to get around the allow-list, so under D-053 it does not block Step 5 and is not fixed.
+
+**Correction (nice to have).** This note, `STATE.md` and `prompts/M2-04h-codex-review.md` said four test functions read the frozen `data/m1/test.jsonl`. The right list is the seven cases of `test_m1_saved_answers_rescore_to_the_same_numbers` in `tests/test_score.py`, plus six in `tests/test_prepublish_check.py`: `test_real_cards_pass`, `test_wrong_score_in_a_table_is_caught`, `test_unknown_row_in_a_score_table_is_caught`, `test_wrong_count_is_caught`, `test_untraced_number_in_prose_is_caught` and `test_every_fingerprint_in_the_cards_is_known` (three of them read it through the shared `scores` and `facts` setups). A review that must not open the frozen file leaves out all of these. The earlier lines stay as written; this one replaces them.
