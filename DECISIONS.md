@@ -242,3 +242,15 @@ The blind review of M2 Step 3 (`reviews/M2-03-blind-review.md`) agreed with 199 
   - Only reading passes: `sys.argv = []` and `del sys.exit` stop.
   - The check is a full `ast` check, not `symtable`, because a stop must name a line. It counts every text field of the code as a binding unless it is known not to be one.
   - The link check runs before the skip for cache files, so a link called `__pycache__` or `something.pyc` stops.
+
+### D-055 (2026-11-02, Elias + Default): Step 5 in two prompts, and what "approved" covered
+- **Elias:** "approved", in reply to Claude in Cowork's next step: write the training prompt M2-05, which starts with a short trial run and asks him before the full run. It approves writing M2-05 and running its trial (each run under $1, as D-019 allows without asking). It does **not** approve the full training run. That waits for Codex's review of the training code and Elias's yes to its cost estimate.
+- **The split:** `prompts/M2-05-grpo-trial.md` (code, tests, trial run, cost estimate for the full run, Codex review prompt), then a later prompt for the full run and the checkpoint choice.
+
+### D-056 (2026-11-02, Default): How the v2 checkpoint is chosen, fixed before any training result
+- **Candidates:** step 0 (v1's adapter with no RL) and every saved checkpoint of the full run.
+- **Each candidate answers** `data/m2/valid-hard.jsonl` (97 pairs: 47 contradictions) and `data/m1/valid.jsonl` (99 pairs), greedy, in all three versions (as written, swapped, no dates), with the same settings as all scoring so far.
+- **Out:** any candidate with an invalid answer; any whose worst-case precision on `valid-hard` is more than 0.02 below step 0's (one false alarm is about 0.02 here, so the D-041 test bar of 0.01 cannot be read on 97 pairs); any whose worst-case precision or recall on `data/m1/valid.jsonl` is more than 0.03 below step 0's (so RL does not make it forget M1).
+- **Pick:** the highest worst-case recall on `valid-hard`; if tied, the higher worst-case precision there; if still tied, the earlier step.
+- **If step 0 is picked,** RL did not help on validation. The hard test set is not run; the result is reported plainly (D-041) and Elias decides what next.
+- `data/m2/test-hard.jsonl` and `data/m1/test.jsonl` are never used to choose.
