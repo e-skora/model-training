@@ -151,3 +151,4 @@ Plain meanings. Add a term the first time it shows up.
 - **num_return_sequences:** a setting that makes the model write several answers to the same prompt in one go. The pool sampling uses 8.
 - **top_p, top_k:** two settings that limit which words the model may pick from when it answers with randomness. `top_p` 1.0 and `top_k` 0 mean no limit, so only the temperature shapes the randomness; these are TRL's GRPO defaults.
 - **Out of memory (GPU):** the graphics card ran out of room for the numbers it holds while answering. Writing fewer answers at once fixes it.
+- **Known limit:** a way past a safety check that only code written on purpose to fool it could use. It is written down but not fixed, and it does not block the next step (D-053). A way past that honest code could hit by accident is a must-fix instead.
