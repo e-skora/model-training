@@ -22,7 +22,7 @@ Run 2026-11-04 by Claude Code (prompt M2-05), `uv run modal run scripts/train_gr
 | Load check (load 124 s, answer 7 s) | 131 s, peak 5.57 GiB |
 | Wall time on the Mac | 17.3 min (it waited for GPUs and started two containers) |
 | Estimate from GPU seconds | about $0.14 (629 s x $0.000222) |
-| Billed (`modal billing report`) | see `trial.meta.json` `billed_total_usd`, added once Modal reports the hour |
+| Billed (`modal billing report`) | **$0.18** (`trial.meta.json` `billed_total_usd` 0.1775) |
 
 ## What it logged
 
