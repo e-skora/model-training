@@ -215,6 +215,14 @@ def test_sampling_matches_the_pool():
     assert grpo.GRPO["use_vllm"] is False
 
 
+def test_every_setting_unsloth_would_fill_in_is_set_here():
+    # Unsloth 2026.10.7 fills these in by itself when left empty (results/m2/grpo/settings.md, Part A item 2).
+    for key, value in {"loss_type": "dapo", "beta": 0.0, "mask_truncated_completions": False, "epsilon_high": 0.28,
+                       "learning_rate": 5e-6, "weight_decay": 0.001, "per_device_train_batch_size": 8,
+                       "gradient_accumulation_steps": 2, "optim": "adamw_8bit", "logging_steps": 1}.items():
+        assert grpo.GRPO[key] == value, key
+
+
 def test_the_record_holds_what_the_trial_asked_and_used(at_repo, tmp_path):
     meta, _ = trial(tmp_path)
     assert meta["sampling_asked"] == grpo.sampling_settings()

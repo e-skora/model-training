@@ -85,6 +85,8 @@ GRPO = {
     "beta": 0.0,  # no pull back toward a reference model, so none is loaded
     "loss_type": "dapo",
     "epsilon": 0.2,
+    # Unsloth sets 0.28 by itself when this is left empty with "dapo" (the trial ran with it); set here so it shows.
+    "epsilon_high": 0.28,
     "num_iterations": 1,
     "scale_rewards": "group",
     "mask_truncated_completions": False,  # a cut-off answer is invalid and must still cost -2.0
@@ -550,7 +552,9 @@ def train(run, rows, max_steps, save_every):
     )
     resolved = {k: getattr(trainer.args, k, None) for k in (
         *settings, "max_steps", "warmup_steps", "seed", "bf16", "fp16", "generation_batch_size",
-        "steps_per_generation", "gradient_checkpointing", "chat_template_kwargs", "generation_kwargs")}
+        "steps_per_generation", "gradient_checkpointing", "chat_template_kwargs", "generation_kwargs", "delta",
+        "importance_sampling_level", "vllm_importance_sampling_correction", "top_entropy_quantile",
+        "router_aux_loss_coef", "disable_dropout")}
     decode_path = ("parse_response" if getattr(trainer._tokenizer, "response_template", None) is not None
                    or getattr(trainer._tokenizer, "response_schema", None) is not None
                    else "batch_decode(skip_special_tokens=True)")
