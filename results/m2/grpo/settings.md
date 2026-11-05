@@ -48,7 +48,11 @@ Two more facts from the same file. `max_prompt_length` no longer exists in TRL 1
 
 **So the sampling matches the pool, on paper.** The trial checks it for real. The GPU job records the settings `generate` ended up with and the sampling steps it added, and stops at the first answer if either differs from the pool's. It also checks that every prompt is one of the pool's 314 prompts, token for token, built the way the pool built them.
 
-**Unsloth's other changes that matter here** (`unsloth/models/rl.py` lines 3238 to 3296, 3434 to 3491): Unsloth replaces some of TRL's defaults with its own, for example learning rate 5e-5, weight decay 0.001, warmup 0.1, `per_device_train_batch_size` 4 and `gradient_accumulation_steps` 2. With `loss_type` "dapo" it also turns `mask_truncated_completions` on by itself (lines 3474 to 3476). So the script sets every one of these values itself, and the record saves the values the trainer really ended with (`resolved_config`).
+**Unsloth's other changes that matter here** (`unsloth/models/rl.py` lines 3238 to 3296, 3434 to 3491): Unsloth replaces some of TRL's defaults with its own, for example learning rate 5e-5, weight decay 0.001, warmup 0.1, `per_device_train_batch_size` 4 and `gradient_accumulation_steps` 2. With `loss_type` "dapo" it also turns `mask_truncated_completions` on by itself (lines 3474 to 3476), and sets `epsilon_high` to 0.28 when it is empty (lines 3477 to 3479). So the script sets every one of these values itself, and the record saves the values the trainer really ended with (`resolved_config`).
+
+**Found in the trial (2026-11-04):** the first script left `epsilon_high` empty, and the trial's log says "Unsloth: The DAPO paper recommends `epsilon_high = 0.28` - we will set it." So the trial ran with 0.28, which its `trial.meta.json` does not show under `grpo` (the full log is `trial-output.log`, line 36). The script now sets 0.28 itself, so the full run uses the trial's value and its record shows it. A test checks that every value Unsloth would fill in is set in the script.
+
+**Also found in the trial:** TRL writes a pair's 8 answers by putting the prompt in the batch 8 times, each with one answer (`num_return_sequences` 1). The pool asked for 8 answers to one prompt (`num_return_sequences` 8). Each answer is drawn the same way in both, from the same settings, so they come from the same spread of answers. The order of the random draws differs, so single answers do not repeat the pool's.
 
 ### 3. Unsloth's GRPO notebook for Qwen3
 
@@ -105,6 +109,7 @@ Unsloth's guide says: "Wait for at least **300 steps** for the reward to actuall
 | `beta` | 0.0 | TRL's and Unsloth's default for "dapo". No reference model is loaded (less memory). The checks against forgetting are the 52 always-right pairs in the pool (D-046) and D-056's M1 validation limit |
 | `loss_type` | "dapo" | TRL's default; Unsloth's docs: "grpo" has a length bias, not recommended |
 | `epsilon`, `num_iterations`, `scale_rewards` | 0.2, 1, "group" | TRL defaults |
+| `epsilon_high` | 0.28 | Unsloth sets it for "dapo" when empty (`rl.py` lines 3477 to 3479), and the trial ran with it; Unsloth's advanced docs: "DAPO recommends **0.28**". It lets a good but unlikely answer gain a bit more per step than `epsilon` alone would. Set here so the record shows it |
 | `mask_truncated_completions` | False | TRL's default. Set on purpose, because Unsloth would turn it on for "dapo". A cut-off answer is invalid JSON and must still cost -2.0, or the model would not learn to stop |
 | Gradient checkpointing | "unsloth" | as M1 |
 | Seed | 3407 | as M1 and the notebook |

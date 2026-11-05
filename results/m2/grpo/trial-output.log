@@ -1,0 +1,223 @@
+✓ Initialized. View run at 
+https://modal.com/apps/e-skora/main/ap-Y7grQw6cJWdeIsmcaYZmDi
+✓ Created objects.
+├── ✓ Uploaded /Users/frank/code/model-training/scripts/train_grpo.py
+├── ✓ Uploaded PythonPackage:judge
+├── ✓ Created Function train.
+├── ✓ Created Function upload.
+└── ✓ Created Function answer.
+🦥 Unsloth: Will patch your computer to enable 2x faster free finetuning.
+W1105 02:07:20.645000 2 site-packages/torch/utils/_pytree.py:630] <enum 'KernelPreference'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+W1105 02:07:20.738000 2 site-packages/torch/utils/_pytree.py:630] <enum 'ScaleCalculationMode'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+Unsloth: xformers is installed but cannot load with torch 2.14.1+cu130 (it was built for 2.10.0+cu128), so PyTorch attention is used instead.
+To install a matching xformers, run `unsloth install-kernels xformers`, or `pip uninstall xformers` to hide this. UNSLOTH_ENABLE_LOGGING=1 shows the full error.
+🦥 Unsloth Zoo will now patch everything to make training faster!
+==((====))==  Unsloth 2026.10.7: Fast Qwen3 patching. Transformers: 5.17.0.
+   \\   /|    NVIDIA L4. Num GPUs = 1. Max memory: 22.062 GB. Platform: Linux.
+O^O/ \_/ \    Torch: 2.14.1+cu130. CUDA: 8.9. CUDA Toolkit: 13.0. Triton: 3.8.0
+\        /    Bfloat16 = TRUE. FA [Xformers = None. FA2 = False]
+ "-____-"     Free license: http://github.com/unslothai/unsloth
+Unsloth: Fast downloading is enabled - ignore downloading bars which are red colored!
+/usr/local/lib/python3.11/site-packages/huggingface_hub/constants.py:302: FutureWarning: The `HF_HUB_ENABLE_HF_TRANSFER` environment variable is deprecated as 'hf_transfer' is not used anymore. Please use `HF_XET_HIGH_PERFORMANCE` instead to enable high performance transfer with Xet. Visit https://huggingface.co/docs/huggingface_hub/package_reference/environment_variables#hfxethighperformance for more details.
+  warnings.warn(
+
+[1ALoading weights:   0%|          | 0/398 [00:00<?, ?it/s]
+[1ALoading weights:   6%|▌         | 23/398 [00:00<00:01, 220.55it/s]
+[1ALoading weights:  14%|█▍        | 56/398 [00:00<00:01, 246.91it/s]
+[1ALoading weights:  23%|██▎       | 92/398 [00:00<00:01, 293.97it/s]
+[1ALoading weights:  34%|███▍      | 135/398 [00:00<00:00, 341.15it/s]
+[1ALoading weights:  45%|████▌     | 181/398 [00:00<00:00, 381.48it/s]
+[1ALoading weights:  58%|█████▊    | 229/398 [00:00<00:00, 410.79it/s]
+[1ALoading weights:  70%|██████▉   | 278/398 [00:00<00:00, 430.51it/s]
+[1ALoading weights:  82%|████████▏ | 328/398 [00:00<00:00, 447.73it/s]
+[1ALoading weights:  94%|█████████▍| 374/398 [00:00<00:00, 408.53it/s]
+[1ALoading weights: 100%|██████████| 398/398 [00:01<00:00, 384.28it/s]
+Unsloth 2026.10.7 patched 36 layers with 36 QKV layers, 36 O layers and 36 MLP layers.
+Unsloth: The DAPO paper recommends `epsilon_high = 0.28` - we will set it.
+[accelerate.utils.other|WARNING][RANK 0] Detected kernel version 4.19.0, which is below the recommended minimum of 5.5.0; this can cause the process to hang. It is recommended to upgrade the kernel to the minimum version or higher.
+loaded in 67 s; 20 steps, saving at [10, 20]; settings {'num_generations': 8, 'max_completion_length': 256, 'temperature': 1.0, 'top_p': 1.0, 'top_k': 0, 'min_p': None, 'repetition_penalty': 1.0, 'use_vllm': False, 'per_device_train_batch_size': 8, 'gradient_accumulation_steps': 2, 'learning_rate': 5e-06, 'lr_scheduler_type': <SchedulerType.LINEAR: 'linear'>, 'optim': <OptimizerNames.ADAMW_8BIT: 'adamw_8bit'>, 'weight_decay': 0.001, 'max_grad_norm': 1.0, 'beta': 0.0, 'loss_type': 'dapo', 'epsilon': 0.2, 'num_iterations': 1, 'scale_rewards': 'group', 'mask_truncated_completions': False, 'logging_steps': 1, 'shuffle_dataset': True, 'log_completions': False, 'remove_unused_columns': False, 'save_strategy': <SaveStrategy.NO: 'no'>, 'report_to': [], 'max_steps': 20, 'warmup_steps': 2, 'seed': 3407, 'bf16': True, 'fp16': False, 'generation_batch_size': 16, 'steps_per_generation': 2, 'gradient_checkpointing': True, 'chat_template_kwargs': None, 'generation_kwargs': {}}
+The tokenizer has new PAD/BOS/EOS tokens that differ from the model config and generation config. The model config and generation config were aligned accordingly, being updated with the tokenizer's values. Updated tokens: {'bos_token_id': None}.
+==((====))==  Unsloth - 2x faster free finetuning | Num GPUs used = 1
+   \\   /|    Num examples = 314 | Num Epochs = 1 | Total steps = 20
+O^O/ \_/ \    Batch size per device = 8 | Gradient accumulation steps = 2
+\        /    Data Parallel GPUs = 1 | Total batch size (8 x 2 x 1) = 16
+ "-____-"     Trainable parameters = 66,060,288 of 4,088,528,384 (1.62% trained)
+
+[1A  0%|          | 0/20 [00:00<?, ?it/s]Passing `generation_config` together with generation-related arguments=({'cache_implementation', 'pad_token_id'}) is deprecated and will be removed in future versions. Please pass either a `generation_config` object OR all generation parameters explicitly, but not both.
+Both `max_new_tokens` (=256) and `max_length`(=262144) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+Unsloth: Will smartly offload gradients to save VRAM!
+Unsloth: Double buffering enabled (parallel H2D + compute) for backward pass.
+
+step 1: reward 0.875 zero_std 0.50 length 42.4 contradiction=0.94 non_contradiction=0.06 unclear=0.00 invalid=0.00
+[1A  5%|▌         | 1/20 [02:53<54:57, 173.55s/it]
+[1A                                               
+{'loss': '-0.005735', 'grad_norm': '0.4571', 'learning_rate': '0', 'num_tokens': '8110', 'completions/mean_length': '42.38', 'completions/min_length': '32', 'completions/max_length': '47', 'completions/clipped_ratio': '0', 'completions/mean_terminated_length': '42.38', 'completions/min_terminated_length': '32', 'completions/max_terminated_length': '47', 'rewards/judge_reward/mean': '0.875', 'rewards/judge_reward/std': '0.5', 'reward': '0.875', 'reward_std': '0.5', 'frac_reward_zero_std': '0.5', 'answers/contradiction': '0.9375', 'answers/invalid': '0', 'answers/non_contradiction': '0.0625', 'answers/unclear': '0', 'completion_length': '42.38', 'kl': '0', 'clip_ratio/low_mean': '0', 'clip_ratio/low_min': '0', 'clip_ratio/high_mean': '0', 'clip_ratio/high_max': '0', 'clip_ratio/region_mean': '0', 'step_time': '173.1', 'epoch': '0.006369'}
+[1A
+[1A  5%|▌         | 1/20 [02:53<54:57, 173.55s/it]Both `max_new_tokens` (=256) and `max_length`(=262144) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+
+step 2: reward 0.719 zero_std 0.50 length 39.6 contradiction=0.81 non_contradiction=0.00 unclear=0.19 invalid=0.00
+[1A 10%|█         | 2/20 [03:05<23:34, 78.57s/it] 
+[1A                                              
+{'loss': '0.00838', 'grad_norm': '0.5589', 'learning_rate': '2.5e-06', 'num_tokens': '1.608e+04', 'completions/mean_length': '39.62', 'completions/min_length': '32', 'completions/max_length': '47', 'completions/clipped_ratio': '0', 'completions/mean_terminated_length': '39.62', 'completions/min_terminated_length': '32', 'completions/max_terminated_length': '47', 'rewards/judge_reward/mean': '0.7188', 'rewards/judge_reward/std': '0.6047', 'reward': '0.7188', 'reward_std': '0.6047', 'frac_reward_zero_std': '0.5', 'answers/contradiction': '0.8125', 'answers/invalid': '0', 'answers/non_contradiction': '0', 'answers/unclear': '0.1875', 'completion_length': '39.62', 'kl': '0', 'clip_ratio/low_mean': '0', 'clip_ratio/low_min': '0', 'clip_ratio/high_mean': '0', 'clip_ratio/high_max': '0', 'clip_ratio/region_mean': '0', 'step_time': '11.92', 'epoch': '0.01274'}
+[1A
+[1A 10%|█         | 2/20 [03:05<23:34, 78.57s/it]Both `max_new_tokens` (=256) and `max_length`(=262144) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+
+step 3: reward 0.203 zero_std 0.00 length 41.4 contradiction=0.31 non_contradiction=0.31 unclear=0.38 invalid=0.00
+[1A 15%|█▌        | 3/20 [03:20<14:01, 49.49s/it]
+[1A                                              
+{'loss': '0.00572', 'grad_norm': '0.7228', 'learning_rate': '5e-06', 'num_tokens': '2.429e+04', 'completions/mean_length': '41.44', 'completions/min_length': '36', 'completions/max_length': '54', 'completions/clipped_ratio': '0', 'completions/mean_terminated_length': '41.44', 'completions/min_terminated_length': '36', 'completions/max_terminated_length': '54', 'rewards/judge_reward/mean': '0.2031', 'rewards/judge_reward/std': '1.038', 'reward': '0.2031', 'reward_std': '1.038', 'frac_reward_zero_std': '0', 'answers/contradiction': '0.3125', 'answers/invalid': '0', 'answers/non_contradiction': '0.3125', 'answers/unclear': '0.375', 'completion_length': '41.44', 'kl': '0', 'clip_ratio/low_mean': '0', 'clip_ratio/low_min': '0', 'clip_ratio/high_mean': '0', 'clip_ratio/high_max': '0', 'clip_ratio/region_mean': '0', 'step_time': '14.57', 'epoch': '0.01911'}
+[1A
+[1A 15%|█▌        | 3/20 [03:20<14:01, 49.49s/it]Both `max_new_tokens` (=256) and `max_length`(=262144) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+
+step 4: reward 1.000 zero_std 1.00 length 38.4 contradiction=1.00 non_contradiction=0.00 unclear=0.00 invalid=0.00
+[1A 20%|██        | 4/20 [03:31<09:10, 34.42s/it]
+[1A                                              
+{'loss': '0', 'grad_norm': '0', 'learning_rate': '4.722e-06', 'num_tokens': '3.216e+04', 'completions/mean_length': '38.38', 'completions/min_length': '34', 'completions/max_length': '44', 'completions/clipped_ratio': '0', 'completions/mean_terminated_length': '38.38', 'completions/min_terminated_length': '34', 'completions/max_terminated_length': '44', 'rewards/judge_reward/mean': '1', 'rewards/judge_reward/std': '0', 'reward': '1', 'reward_std': '0', 'frac_reward_zero_std': '1', 'answers/contradiction': '1', 'answers/invalid': '0', 'answers/non_contradiction': '0', 'answers/unclear': '0', 'completion_length': '38.38', 'kl': '0', 'clip_ratio/low_mean': '0', 'clip_ratio/low_min': '0', 'clip_ratio/high_mean': '0', 'clip_ratio/high_max': '0', 'clip_ratio/region_mean': '0', 'step_time': '11.04', 'epoch': '0.02548'}
+[1A
+[1A 20%|██        | 4/20 [03:31<09:10, 34.42s/it]Both `max_new_tokens` (=256) and `max_length`(=262144) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+
+step 5: reward 1.125 zero_std 1.00 length 40.2 contradiction=0.50 non_contradiction=0.50 unclear=0.00 invalid=0.00
+[1A 25%|██▌       | 5/20 [03:44<06:36, 26.41s/it]
+[1A                                              
+{'loss': '0', 'grad_norm': '0', 'learning_rate': '4.444e-06', 'num_tokens': '4.022e+04', 'completions/mean_length': '40.25', 'completions/min_length': '33', 'completions/max_length': '50', 'completions/clipped_ratio': '0', 'completions/mean_terminated_length': '40.25', 'completions/min_terminated_length': '33', 'completions/max_terminated_length': '50', 'rewards/judge_reward/mean': '1.125', 'rewards/judge_reward/std': '0.1291', 'reward': '1.125', 'reward_std': '0.1291', 'frac_reward_zero_std': '1', 'answers/contradiction': '0.5', 'answers/invalid': '0', 'answers/non_contradiction': '0.5', 'answers/unclear': '0', 'completion_length': '40.25', 'kl': '0', 'clip_ratio/low_mean': '0', 'clip_ratio/low_min': '0', 'clip_ratio/high_mean': '0', 'clip_ratio/high_max': '0', 'clip_ratio/region_mean': '0', 'step_time': '11.94', 'epoch': '0.03185'}
+[1A
+[1A 25%|██▌       | 5/20 [03:44<06:36, 26.41s/it]Both `max_new_tokens` (=256) and `max_length`(=262144) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+
+step 6: reward 1.125 zero_std 1.00 length 43.8 contradiction=0.50 non_contradiction=0.50 unclear=0.00 invalid=0.00
+[1A 30%|███       | 6/20 [03:56<05:02, 21.61s/it]
+[1A                                              
+{'loss': '0', 'grad_norm': '0', 'learning_rate': '4.167e-06', 'num_tokens': '4.841e+04', 'completions/mean_length': '43.81', 'completions/min_length': '39', 'completions/max_length': '51', 'completions/clipped_ratio': '0', 'completions/mean_terminated_length': '43.81', 'completions/min_terminated_length': '39', 'completions/max_terminated_length': '51', 'rewards/judge_reward/mean': '1.125', 'rewards/judge_reward/std': '0.1291', 'reward': '1.125', 'reward_std': '0.1291', 'frac_reward_zero_std': '1', 'answers/contradiction': '0.5', 'answers/invalid': '0', 'answers/non_contradiction': '0.5', 'answers/unclear': '0', 'completion_length': '43.81', 'kl': '0', 'clip_ratio/low_mean': '0', 'clip_ratio/low_min': '0', 'clip_ratio/high_mean': '0', 'clip_ratio/high_max': '0', 'clip_ratio/region_mean': '0', 'step_time': '12.03', 'epoch': '0.03822'}
+[1A
+[1A 30%|███       | 6/20 [03:56<05:02, 21.61s/it]Both `max_new_tokens` (=256) and `max_length`(=262144) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+
+step 7: reward 1.250 zero_std 1.00 length 41.7 contradiction=0.00 non_contradiction=1.00 unclear=0.00 invalid=0.00
+[1A 35%|███▌      | 7/20 [04:07<03:57, 18.29s/it]                                              
+{'loss': '0', 'grad_norm': '0', 'learning_rate': '3.889e-06', 'num_tokens': '5.634e+04', 'completions/mean_length': '41.69', 'completions/min_length': '36', 'completions/max_length': '45', 'completions/clipped_ratio': '0', 'completions/mean_terminated_length': '41.69', 'completions/min_terminated_length': '36', 'completions/max_terminated_length': '45', 'rewards/judge_reward/mean': '1.25', 'rewards/judge_reward/std': '0', 'reward': '1.25', 'reward_std': '0', 'frac_reward_zero_std': '1', 'answers/contradiction': '0', 'answers/invalid': '0', 'answers/non_contradiction': '1', 'answers/unclear': '0', 'completion_length': '41.69', 'kl': '0', 'clip_ratio/low_mean': '0', 'clip_ratio/low_min': '0', 'clip_ratio/high_mean': '0', 'clip_ratio/high_max': '0', 'clip_ratio/region_mean': '0', 'step_time': '11.19', 'epoch': '0.04459'}
+[1A
+[1A 35%|███▌      | 7/20 [04:07<03:57, 18.29s/it]Both `max_new_tokens` (=256) and `max_length`(=262144) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+
+step 8: reward 0.844 zero_std 0.50 length 42.7 contradiction=0.31 non_contradiction=0.50 unclear=0.19 invalid=0.00
+[1A 40%|████      | 8/20 [04:22<03:25, 17.12s/it]
+[1A                                              
+{'loss': '0.02192', 'grad_norm': '0.5896', 'learning_rate': '3.611e-06', 'num_tokens': '6.456e+04', 'completions/mean_length': '42.69', 'completions/min_length': '36', 'completions/max_length': '53', 'completions/clipped_ratio': '0', 'completions/mean_terminated_length': '42.69', 'completions/min_terminated_length': '36', 'completions/max_terminated_length': '53', 'rewards/judge_reward/mean': '0.8438', 'rewards/judge_reward/std': '0.6762', 'reward': '0.8438', 'reward_std': '0.6762', 'frac_reward_zero_std': '0.5', 'answers/contradiction': '0.3125', 'answers/invalid': '0', 'answers/non_contradiction': '0.5', 'answers/unclear': '0.1875', 'completion_length': '42.69', 'kl': '0', 'clip_ratio/low_mean': '0', 'clip_ratio/low_min': '0', 'clip_ratio/high_mean': '0', 'clip_ratio/high_max': '0', 'clip_ratio/region_mean': '0', 'step_time': '14.31', 'epoch': '0.05096'}
+[1A
+[1A 40%|████      | 8/20 [04:22<03:25, 17.12s/it]Both `max_new_tokens` (=256) and `max_length`(=262144) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+
+step 9: reward 0.438 zero_std 0.00 length 39.9 contradiction=0.62 non_contradiction=0.00 unclear=0.38 invalid=0.00
+[1A 45%|████▌     | 9/20 [04:36<02:59, 16.32s/it]                                              
+{'loss': '0.03666', 'grad_norm': '0.7826', 'learning_rate': '3.333e-06', 'num_tokens': '7.286e+04', 'completions/mean_length': '39.88', 'completions/min_length': '28', 'completions/max_length': '50', 'completions/clipped_ratio': '0', 'completions/mean_terminated_length': '39.88', 'completions/min_terminated_length': '28', 'completions/max_terminated_length': '50', 'rewards/judge_reward/mean': '0.4375', 'rewards/judge_reward/std': '0.75', 'reward': '0.4375', 'reward_std': '0.75', 'frac_reward_zero_std': '0', 'answers/contradiction': '0.625', 'answers/invalid': '0', 'answers/non_contradiction': '0', 'answers/unclear': '0.375', 'completion_length': '39.88', 'kl': '0', 'clip_ratio/low_mean': '0', 'clip_ratio/low_min': '0', 'clip_ratio/high_mean': '0', 'clip_ratio/high_max': '0', 'clip_ratio/region_mean': '0', 'step_time': '14.27', 'epoch': '0.05732'}
+[1A
+[1A 45%|████▌     | 9/20 [04:37<02:59, 16.32s/it]Both `max_new_tokens` (=256) and `max_length`(=262144) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+Unsloth: Restored added_tokens_decoder metadata in /runs/trial/step-10/tokenizer_config.json.
+
+step 10: reward 1.016 zero_std 0.50 length 38.8 contradiction=0.50 non_contradiction=0.44 unclear=0.06 invalid=0.00
+[1A 50%|█████     | 10/20 [04:58<02:59, 17.91s/it]
+[1A                                               
+{'loss': '-0.00171', 'grad_norm': '0.6805', 'learning_rate': '3.056e-06', 'num_tokens': '8.07e+04', 'completions/mean_length': '38.75', 'completions/min_length': '32', 'completions/max_length': '53', 'completions/clipped_ratio': '0', 'completions/mean_terminated_length': '38.75', 'completions/min_terminated_length': '32', 'completions/max_terminated_length': '53', 'rewards/judge_reward/mean': '1.016', 'rewards/judge_reward/std': '0.423', 'reward': '1.016', 'reward_std': '0.423', 'frac_reward_zero_std': '0.5', 'answers/contradiction': '0.5', 'answers/invalid': '0', 'answers/non_contradiction': '0.4375', 'answers/unclear': '0.0625', 'completion_length': '38.75', 'kl': '0', 'clip_ratio/low_mean': '0', 'clip_ratio/low_min': '0', 'clip_ratio/high_mean': '0', 'clip_ratio/high_max': '0', 'clip_ratio/region_mean': '0', 'step_time': '12.07', 'epoch': '0.06369'}
+[1A
+[1A 50%|█████     | 10/20 [04:58<02:59, 17.91s/it]Both `max_new_tokens` (=256) and `max_length`(=262144) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+
+step 11: reward 0.531 zero_std 0.50 length 42.7 contradiction=0.69 non_contradiction=0.00 unclear=0.31 invalid=0.00
+[1A 55%|█████▌    | 11/20 [05:11<02:26, 16.27s/it]                                               
+{'loss': '0.008132', 'grad_norm': '0.521', 'learning_rate': '2.778e-06', 'num_tokens': '8.867e+04', 'completions/mean_length': '42.69', 'completions/min_length': '33', 'completions/max_length': '55', 'completions/clipped_ratio': '0', 'completions/mean_terminated_length': '42.69', 'completions/min_terminated_length': '33', 'completions/max_terminated_length': '55', 'rewards/judge_reward/mean': '0.5312', 'rewards/judge_reward/std': '0.7181', 'reward': '0.5312', 'reward_std': '0.7181', 'frac_reward_zero_std': '0.5', 'answers/contradiction': '0.6875', 'answers/invalid': '0', 'answers/non_contradiction': '0', 'answers/unclear': '0.3125', 'completion_length': '42.69', 'kl': '0', 'clip_ratio/low_mean': '0', 'clip_ratio/low_min': '0', 'clip_ratio/high_mean': '0', 'clip_ratio/high_max': '0', 'clip_ratio/region_mean': '0', 'step_time': '12.42', 'epoch': '0.07006'}
+[1A
+[1A 55%|█████▌    | 11/20 [05:11<02:26, 16.27s/it]Both `max_new_tokens` (=256) and `max_length`(=262144) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+
+step 12: reward 0.500 zero_std 0.00 length 38.9 contradiction=0.19 non_contradiction=0.69 unclear=0.12 invalid=0.00
+[1A 60%|██████    | 12/20 [05:22<01:57, 14.73s/it]
+[1A                                               
+{'loss': '0.02177', 'grad_norm': '0.8209', 'learning_rate': '2.5e-06', 'num_tokens': '9.672e+04', 'completions/mean_length': '38.94', 'completions/min_length': '32', 'completions/max_length': '45', 'completions/clipped_ratio': '0', 'completions/mean_terminated_length': '38.94', 'completions/min_terminated_length': '32', 'completions/max_terminated_length': '45', 'rewards/judge_reward/mean': '0.5', 'rewards/judge_reward/std': '1.151', 'reward': '0.5', 'reward_std': '1.151', 'frac_reward_zero_std': '0', 'answers/contradiction': '0.1875', 'answers/invalid': '0', 'answers/non_contradiction': '0.6875', 'answers/unclear': '0.125', 'completion_length': '38.94', 'kl': '0', 'clip_ratio/low_mean': '0', 'clip_ratio/low_min': '0', 'clip_ratio/high_mean': '0', 'clip_ratio/high_max': '0', 'clip_ratio/region_mean': '0', 'step_time': '10.91', 'epoch': '0.07643'}
+[1A
+[1A 60%|██████    | 12/20 [05:22<01:57, 14.73s/it]Both `max_new_tokens` (=256) and `max_length`(=262144) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+
+step 13: reward 1.031 zero_std 0.50 length 41.9 contradiction=0.44 non_contradiction=0.50 unclear=0.06 invalid=0.00
+[1A 65%|██████▌   | 13/20 [05:34<01:38, 14.11s/it]                                               
+{'loss': '-0.01794', 'grad_norm': '0.4441', 'learning_rate': '2.222e-06', 'num_tokens': '1.048e+05', 'completions/mean_length': '41.88', 'completions/min_length': '32', 'completions/max_length': '53', 'completions/clipped_ratio': '0', 'completions/mean_terminated_length': '41.88', 'completions/min_terminated_length': '32', 'completions/max_terminated_length': '53', 'rewards/judge_reward/mean': '1.031', 'rewards/judge_reward/std': '0.427', 'reward': '1.031', 'reward_std': '0.427', 'frac_reward_zero_std': '0.5', 'answers/contradiction': '0.4375', 'answers/invalid': '0', 'answers/non_contradiction': '0.5', 'answers/unclear': '0.0625', 'completion_length': '41.88', 'kl': '0', 'clip_ratio/low_mean': '0', 'clip_ratio/low_min': '0', 'clip_ratio/high_mean': '0', 'clip_ratio/high_max': '0', 'clip_ratio/region_mean': '0', 'step_time': '12.38', 'epoch': '0.0828'}
+[1A
+[1A 65%|██████▌   | 13/20 [05:35<01:38, 14.11s/it]Both `max_new_tokens` (=256) and `max_length`(=262144) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+
+step 14: reward 0.500 zero_std 0.00 length 38.8 contradiction=0.44 non_contradiction=0.50 unclear=0.00 invalid=0.06
+[1A 70%|███████   | 14/20 [05:47<01:21, 13.56s/it]                                               
+{'loss': '0.0357', 'grad_norm': '0.9682', 'learning_rate': '1.944e-06', 'num_tokens': '1.127e+05', 'completions/mean_length': '38.81', 'completions/min_length': '30', 'completions/max_length': '49', 'completions/clipped_ratio': '0', 'completions/mean_terminated_length': '38.81', 'completions/min_terminated_length': '30', 'completions/max_terminated_length': '49', 'rewards/judge_reward/mean': '0.5', 'rewards/judge_reward/std': '1.144', 'reward': '0.5', 'reward_std': '1.144', 'frac_reward_zero_std': '0', 'answers/contradiction': '0.4375', 'answers/invalid': '0.0625', 'answers/non_contradiction': '0.5', 'answers/unclear': '0', 'completion_length': '38.81', 'kl': '0', 'clip_ratio/low_mean': '0', 'clip_ratio/low_min': '0', 'clip_ratio/high_mean': '0', 'clip_ratio/high_max': '0', 'clip_ratio/region_mean': '0', 'step_time': '11.99', 'epoch': '0.08917'}
+[1A
+[1A 70%|███████   | 14/20 [05:47<01:21, 13.56s/it]Both `max_new_tokens` (=256) and `max_length`(=262144) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+
+step 15: reward 1.125 zero_std 1.00 length 44.9 contradiction=0.00 non_contradiction=0.50 unclear=0.50 invalid=0.00
+[1A 75%|███████▌  | 15/20 [06:00<01:06, 13.35s/it]                                               
+{'loss': '0', 'grad_norm': '0', 'learning_rate': '1.667e-06', 'num_tokens': '1.208e+05', 'completions/mean_length': '44.88', 'completions/min_length': '34', 'completions/max_length': '56', 'completions/clipped_ratio': '0', 'completions/mean_terminated_length': '44.88', 'completions/min_terminated_length': '34', 'completions/max_terminated_length': '56', 'rewards/judge_reward/mean': '1.125', 'rewards/judge_reward/std': '0.1291', 'reward': '1.125', 'reward_std': '0.1291', 'frac_reward_zero_std': '1', 'answers/contradiction': '0', 'answers/invalid': '0', 'answers/non_contradiction': '0.5', 'answers/unclear': '0.5', 'completion_length': '44.88', 'kl': '0', 'clip_ratio/low_mean': '0', 'clip_ratio/low_min': '0', 'clip_ratio/high_mean': '0', 'clip_ratio/high_max': '0', 'clip_ratio/region_mean': '0', 'step_time': '12.58', 'epoch': '0.09554'}
+[1A
+[1A 75%|███████▌  | 15/20 [06:00<01:06, 13.35s/it]Both `max_new_tokens` (=256) and `max_length`(=262144) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+
+step 16: reward 0.906 zero_std 0.50 length 38.9 contradiction=0.94 non_contradiction=0.00 unclear=0.06 invalid=0.00
+[1A 80%|████████  | 16/20 [06:12<00:52, 13.02s/it]
+[1A                                               
+{'loss': '0.04319', 'grad_norm': '0.5727', 'learning_rate': '1.389e-06', 'num_tokens': '1.288e+05', 'completions/mean_length': '38.88', 'completions/min_length': '34', 'completions/max_length': '51', 'completions/clipped_ratio': '0', 'completions/mean_terminated_length': '38.88', 'completions/min_terminated_length': '34', 'completions/max_terminated_length': '51', 'rewards/judge_reward/mean': '0.9062', 'rewards/judge_reward/std': '0.375', 'reward': '0.9062', 'reward_std': '0.375', 'frac_reward_zero_std': '0.5', 'answers/contradiction': '0.9375', 'answers/invalid': '0', 'answers/non_contradiction': '0', 'answers/unclear': '0.0625', 'completion_length': '38.88', 'kl': '0', 'clip_ratio/low_mean': '0', 'clip_ratio/low_min': '0', 'clip_ratio/high_mean': '0', 'clip_ratio/high_max': '0', 'clip_ratio/region_mean': '0', 'step_time': '12', 'epoch': '0.1019'}
+[1A
+[1A 80%|████████  | 16/20 [06:12<00:52, 13.02s/it]Both `max_new_tokens` (=256) and `max_length`(=262144) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+
+step 17: reward 0.609 zero_std 0.50 length 39.0 contradiction=0.69 non_contradiction=0.31 unclear=0.00 invalid=0.00
+[1A 85%|████████▌ | 17/20 [06:24<00:38, 12.85s/it]                                               
+{'loss': '0.03599', 'grad_norm': '0.5736', 'learning_rate': '1.111e-06', 'num_tokens': '1.368e+05', 'completions/mean_length': '39', 'completions/min_length': '30', 'completions/max_length': '51', 'completions/clipped_ratio': '0', 'completions/mean_terminated_length': '39', 'completions/min_terminated_length': '30', 'completions/max_terminated_length': '51', 'rewards/judge_reward/mean': '0.6094', 'rewards/judge_reward/std': '1.053', 'reward': '0.6094', 'reward_std': '1.053', 'frac_reward_zero_std': '0.5', 'answers/contradiction': '0.6875', 'answers/invalid': '0', 'answers/non_contradiction': '0.3125', 'answers/unclear': '0', 'completion_length': '39', 'kl': '0', 'clip_ratio/low_mean': '0', 'clip_ratio/low_min': '0', 'clip_ratio/high_mean': '0', 'clip_ratio/high_max': '0', 'clip_ratio/region_mean': '0', 'step_time': '12.19', 'epoch': '0.1083'}
+[1A
+[1A 85%|████████▌ | 17/20 [06:24<00:38, 12.85s/it]Both `max_new_tokens` (=256) and `max_length`(=262144) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+
+step 18: reward 0.375 zero_std 0.50 length 40.8 contradiction=0.69 non_contradiction=0.31 unclear=0.00 invalid=0.00
+[1A 90%|█████████ | 18/20 [06:37<00:25, 12.68s/it]                                               
+{'loss': '0.07149', 'grad_norm': '0.6688', 'learning_rate': '8.333e-07', 'num_tokens': '1.45e+05', 'completions/mean_length': '40.75', 'completions/min_length': '34', 'completions/max_length': '50', 'completions/clipped_ratio': '0', 'completions/mean_terminated_length': '40.75', 'completions/min_terminated_length': '34', 'completions/max_terminated_length': '50', 'rewards/judge_reward/mean': '0.375', 'rewards/judge_reward/std': '0.9574', 'reward': '0.375', 'reward_std': '0.9574', 'frac_reward_zero_std': '0.5', 'answers/contradiction': '0.6875', 'answers/invalid': '0', 'answers/non_contradiction': '0.3125', 'answers/unclear': '0', 'completion_length': '40.75', 'kl': '0', 'clip_ratio/low_mean': '0', 'clip_ratio/low_min': '0', 'clip_ratio/high_mean': '0', 'clip_ratio/high_max': '0', 'clip_ratio/region_mean': '0', 'step_time': '12', 'epoch': '0.1146'}
+[1A
+[1A 90%|█████████ | 18/20 [06:37<00:25, 12.68s/it]Both `max_new_tokens` (=256) and `max_length`(=262144) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+
+step 19: reward 0.734 zero_std 0.00 length 42.5 contradiction=0.31 non_contradiction=0.44 unclear=0.25 invalid=0.00
+[1A 95%|█████████▌| 19/20 [06:49<00:12, 12.66s/it]
+[1A                                               
+{'loss': '-0.03229', 'grad_norm': '0.6925', 'learning_rate': '5.556e-07', 'num_tokens': '1.53e+05', 'completions/mean_length': '42.5', 'completions/min_length': '37', 'completions/max_length': '53', 'completions/clipped_ratio': '0', 'completions/mean_terminated_length': '42.5', 'completions/min_terminated_length': '37', 'completions/max_terminated_length': '53', 'rewards/judge_reward/mean': '0.7344', 'rewards/judge_reward/std': '0.7442', 'reward': '0.7344', 'reward_std': '0.7442', 'frac_reward_zero_std': '0', 'answers/contradiction': '0.3125', 'answers/invalid': '0', 'answers/non_contradiction': '0.4375', 'answers/unclear': '0.25', 'completion_length': '42.5', 'kl': '0', 'clip_ratio/low_mean': '0', 'clip_ratio/low_min': '0', 'clip_ratio/high_mean': '0', 'clip_ratio/high_max': '0', 'clip_ratio/region_mean': '0', 'step_time': '12.34', 'epoch': '0.121'}
+[1A
+[1A 95%|█████████▌| 19/20 [06:49<00:12, 12.66s/it]Both `max_new_tokens` (=256) and `max_length`(=262144) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+Unsloth: Restored added_tokens_decoder metadata in /runs/trial/step-20/tokenizer_config.json.
+
+step 20: reward 0.797 zero_std 0.00 length 42.4 contradiction=0.12 non_contradiction=0.50 unclear=0.38 invalid=0.00
+[1A100%|██████████| 20/20 [07:09<00:00, 14.75s/it]
+[1A                                               
+{'loss': '-0.02842', 'grad_norm': '0.7767', 'learning_rate': '2.778e-07', 'num_tokens': '1.611e+05', 'completions/mean_length': '42.44', 'completions/min_length': '34', 'completions/max_length': '53', 'completions/clipped_ratio': '0', 'completions/mean_terminated_length': '42.44', 'completions/min_terminated_length': '34', 'completions/max_terminated_length': '53', 'rewards/judge_reward/mean': '0.7969', 'rewards/judge_reward/std': '0.9047', 'reward': '0.7969', 'reward_std': '0.9047', 'frac_reward_zero_std': '0', 'answers/contradiction': '0.125', 'answers/invalid': '0', 'answers/non_contradiction': '0.5', 'answers/unclear': '0.375', 'completion_length': '42.44', 'kl': '0', 'clip_ratio/low_mean': '0', 'clip_ratio/low_min': '0', 'clip_ratio/high_mean': '0', 'clip_ratio/high_max': '0', 'clip_ratio/region_mean': '0', 'step_time': '12.39', 'epoch': '0.1274'}
+[1A
+[1A100%|██████████| 20/20 [07:09<00:00, 14.75s/it]
+[1A                                               
+{'train_runtime': '429.3', 'train_samples_per_second': '0.745', 'train_steps_per_second': '0.047', 'train_loss': '0.01014', 'epoch': '0.1274'}
+[1A
+[1A100%|██████████| 20/20 [07:09<00:00, 14.75s/it]
+[1A100%|██████████| 20/20 [07:09<00:00, 21.46s/it]
+🦥 Unsloth: Will patch your computer to enable 2x faster free finetuning.
+W1105 02:27:44.778000 2 site-packages/torch/utils/_pytree.py:630] <enum 'KernelPreference'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+W1105 02:27:44.834000 2 site-packages/torch/utils/_pytree.py:630] <enum 'ScaleCalculationMode'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+Unsloth: xformers is installed but cannot load with torch 2.14.1+cu130 (it was built for 2.10.0+cu128), so PyTorch attention is used instead.
+To install a matching xformers, run `unsloth install-kernels xformers`, or `pip uninstall xformers` to hide this. UNSLOTH_ENABLE_LOGGING=1 shows the full error.
+🦥 Unsloth Zoo will now patch everything to make training faster!
+==((====))==  Unsloth 2026.10.7: Fast Qwen3 patching. Transformers: 5.17.0.
+   \\   /|    NVIDIA L4. Num GPUs = 1. Max memory: 22.062 GB. Platform: Linux.
+O^O/ \_/ \    Torch: 2.14.1+cu130. CUDA: 8.9. CUDA Toolkit: 13.0. Triton: 3.8.0
+\        /    Bfloat16 = TRUE. FA [Xformers = None. FA2 = False]
+ "-____-"     Free license: http://github.com/unslothai/unsloth
+Unsloth: Fast downloading is enabled - ignore downloading bars which are red colored!
+/usr/local/lib/python3.11/site-packages/huggingface_hub/constants.py:302: FutureWarning: The `HF_HUB_ENABLE_HF_TRANSFER` environment variable is deprecated as 'hf_transfer' is not used anymore. Please use `HF_XET_HIGH_PERFORMANCE` instead to enable high performance transfer with Xet. Visit https://huggingface.co/docs/huggingface_hub/package_reference/environment_variables#hfxethighperformance for more details.
+  warnings.warn(
+
+[1ALoading weights:   0%|          | 0/398 [00:00<?, ?it/s]
+[1ALoading weights:  14%|█▍        | 55/398 [00:00<00:00, 519.69it/s]
+[1ALoading weights:  33%|███▎      | 130/398 [00:00<00:00, 648.76it/s]
+[1ALoading weights:  52%|█████▏    | 207/398 [00:00<00:00, 695.31it/s]
+[1ALoading weights:  70%|██████▉   | 277/398 [00:00<00:00, 696.22it/s]
+[1ALoading weights:  89%|████████▉ | 355/398 [00:00<00:00, 721.55it/s]
+[1ALoading weights: 100%|██████████| 398/398 [00:00<00:00, 682.75it/s]
+Both `max_new_tokens` (=256) and `max_length`(=262144) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+trial: 20 steps in 431.0 s (21.55 s a step), load 67.0 s, peak VRAM 7.49 GiB, wall 17.3 min; saved ['step-10', 'step-20']; warnings 0
+  valid_hard/as_is/va2-001: {"label": "non_contradiction", "type": "update", "reason": "The newer memory says a carbon bike took over the steel one."}  problem=None format=None
+  valid_hard/as_is/va2-002: {"label": "non_contradiction", "type": "compatible_detail", "reason": "Both say Bulelani's home is at street level, and one adds that it is a flat."}  problem=None format=None
+  valid_hard/as_is/va2-004: {"label": "contradiction", "type": null, "reason": "One says Ghanim has no phone, the other that he uses his own mobile every morning."}  problem=None format=None
+  valid_hard/as_is/va2-005: {"label": "contradiction", "type": null, "reason": "One says Tülay supports a football club and attends every home game, the other that she has never been to a match."}  problem=None format=None
+  valid_hard/as_is/va2-006: {"label": "contradiction", "type": null, "reason": "Five kilos is about ten pounds, not eleven."}  problem=None format=None
+  valid_hard/as_is/va2-007: {"label": "non_contradiction", "type": "update", "reason": "The newer memory says Vardan stores his skis in the garage now."}  problem=None format=None
+  valid_hard/as_is/va2-008: {"label": "non_contradiction", "type": "merely_related", "reason": "A judo bronze at fifteen and a wrestling bronze at seventeen can both be true."}  problem=None format=None
+  valid_hard/as_is/va2-009: {"label": "non_contradiction", "type": "update", "reason": "The newer memory says Porfirio gave the goats away and turned the pen into a vegetable patch."}  problem=None format=None
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/e-skora/main/ap-Y7grQw6cJWdeIsmcaYZmDi
