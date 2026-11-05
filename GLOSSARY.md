@@ -151,3 +151,17 @@ Plain meanings. Add a term the first time it shows up.
 - **num_return_sequences:** a setting that makes the model write several answers to the same prompt in one go. The pool sampling uses 8.
 - **top_p, top_k:** two settings that limit which words the model may pick from when it answers with randomness. `top_p` 1.0 and `top_k` 0 mean no limit, so only the temperature shapes the randomness; these are TRL's GRPO defaults.
 - **Out of memory (GPU):** the graphics card ran out of room for the numbers it holds while answering. Writing fewer answers at once fixes it.
+- **min_p:** another setting that limits which words the model may pick: it drops every word far less likely than the top one. Unsloth's GRPO notebook uses 0.1. We leave it off, because the RL pool was sampled without it.
+- **Completion:** one answer the model writes to a prompt during GRPO. Each pair gets 8.
+- **Advantage:** in GRPO, how much better one answer scored than the average of its group of 8. Training makes answers with a positive advantage more likely and ones with a negative advantage less likely.
+- **frac_reward_zero_std:** the share of pairs in a training step whose 8 answers all got the same points. GRPO learns nothing from those pairs, because no answer beat the group's average.
+- **Reference model and beta:** GRPO can keep a frozen copy of the starting model (the reference model) and pull the trained model back toward it. `beta` sets how hard it pulls. We use `beta` 0.0, TRL's default: no pull and no copy loaded, which saves memory.
+- **Loss type (DAPO):** the formula GRPO uses to turn the advantages into a training signal. "dapo" is TRL's default. Unsloth's docs advise against the older "grpo" formula because it favours some answer lengths.
+- **Clipping (epsilon, epsilon_high):** a limit on how far one training step may change how likely an answer is: at most 20% down (`epsilon` 0.2) and 28% up (`epsilon_high` 0.28). It keeps one lucky batch from changing the model too much.
+- **Gradient clipping (max_grad_norm):** a cap on the size of one update, here 1.0, so a single odd step cannot throw the adapter off course.
+- **Optimizer (adamw_8bit):** the method that turns each step's signal into changes to the adapter's numbers. "8-bit" stores its own bookkeeping in less memory.
+- **Truncated answer:** an answer cut off at the 256-token limit. It is never valid JSON, so it scores -2.0. We keep that penalty (`mask_truncated_completions` off), so the model learns to finish its answers.
+- **Generation config:** the settings `generate` uses to write an answer: whether to sample, temperature, top_p, top_k, min_p, the most new tokens. The GRPO trial records the one it really used.
+- **Logits processor:** a small step inside `generate` that changes the model's word chances before a word is picked, for example by applying top_k. With the pool's settings there are none, so words are picked from the model's plain chances.
+- **Step 0:** v1 itself, before any RL. It is one of the candidates when the checkpoint is chosen (D-056), so RL must beat it to be picked.
+- **Billed cost:** what Modal really charges for a run, read from `modal billing report`. It includes CPU and memory as well as the GPU, and is reported for full hours only.

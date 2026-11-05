@@ -228,3 +228,25 @@ Codex's fourth review got past the stops with `runtime = sys`, a `case re:` patt
 ## 2026-11-01: Lesson: say what a safety check must withstand before it is reviewed
 The reward fingerprint went through five Codex reviews. Each of the first four found a new way past it, and each fix covered more: named functions, then whole files, then the whole `src/` folder, then allow-lists. From the third round on, the bypasses were code nobody would write by accident (`runpy`, a linked `judge` folder, `case re:`, `sys.exit.__self__`). The reviews only stopped when Elias set the bar (D-053): the fingerprint must catch honest changes, and tricks written to fool it are known limits.
 **Lesson:** before a reviewer checks a safety check, write down what it must withstand (honest mistakes or a deliberate attacker) and give that to the reviewer. Without it, a careful reviewer can always find one more way in. Also: when two rounds of fixes each miss a new case, change the approach (cover a whole folder, allow-list instead of block-list) rather than add one more case.
+
+## 2026-11-04: Lesson: check where a safety patch runs, not only what it does
+The M2-05 prompt said Unsloth's `_caller_sampling_only` keeps the model's own sampling defaults (Qwen3: top_p 0.8, top_k 20) out of GRPO. The installed code does that, but only when the model generates through a wrapper (PPO's case, `unsloth/models/rl.py` line 282). On our GRPO path it never runs. The sampling stayed right for another reason: transformers 5.17.0 fills in a model default only where TRL left a setting empty. Reading the code gave the right answer on paper. The trial then proved it: it recorded the settings every `generate` call really used, and checked each prompt against the pool's.
+**Lesson:** when a note says "this patch protects us", read the line that decides whether it runs. Then record what the run really did, not only what it asked for.
+
+## 2026-11-04: Mistake: a library changed a setting we had left at its default
+The script left `epsilon_high` empty, meaning TRL's default. Unsloth filled it in with 0.28, and only its log said so ("we will set it"). The trial's record did not show it. Unsloth fills in several GRPO values this way (`mask_truncated_completions`, `beta`, `loss_type`, `epsilon_high`, learning rate, batch). The fix: set each of them in the script, record the trainer's resolved values, and add a test that they are all set.
+**Lesson:** with Unsloth, never rely on a default: set every value it might fill in, and read the "Unsloth:" lines in a run's log.
+
+## 2026-11-04: Mistake: a default value captured a constant when the file loaded
+`read_pool(path=POOL_PATH, expected=POOL_SHA256)` took the fingerprint once, when the script loaded. A test that changed the constant found the check did not move with it. It is the same trap Codex found in the reward fingerprint (default values, 2026-10-29). Now the defaults are read when the function is called.
+**Lesson:** a check's expected value should be read at the moment of the check, not frozen into a default argument.
+
+## 2026-11-04: Lesson: the first GRPO step is slow, so do not project from the average
+In the trial, step 1 took 174 s and every later step 13.5 s. The average over 20 steps, 21.6 s, would have put the full run at 113 minutes instead of 75. The plan counts the first step once and the rest at the later rate.
+**Lesson:** split a trial's time into one-off start-up and the steady rate before projecting a long run.
+
+## 2026-11-04: Mistake: a tool-checking job crash-looped for ten minutes
+A CPU-only Modal job meant to copy installed source files used the image without our own code, while the script itself imported `judge`. Every container failed at start, and the local command waited silently until it timed out. It cost under a cent. **Lesson:** a scratch Modal script must use the same image as the code it imports (`judge.modal_image.image`), and a job that prints nothing for minutes should have its app logs read at once (`modal app logs <app id>`).
+
+## 2026-11-04: Mistake: a fingerprint check opened the frozen test files
+To show that nothing changed, Claude Code ran `shasum -a 256` on `data/m2/rl-pool.jsonl` and, in the same command, on both frozen test files. `shasum` reads every byte, so it opened files the prompt says never to open. Only the two fingerprints were printed (both equal to the frozen values in STATE.md); no model saw them and no text was shown. **Lesson:** "never open" includes reading a file only to fingerprint it. To show a frozen file is unchanged, use git (`git diff main --stat -- data/`), which compares what git stored without opening the file's text here.
