@@ -4,10 +4,10 @@ Written 2026-11-04 by Claude Code (prompt M2-05). Nothing here has run. The full
 
 ## The answer first
 
-- **Training: about 75 L4 minutes, about $1.00 to $1.10. That is just over the $1 a run that D-019 allows without asking, so Elias decides.**
+- **Training: about 71 L4 minutes, about $1.02 (likely $0.95 to $1.10). That is just over the $1 a run that D-019 allows without asking, so Elias decides.** (Corrected 2026-11-08 after Codex's review: the first estimate, about $1.08, counted the checkpoint saves twice.)
 - Choosing the checkpoint: about 50 L4 minutes spread over 8 machines at once, about $0.65 to $0.75. Under $1.
 - Upload: CPU only, under $0.01.
-- **All of Step 5 from here: about $1.70 to $1.85**, inside Modal's free $30 a month (D-014) and the SPEC's $2 to $8 for all of M2.
+- **All of Step 5 from here: about $1.65 to $1.80**, inside Modal's free $30 a month (D-014) and the SPEC's $2 to $8 for all of M2.
 
 ## What runs
 
@@ -25,15 +25,18 @@ All seconds below come from `trial.meta.json`, except the answer rate, which com
 **Training.**
 - Load: 67 s.
 - The first step: 174 s. It holds one-off start-up work, so it is counted once.
-- Every later step: 13.5 s. The trial's steps 2 to 20 took 255.8 s in all, including one checkpoint save.
-- Steps 2 to 314: 313 x 13.5 s = 4,213 s.
-- Six more checkpoint saves than the trial measured, at about 9 s each (the step-10 save added about 9 s): about 54 s.
-- Total: 67 + 174 + 4,213 + 54 = about 4,510 s, which is **75 L4 minutes**.
-- At Modal's L4 price ($0.000222 a second, https://modal.com/pricing): 4,510 x $0.000222 = **$1.00**.
-- Modal also bills CPU and memory. On the M2-04 pool run, the bill was about 8% above the L4 seconds alone ($0.80 against $0.74, `runs/RUNLOG.md`). With that: **about $1.08**.
+- Every later step without a save: 12.65 s. The trial's steps 2 to 20 took 255.8 s in all. That holds both of the trial's checkpoint saves (steps 10 and 20), so 255.8 = 17 x 12.65 + 2 x (12.65 + 7.75).
+- Each checkpoint save: about 7.75 s more than a plain step.
+- Steps 2 to 314: 313 x 12.65 s = 3,959 s.
+- Seven saves in the full run (steps 50 to 300, and 314): 7 x 7.75 s = about 54 s.
+- Total: 67 + 174 + 3,959 + 54 = about 4,255 s, which is **71 L4 minutes**.
+- At Modal's L4 price ($0.000222 a second, https://modal.com/pricing): 4,255 x $0.000222 = **$0.94**.
+- Modal also bills CPU and memory. On the M2-04 pool run, the bill was about 8% above the L4 seconds alone ($0.80 against $0.74, `runs/RUNLOG.md`). With that: **about $1.02**.
+- This is an estimate from 20 steps on 40 of the 314 pairs. Longer prompts or answers make it slower; the trial's real bill was $0.18 for 10.5 L4 minutes, about 27% above the GPU seconds alone ($0.1775 against 629 s x $0.000222 = $0.14), because it also paid for a second machine starting up. So $0.95 to $1.10 is the honest range.
+- The fixes after Codex's review add a few counts and comparisons per step on the CPU. They are not measured on a GPU yet; they are too small to change these numbers. The first step checks every one of them, so a problem stops the run within about 3 minutes (about $0.05).
 - The trial's 40 pairs were a random draw from the pool, so the real run should be close. Longer prompts or answers would make it slower, and a run that stops early would make it cheaper.
 - The function's timeout is 3 hours, well above 75 minutes. A checkpoint is saved to the volume every 50 steps, so a crash keeps what was saved.
-- Peak memory in the trial was 7.49 GiB of the L4's 22 GiB, so memory is not a risk.
+- Peak memory in the trial was 7.49 GiB of the L4's 22 GiB, for 40 of the 314 pairs. That is room to spare in the trial; a longer prompt in the full run uses a little more.
 
 **Choosing.**
 - Each of the 8 candidates loads the model (about 124 s, the trial's load check) and writes 588 greedy answers.
@@ -49,4 +52,4 @@ All seconds below come from `trial.meta.json`, except the answer rate, which com
 
 ## Recommendation
 
-Run it as planned: 314 steps, about $1.08. The only way to land under $1 is fewer steps (about 290), which goes below Unsloth's 300-step guidance for a saving of about 8 cents.
+Run it as planned: 314 steps, about $1.02. The only way to land surely under $1 is fewer steps (about 305), just above Unsloth's 300-step minimum, for a saving of about 3 cents.

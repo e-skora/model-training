@@ -48,6 +48,13 @@ Two more facts from the same file. `max_prompt_length` no longer exists in TRL 1
 
 **So the sampling matches the pool, on paper.** The trial checks it for real. The GPU job records the settings `generate` ended up with and the sampling steps it added, and stops at the first answer if either differs from the pool's. It also checks that every prompt is one of the pool's 314 prompts, token for token, built the way the pool built them.
 
+**Tightened after Codex's review (2026-11-08, `reviews/M2-05-fixes.md`):**
+- The checks now also watch `generate` itself and TRL's generation step.
+- They allow no word filter at all, and only the length limit and the end token as stop rules.
+- They need exactly one answer per prompt copy and 8 copies of one pool prompt per group.
+- After every step, the counts at all five places must agree, and the reward must have scored every answer.
+- A full run must give every pool pair exactly 2 groups.
+
 **Unsloth's other changes that matter here** (`unsloth/models/rl.py` lines 3238 to 3296, 3434 to 3491): Unsloth replaces some of TRL's defaults with its own, for example learning rate 5e-5, weight decay 0.001, warmup 0.1, `per_device_train_batch_size` 4 and `gradient_accumulation_steps` 2. With `loss_type` "dapo" it also turns `mask_truncated_completions` on by itself (lines 3474 to 3476), and sets `epsilon_high` to 0.28 when it is empty (lines 3477 to 3479). So the script sets every one of these values itself, and the record saves the values the trainer really ended with (`resolved_config`).
 
 **Found in the trial (2026-11-04):** the first script left `epsilon_high` empty, and the trial's log says "Unsloth: The DAPO paper recommends `epsilon_high = 0.28` - we will set it." So the trial ran with 0.28, which its `trial.meta.json` does not show under `grpo` (the full log is `trial-output.log`, line 36). The script now sets 0.28 itself, so the full run uses the trial's value and its record shows it. A test checks that every value Unsloth would fill in is set in the script.
