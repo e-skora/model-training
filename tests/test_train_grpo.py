@@ -2,14 +2,18 @@
 
 No GPU, no network, no Modal job: every remote call is a fake that records
 what it was asked. Results are written only to a temporary folder; the real
-repo is only read. The frozen test files are never opened, and one test
-proves the script does not open them either.
+repo is only read. tests/conftest.py points Modal at an empty temporary config
+before this file imports it. The frozen test files are never opened, and one
+test proves the script does not open them either.
 """
 
 import builtins
 import importlib.util
 import io
 import json
+import os
+import subprocess
+import sys
 from fractions import Fraction
 from pathlib import Path
 
@@ -34,47 +38,69 @@ def load_script():
 
 
 grpo = load_script()
+V1_FILES = {"adapter_config.json": "c" * 64, "adapter_model.safetensors": "d" * 64}
+
+
+def files_of(name):
+    return {"adapter_config.json": f"{name}-config", "adapter_model.safetensors": f"{name}-weights"}
 
 
 # ---------- fakes ----------
 
 class Calls:
-    """Fake Modal jobs. `answers` maps a checkpoint to a function (pair, version) -> raw answer; default: right."""
+    """Fake Modal jobs. `answers` maps a checkpoint to a function (pair, version) -> raw answer; default: right.
 
-    def __init__(self, answers=None):
+    `train` returns a record shaped like the real one, finished and checked unless `train_changes` says otherwise.
+    """
+
+    def __init__(self, answers=None, train_changes=None, answer_files=None, drop_items=0, upload_result=None):
         self.log = []
         self.answers = answers or {}
+        self.train_changes = train_changes or {}
+        self.answer_files = answer_files or {}
+        self.drop_items = drop_items
+        self.upload_result = upload_result
 
     def app_id(self):
         return "ap-test"
 
-    def train(self, run, rows, max_steps, save_every):
-        self.log.append(("train", run, [r["id"] for r in rows], max_steps, save_every))
+    def train(self, run, rows, max_steps, save_every, each):
+        self.log.append(("train", run, [r["id"] for r in rows], max_steps, save_every, each))
         total = grpo.planned_steps(len(rows), max_steps)
         points = grpo.save_points(total, save_every)
-        return {"run": run, "global_step": total, "planned_steps": total, "train_seconds": 40.0, "load_seconds": 60.0,
-                "seconds_per_step": 2.0, "peak_vram_gib": 12.0, "warnings": [], "steps": [],
-                "saved": [{"name": f"step-{p}", "step": p} for p in points], "sampling_used": {}}
+        result = {
+            "run": run, "planned_steps": total, "global_step": total, "save_points": points,
+            "saved": [{"name": f"step-{p}", "step": p, "files": files_of(f"step-{p}")} for p in points],
+            "adapter_check": {"v1_files": dict(V1_FILES)},
+            "sampling_used": {"calls": dict.fromkeys(("entry", "config", "processors", "stopping", "trainer"), total)},
+            "run_checks": {"passed": True, "problems": [], "each_pair_groups": each},
+            "steps": [{"step": i + 1} for i in range(total)], "warnings": [],
+            "train_seconds": 40.0, "load_seconds": 60.0, "peak_vram_gib": 12.0,
+        }
+        result.update(self.train_changes)
+        return result
 
-    def answer(self, run, checkpoint, items):
+    def answer(self, run, checkpoint, items, expected_files):
         self.log.append(("answer", run, checkpoint, [i["id"] for i in items]))
         valid, _ = grpo.read_valid()
         by_file = {f: {p["id"]: p for p in pairs} for f, pairs in valid.items()}
         results = []
-        for item in items:
+        for item in items[self.drop_items:]:
             name, version, pair_id = item["id"].split("/", 2)
             pair = by_file[name][pair_id]
             rule = self.answers.get(checkpoint)
             results.append({"id": item["id"], "raw": rule(pair, version) if rule else answer_text(pair)})
-        return {"checkpoint": checkpoint, "load_seconds": 1, "answer_seconds": 1, "results": results}
+        return {"checkpoint": checkpoint, "load_seconds": 1, "answer_seconds": 1, "results": results,
+                "files": self.answer_files.get(checkpoint, expected_files)}
 
     def answer_many(self, args):
         self.log.append(("answer_many", [a[1] for a in args]))
-        return [self.answer(run, c, items) for run, c, items in args]
+        return [self.answer(*a) for a in args]
 
-    def upload(self, run, checkpoint, meta_text):
-        self.log.append(("upload", run, checkpoint))
-        return {"repo": "test/repo", "commit": "c1", "private": True, "files": []}
+    def upload(self, run, checkpoint, meta_text, expected_files):
+        self.log.append(("upload", run, checkpoint, expected_files))
+        return self.upload_result or {"repo": "test/repo", "commit": "c1", "private": True, "files": [],
+                                      "recovered": False}
 
 
 @pytest.fixture
@@ -85,11 +111,45 @@ def at_repo(monkeypatch):
 
 def trial(tmp_path, calls=None):
     calls = calls or Calls()
-    return grpo.run_stage("trial", "v2", calls, out=tmp_path), calls
+    return grpo.run_stage("trial", calls, out=tmp_path), calls
 
 
-def finished_run(tmp_path):
-    return grpo.run_stage("train", "v2", Calls(), out=tmp_path)
+def finished_run(tmp_path, **changes):
+    return grpo.run_stage("train", Calls(train_changes=changes), out=tmp_path)
+
+
+def label_only(pair, version):
+    return json.dumps({"label": pair["label"]})
+
+
+# ---------- Modal's settings stay out of the tests (finding 5) ----------
+
+def test_modal_reads_an_empty_temporary_config_not_the_real_one():
+    import modal.config
+
+    assert Path(modal.config.user_config_path).resolve() == Path(os.environ["MODAL_CONFIG_PATH"]).resolve()
+    assert Path(modal.config.user_config_path).resolve() != Path("~/.modal.toml").expanduser().resolve()
+    assert Path(modal.config.user_config_path).read_text() == ""
+    assert not [k for k in os.environ if k.startswith(("HF_TOKEN", "MODAL_TOKEN"))]
+
+
+def test_collecting_the_tests_never_reads_a_home_modal_config(tmp_path):
+    # A home folder whose .modal.toml cannot be read: if collection tried to read it, Modal's import would fail.
+    home = tmp_path / "home"
+    home.mkdir()
+    locked = home / ".modal.toml"
+    locked.write_text("[broken\n")
+    locked.chmod(0)
+    env = {k: v for k, v in os.environ.items() if not k.startswith(("MODAL_", "HF_"))}
+    env.update(HOME=str(home), PYTHONDONTWRITEBYTECODE="1")
+    try:
+        done = subprocess.run([sys.executable, "-m", "pytest", "--collect-only", "-q", "-p", "no:cacheprovider",
+                               "tests/test_train_grpo.py", "tests/test_run_records.py"],
+                              cwd=REPO, env=env, capture_output=True, text=True, timeout=300)
+    finally:
+        locked.chmod(0o600)
+    assert done.returncode == 0, done.stdout + done.stderr
+    assert "error" not in done.stdout.lower()
 
 
 # ---------- the data ----------
@@ -99,7 +159,7 @@ def test_dataset_rows_are_the_pool_rows_in_their_saved_versions():
     assert sha == grpo.POOL_SHA256
     rows = grpo.dataset_rows(pool)
     assert [r["id"] for r in rows] == [p["id"] for p in pool]
-    assert len(rows) == 314
+    assert len(rows) == grpo.POOL_ROWS == 314
     assert all(set(r) == {"prompt", "gold_label", "gold_type", "id"} for r in rows)
     assert [(r["gold_label"], r["gold_type"]) for r in rows] == [(p["label"], p["type"]) for p in pool]
     # The prompt the pool really sampled: judge.pool.show over all candidates, as scripts/sample_pool.py did.
@@ -147,6 +207,47 @@ def test_training_gets_only_pool_rows_never_validation_rows(at_repo, tmp_path):
     assert meta["load_check"]["answers"][0]["problem"] is None
 
 
+# ---------- run folders are fresh, records are whole (finding 1) ----------
+
+def test_every_run_gets_a_fresh_name(at_repo, tmp_path):
+    first = trial(tmp_path / "a")[0]["run"]
+    second = trial(tmp_path / "b")[0]["run"]
+    full = finished_run(tmp_path / "c")["run"]
+    assert first.startswith("trial-") and second.startswith("trial-") and full.startswith("train-")
+    assert len({first, second, full}) == 3
+
+
+def test_files_sha256_fingerprints_each_plain_file(tmp_path):
+    (tmp_path / "adapter_model.safetensors").write_bytes(b"weights")
+    (tmp_path / "adapter_config.json").write_text("{}")
+    found = grpo.files_sha256(tmp_path)
+    assert list(found) == ["adapter_config.json", "adapter_model.safetensors"]
+    (tmp_path / "adapter_model.safetensors").write_bytes(b"weights!")
+    assert grpo.files_sha256(tmp_path)["adapter_model.safetensors"] != found["adapter_model.safetensors"]
+    (tmp_path / "link").symlink_to(tmp_path / "adapter_config.json")
+    with pytest.raises(RuntimeError, match="not a plain file"):
+        grpo.files_sha256(tmp_path)
+
+
+def test_records_are_written_whole_and_a_new_one_never_replaces_an_old_one(tmp_path):
+    path = tmp_path / "trial.meta.json"
+    grpo.write_new_json(path, {"a": 1})
+    with pytest.raises(SystemExit, match="already exists"):
+        grpo.write_new_json(path, {"a": 2})
+    assert json.loads(path.read_text()) == {"a": 1}
+    grpo.replace_json(path, {"a": 3})
+    assert json.loads(path.read_text()) == {"a": 3}
+    assert sorted(p.name for p in tmp_path.iterdir()) == ["trial.meta.json"]  # no scratch file left behind
+
+
+def test_a_saved_trial_record_is_never_replaced(at_repo, tmp_path):
+    trial(tmp_path)
+    calls = Calls()
+    with pytest.raises(SystemExit, match="already exist"):
+        trial(tmp_path, calls)
+    assert calls.log == []
+
+
 # ---------- fingerprints stop before anything runs ----------
 
 def test_a_wrong_pool_fingerprint_stops_before_anything_runs(at_repo, tmp_path, monkeypatch):
@@ -185,7 +286,7 @@ def test_a_wrong_v1_record_stops_before_anything_runs(at_repo, tmp_path):
     fake.write_text(json.dumps(record), encoding="utf-8")
     calls = Calls()
     with pytest.raises(SystemExit, match="epoch-2 adapter"):
-        grpo.run_stage("trial", "v2", calls, out=tmp_path / "out", train_meta_path=fake)
+        grpo.run_stage("trial", calls, out=tmp_path / "out", train_meta_path=fake)
     assert calls.log == []
 
 
@@ -193,15 +294,7 @@ def test_the_real_v1_record_names_the_pins():
     grpo.check_v1(json.loads((REPO / grpo.TRAIN_META).read_text(encoding="utf-8")))
 
 
-def test_a_saved_trial_record_is_never_replaced(at_repo, tmp_path):
-    trial(tmp_path)
-    calls = Calls()
-    with pytest.raises(SystemExit, match="already exist"):
-        trial(tmp_path, calls)
-    assert calls.log == []
-
-
-# ---------- sampling ----------
+# ---------- sampling (finding 3) ----------
 
 def test_sampling_matches_the_pool():
     asked = grpo.sampling_settings()
@@ -223,13 +316,116 @@ def test_every_setting_unsloth_would_fill_in_is_set_here():
         assert grpo.GRPO[key] == value, key
 
 
+GOOD_CONFIG = {"do_sample": True, "num_beams": 1, "temperature": 1.0, "top_p": 1.0, "top_k": 0, "min_p": None,
+               "typical_p": 1.0, "top_h": None, "repetition_penalty": 1.0, "max_new_tokens": 256,
+               "num_return_sequences": 1}  # what the trial's 20 generate calls really used
+PROMPT_A, PROMPT_B = (1, 2, 3), (4, 5, 6)
+
+
+def new_watch():
+    return grpo.GenerationWatch(grpo.sampling_settings(), {PROMPT_A: "tr-a", PROMPT_B: "tr-b"}, 8)
+
+
+def one_step(watch, prompts=(PROMPT_A, PROMPT_B), skip=()):
+    """Feed the watch one generation the way the GPU job does; `skip` leaves out recording points."""
+    if "entry" not in skip:
+        watch.entry()
+    if "config" not in skip:
+        watch.config(GOOD_CONFIG)
+    if "processors" not in skip:
+        watch.processors([])
+    if "stopping" not in skip:
+        watch.stopping(["MaxLengthCriteria", "EosTokenCriteria"])
+    rows = [list(p) for p in prompts for _ in range(8)]
+    if "trainer" not in skip:
+        watch.trainer_call(rows, [[9]] * len(rows))
+
+
+def test_the_watch_passes_the_pools_sampling_and_counts_groups():
+    watch = new_watch()
+    one_step(watch)
+    watch.check_counts(1, rewarded=16)
+    one_step(watch, prompts=(PROMPT_B, PROMPT_A))
+    watch.check_counts(2, rewarded=32)
+    assert watch.summary()["groups_per_pool_pair"] == {"tr-a": 2, "tr-b": 2}
+
+
+@pytest.mark.parametrize("change", [
+    {"temperature": 0.7}, {"top_p": 0.8}, {"top_k": 20}, {"min_p": 0.1}, {"repetition_penalty": 1.1},
+    {"max_new_tokens": 512}, {"do_sample": False}, {"num_return_sequences": 2}, {"num_beams": 2},
+])
+def test_other_sampling_stops_at_once(change):
+    with pytest.raises(grpo.GenerationCheckError, match="other sampling"):
+        new_watch().config({**GOOD_CONFIG, **change})
+
+
+def test_any_word_filter_stops():
+    with pytest.raises(grpo.GenerationCheckError, match="word chances"):
+        new_watch().processors(["NoBadWordsLogitsProcessor"])
+
+
+@pytest.mark.parametrize("names", [["MaxLengthCriteria", "StopStringCriteria"], ["EosTokenCriteria"],
+                                   ["MaxLengthCriteria", "MaxTimeCriteria"]])
+def test_other_stop_rules_stop(names):
+    with pytest.raises(grpo.GenerationCheckError, match="stop rules"):
+        new_watch().stopping(names)
+
+
+def test_a_group_must_be_eight_copies_of_one_pool_prompt():
+    mixed = [list(PROMPT_A)] * 7 + [list(PROMPT_B)] + [list(PROMPT_B)] * 8
+    with pytest.raises(grpo.GenerationCheckError, match="mixes different prompts"):
+        new_watch().trainer_call(mixed, [[9]] * 16)
+    with pytest.raises(grpo.GenerationCheckError, match="not one of the pool's"):
+        new_watch().trainer_call([[7, 7]] * 8, [[9]] * 8)
+    with pytest.raises(grpo.GenerationCheckError, match="whole groups"):
+        new_watch().trainer_call([list(PROMPT_A)] * 12, [[9]] * 12)
+    with pytest.raises(grpo.GenerationCheckError, match="got 32 answers"):
+        new_watch().trainer_call([list(PROMPT_A)] * 16, [[9]] * 32)
+
+
+@pytest.mark.parametrize("skip", ["entry", "config", "processors", "stopping", "trainer"])
+def test_a_call_that_skips_any_check_stops_at_the_step_end(skip):
+    watch = new_watch()
+    one_step(watch, skip={skip})
+    with pytest.raises(grpo.GenerationCheckError, match="went unseen"):
+        watch.check_counts(1, rewarded=16)
+
+
+def test_rewarded_answers_must_equal_written_ones():
+    watch = new_watch()
+    one_step(watch)
+    with pytest.raises(grpo.GenerationCheckError, match="16 answers written, 15 rewarded"):
+        watch.check_counts(1, rewarded=15)
+
+
+def test_coverage_in_a_full_run_is_each_pair_exactly_twice():
+    ids = ["a", "b", "c", "d"]
+    assert grpo.coverage_problems({"a": 2, "b": 2, "c": 2, "d": 2}, ids, steps=4, each=2) == []
+    problems = grpo.coverage_problems({"a": 3, "b": 1, "c": 2, "d": 2}, ids, steps=4, each=2)
+    assert any("did not get exactly 2" in p for p in problems)
+    assert any("not in the pool" in p for p in grpo.coverage_problems({"z": 2}, ids, steps=1, each=None))
+    assert any("more than one group" in p for p in grpo.coverage_problems({"a": 2}, ids, steps=1, each=None))
+    assert any("groups in 3 steps" in p for p in grpo.coverage_problems({"a": 1, "b": 1}, ids, steps=3, each=None))
+
+
+def test_a_logged_step_missing_a_watch_metric_stops():
+    good = {"reward": 1, "frac_reward_zero_std": 0.5, "completions/mean_length": 40,
+            **{f"answers/{k}": 0.25 for k in grpo.ANSWER_KINDS}}
+    assert grpo.check_step_log(good)["reward"] == 1.0
+    for key in grpo.REQUIRED_STEP_KEYS:
+        with pytest.raises(grpo.GenerationCheckError, match="lacks"):
+            grpo.check_step_log({k: v for k, v in good.items() if k != key})
+
+
 def test_the_record_holds_what_the_trial_asked_and_used(at_repo, tmp_path):
     meta, _ = trial(tmp_path)
     assert meta["sampling_asked"] == grpo.sampling_settings()
-    assert "sampling_used" in meta
+    assert meta["sampling_used"]["calls"]["trainer"] == 20
     assert meta["pool_sha256"] == grpo.POOL_SHA256 and meta["reward_sha256"] == grpo.REWARD_SHA256
     assert (meta["base_revision"], meta["adapter_revision"]) == (grpo.BASE_REVISION, grpo.V1_ADAPTER_REVISION)
     assert meta["modal_app_id"] == "ap-test"
+    assert meta["save_every_used"] == 10 and meta["save_points"] == [10, 20]
+    assert set(meta["gpu_seconds"]) == {"train", "load_check"}
 
 
 # ---------- steps, warmup and checkpoints ----------
@@ -238,6 +434,7 @@ def test_steps_and_checkpoints():
     assert grpo.planned_steps(314) == 314  # 2 pairs a step, 2 epochs
     assert grpo.warmup_steps(314) == 31
     assert grpo.save_points(314, grpo.SAVE_EVERY) == [50, 100, 150, 200, 250, 300, 314]
+    assert grpo.full_run_checkpoints() == [f"step-{p}" for p in (50, 100, 150, 200, 250, 300, 314)]
     assert grpo.save_points(20, 10) == [10, 20]
     assert grpo.planned_steps(314, max_steps=20) == 20
 
@@ -281,17 +478,19 @@ def test_the_limits_themselves_do_not_warn():
     assert grpo.watch_warnings(log(20, **{"answers/unclear": 0.15})) == []
 
 
-# ---------- the D-056 rule ----------
+# ---------- the D-056 rule, with D-057's Style A gate (finding 4) ----------
 
-def version_counts(caught, said, real, invalid=0):
-    return {v: {"caught": caught, "said": said, "real": real, "invalid": invalid} for v in VERSIONS}
+def version_counts(caught, said, real, invalid=0, breaks=None):
+    return {v: {"caught": caught, "said": said, "real": real, "invalid": invalid,
+                "style_a_breaks": invalid if breaks is None else breaks} for v in VERSIONS}
 
 
-def cand(step, hard=(40, 42, 47), m1=(40, 42, 46), hard_invalid=0, m1_invalid=0, **per_version):
-    c = {"step": step, "valid_hard": version_counts(*hard, hard_invalid), "m1_valid": version_counts(*m1, m1_invalid)}
+def cand(step, hard=(40, 42, 47), m1=(40, 42, 46), hard_invalid=0, m1_invalid=0, hard_breaks=None, **per_version):
+    c = {"step": step, "valid_hard": version_counts(*hard, hard_invalid, hard_breaks),
+         "m1_valid": version_counts(*m1, m1_invalid)}
     for key, value in per_version.items():  # e.g. valid_hard__no_dates=(30, 32, 47)
         f, v = key.split("__")
-        c[f][v] = {"caught": value[0], "said": value[1], "real": value[2], "invalid": 0}
+        c[f][v] = {"caught": value[0], "said": value[1], "real": value[2], "invalid": 0, "style_a_breaks": 0}
     return c
 
 
@@ -314,6 +513,9 @@ def test_a_recall_tie_goes_to_higher_precision_then_the_earlier_step():
     assert grpo.choose_checkpoint(tie_precision)[0] == "step-100"
     full_tie = {"step-0": cand(0), "step-50": cand(50, hard=(43, 45, 47)), "step-100": cand(100, hard=(43, 45, 47))}
     assert grpo.choose_checkpoint(full_tie)[0] == "step-50"
+    # The same tie listed the other way round: the earlier step still wins, so the record's order does not matter.
+    reversed_tie = {"step-0": cand(0), "step-100": cand(100, hard=(43, 45, 47)), "step-50": cand(50, hard=(43, 45, 47))}
+    assert grpo.choose_checkpoint(reversed_tie)[0] == "step-50"
 
 
 def test_step_zero_wins_when_nothing_beats_it():
@@ -325,6 +527,13 @@ def test_step_zero_wins_when_nothing_beats_it():
 def test_invalid_answers_disqualify():
     chosen, out = grpo.choose_checkpoint({"step-0": cand(0), "step-50": cand(50, hard=(47, 47, 47), m1_invalid=1)})
     assert chosen == "step-0" and out["step-50"] == ["3 invalid answers"]
+
+
+def test_answers_not_in_v1s_format_disqualify():
+    # Right labels everywhere, but no type or reason in 97 answers per version: the scorer calls them valid, the reward not.
+    chosen, out = grpo.choose_checkpoint({"step-0": cand(0), "step-50": cand(50, hard=(47, 47, 47), hard_breaks=97)})
+    assert chosen == "step-0"
+    assert out["step-50"] == ["291 answers not in v1's exact format (type or reason)"]
 
 
 def test_a_precision_drop_on_valid_hard_disqualifies_only_beyond_0_02():
@@ -340,6 +549,19 @@ def test_exactly_0_02_lower_precision_stays_in():
     assert Fraction(47, 50) == Fraction(48, 50) - Fraction(2, 100)
     chosen, out = grpo.choose_checkpoint({"step-0": cand(0, hard=(48, 50, 50)), "step-50": cand(50, hard=(47, 50, 49))})
     assert out == {} and chosen == "step-0"  # in, but step 0's recall 48/50 beats 47/49
+
+
+@pytest.mark.parametrize("m1, kept", [
+    ((94, 100, 94), True),  # precision 0.94: exactly 0.03 below step 0's 0.97, so in
+    ((94, 97, 100), True),  # recall 0.94: exactly 0.03 below step 0's 0.97, so in
+    ((93, 100, 93), False),  # precision 0.93: more than 0.03 below
+    ((93, 96, 100), False),  # recall 0.93: more than 0.03 below
+])
+def test_the_m1_limits_at_exactly_0_03(m1, kept):
+    base = cand(0, m1=(97, 100, 100))  # M1 precision and recall both 0.97
+    better = cand(50, hard=(41, 43, 47), m1=m1)  # better than step 0 on valid-hard
+    chosen, out = grpo.choose_checkpoint({"step-0": base, "step-50": better})
+    assert (chosen == "step-50") is kept and ("step-50" not in out) is kept
 
 
 @pytest.mark.parametrize("m1, reason", [
@@ -362,16 +584,19 @@ def test_never_saying_contradiction_counts_as_precision_zero():
     assert chosen == "step-0" and "step-50" in out
 
 
-def test_counts_come_from_the_scorer():
+def test_counts_come_from_the_scorer_and_the_rewards_reader():
     pairs, _ = read_pairs(REPO / "data/m2/valid-hard.jsonl")
     right = [{"id": p["id"], "raw": answer_text(p)} for p in pairs]
     real = sum(p["label"] == "contradiction" for p in pairs)
-    assert grpo.counts(pairs, right) == {"caught": real, "said": real, "real": real, "invalid": 0}
+    assert grpo.counts(pairs, right) == {"caught": real, "said": real, "real": real, "invalid": 0, "style_a_breaks": 0}
     broken = [dict(a, raw="not json") for a in right]
-    assert grpo.counts(pairs, broken)["invalid"] == len(pairs)
+    assert grpo.counts(pairs, broken)["invalid"] == grpo.counts(pairs, broken)["style_a_breaks"] == len(pairs)
+    bare = [{"id": p["id"], "raw": label_only(p, "as_is")} for p in pairs]
+    c = grpo.counts(pairs, bare)
+    assert (c["invalid"], c["style_a_breaks"], c["caught"]) == (0, len(pairs), real)
 
 
-# ---------- the choose and upload stages, with fake answers ----------
+# ---------- choose and upload need a finished, checked run (finding 2) ----------
 
 def test_choose_answers_every_candidate_and_applies_the_rule(at_repo, tmp_path):
     finished_run(tmp_path)
@@ -379,23 +604,133 @@ def test_choose_answers_every_candidate_and_applies_the_rule(at_repo, tmp_path):
     def alarm(pair, version):
         return json.dumps({"label": "contradiction", "type": None, "reason": "Always."})
 
-    calls = Calls(answers={"step-300": alarm})
-    meta = grpo.run_stage("choose", "v2", calls, out=tmp_path)
+    calls = Calls(answers={"step-300": alarm, "step-250": label_only})
+    meta = grpo.run_stage("choose", calls, out=tmp_path)
     names = ["step-0", "step-50", "step-100", "step-150", "step-200", "step-250", "step-300", "step-314"]
     assert calls.log[0] == ("answer_many", names)
     assert meta["choice"]["chosen"] == "step-0"  # all right answers tie, so the earliest step
     assert "step-300" in meta["choice"]["out"]
+    assert any("v1's exact format" in r for r in meta["choice"]["out"]["step-250"])
     assert len(list((tmp_path / "valid").iterdir())) == len(names) * 2 * 3
+    assert not [p for p in tmp_path.iterdir() if p.name.startswith(".")]
     with pytest.raises(SystemExit, match="already holds a choice"):
-        grpo.run_stage("choose", "v2", Calls(), out=tmp_path)
+        grpo.run_stage("choose", Calls(), out=tmp_path)
 
 
-def test_a_changed_setting_stops_choose_before_any_remote_call(at_repo, tmp_path, monkeypatch):
-    finished_run(tmp_path)
-    monkeypatch.setitem(grpo.GRPO, "learning_rate", 1e-5)
+@pytest.mark.parametrize("changes, message", [
+    ({"run_checks": {"passed": False, "problems": ["x"]}}, "own checks did not pass"),
+    ({"global_step": 50}, "did 50 steps"),
+    ({"saved": [{"name": "step-50", "step": 50, "files": files_of("step-50")}]}, "saved checkpoints are"),
+    ({"steps": []}, "step log has 0 steps"),
+    ({"sampling_used": {}}, "one checked generation per step"),
+    ({"adapter_check": {}}, "fingerprints of v1's files"),
+])
+def test_choose_refuses_an_unfinished_or_unchecked_run(at_repo, tmp_path, changes, message):
+    finished_run(tmp_path, **changes)
     calls = Calls()
-    with pytest.raises(SystemExit, match="grpo is"):
-        grpo.run_stage("choose", "v2", calls, out=tmp_path)
+    with pytest.raises(SystemExit, match=message):
+        grpo.run_stage("choose", calls, out=tmp_path)
+    assert calls.log == []
+
+
+def test_choose_refuses_a_trial_record(at_repo, tmp_path):
+    trial(tmp_path)
+    (tmp_path / "trial.meta.json").rename(tmp_path / "train.meta.json")
+    calls = Calls()
+    with pytest.raises(SystemExit, match="'trial' run"):
+        grpo.run_stage("choose", calls, out=tmp_path)
+    assert calls.log == []
+
+
+def test_choose_refuses_changed_validation_files_and_a_changed_reward(at_repo, tmp_path, monkeypatch):
+    finished_run(tmp_path)
+    record = json.loads((tmp_path / "train.meta.json").read_text())
+    record["valid_kept_apart"]["data/m2/valid-hard.jsonl"] = "0" * 64
+    (tmp_path / "train.meta.json").write_text(json.dumps(record))
+    calls = Calls()
+    with pytest.raises(SystemExit, match="validation files"):
+        grpo.run_stage("choose", calls, out=tmp_path)
+    record["valid_kept_apart"] = grpo.read_valid()[1]
+    (tmp_path / "train.meta.json").write_text(json.dumps(record))
+    monkeypatch.setattr(judge.reward, "reward_sha256", lambda: "f" * 64)
+    with pytest.raises(SystemExit, match="reward fingerprint is f"):
+        grpo.run_stage("choose", calls, out=tmp_path)
+    assert calls.log == []
+
+
+@pytest.mark.parametrize("calls, message", [
+    (Calls(drop_items=1), "not each of the"),
+    (Calls(answer_files={"step-100": files_of("other")}), "differ from its saved fingerprints"),
+])
+def test_choose_writes_nothing_when_answers_are_missing_or_from_other_files(at_repo, tmp_path, calls, message):
+    finished_run(tmp_path)
+    before = (tmp_path / "train.meta.json").read_text()
+    with pytest.raises(SystemExit, match=message):
+        grpo.run_stage("choose", calls, out=tmp_path)
+    assert (tmp_path / "train.meta.json").read_text() == before
+    assert not (tmp_path / "valid").exists()
+    grpo.run_stage("choose", Calls(), out=tmp_path)  # a clean retry works
+
+
+def test_check_outcomes_wants_each_candidate_once():
+    expected = {"step-0": V1_FILES, "step-50": files_of("step-50")}
+    one = {"checkpoint": "step-0", "results": [{"id": "x"}], "files": V1_FILES}
+    with pytest.raises(SystemExit, match="answers came back for"):
+        grpo.check_outcomes([one, one], expected, ["x"])
+    twice = {"checkpoint": "step-50", "results": [{"id": "x"}, {"id": "x"}], "files": files_of("step-50")}
+    with pytest.raises(SystemExit, match="answered 2 items"):
+        grpo.check_outcomes([one, twice], expected, ["x"])
+
+
+def test_choose_sends_each_candidates_fingerprints(at_repo, tmp_path):
+    finished_run(tmp_path)
+    seen = []
+
+    class Recording(Calls):
+        def answer(self, run, checkpoint, items, expected_files):
+            seen.append((checkpoint, expected_files))
+            return super().answer(run, checkpoint, items, expected_files)
+
+    grpo.run_stage("choose", Recording(), out=tmp_path)
+    assert dict(seen) == {"step-0": V1_FILES, **{f"step-{p}": files_of(f"step-{p}")
+                                                 for p in (50, 100, 150, 200, 250, 300, 314)}}
+
+
+def choose_with_winner(tmp_path, winner="step-150"):
+    """A finished run and a choice that picks `winner`: it catches one more contradiction than the rest."""
+    finished_run(tmp_path)
+    valid, _ = grpo.read_valid()
+    miss = next(p["id"] for p in valid["valid_hard"] if p["label"] == "contradiction")
+
+    def misses_one(pair, version):
+        if pair["id"] == miss:
+            return json.dumps({"label": "non_contradiction", "type": "update", "reason": "Missed."})
+        return answer_text(pair)
+
+    rules = {n: misses_one for n in ["step-0", *grpo.full_run_checkpoints()] if n != winner}
+    return grpo.run_stage("choose", Calls(answers=rules), out=tmp_path)
+
+
+def test_upload_sends_the_chosen_fingerprints_and_records_its_own_commit(at_repo, tmp_path):
+    meta = choose_with_winner(tmp_path)
+    assert meta["choice"]["chosen"] == "step-150"
+    calls = Calls(upload_result={"repo": "test/repo", "commit": "abc123", "private": True, "files": [],
+                                 "recovered": False})
+    meta = grpo.run_stage("upload", calls, out=tmp_path)
+    assert calls.log[0][2:] == ("step-150", files_of("step-150"))
+    assert meta["upload"]["commit"] == "abc123" and meta["upload"]["modal_app_id"] == "ap-test"
+    with pytest.raises(SystemExit, match="already records an upload"):
+        grpo.run_stage("upload", Calls(), out=tmp_path)
+
+
+def test_upload_refuses_a_choice_the_counts_no_longer_make(at_repo, tmp_path):
+    choose_with_winner(tmp_path)
+    record = json.loads((tmp_path / "train.meta.json").read_text())
+    record["choice"]["chosen"] = "step-100"
+    (tmp_path / "train.meta.json").write_text(json.dumps(record))
+    calls = Calls()
+    with pytest.raises(SystemExit, match="no longer pick"):
+        grpo.run_stage("upload", calls, out=tmp_path)
     assert calls.log == []
 
 
@@ -403,11 +738,28 @@ def test_upload_refuses_step_zero_and_a_missing_choice(at_repo, tmp_path):
     finished_run(tmp_path)
     calls = Calls()
     with pytest.raises(SystemExit, match="nothing to upload"):
-        grpo.run_stage("upload", "v2", calls, out=tmp_path)
-    grpo.run_stage("choose", "v2", Calls(), out=tmp_path)
+        grpo.run_stage("upload", calls, out=tmp_path)
+    grpo.run_stage("choose", Calls(), out=tmp_path)
     with pytest.raises(SystemExit, match="nothing to upload"):  # step-0 was chosen
-        grpo.run_stage("upload", "v2", calls, out=tmp_path)
+        grpo.run_stage("upload", calls, out=tmp_path)
     assert calls.log == []
+
+
+def test_a_changed_setting_stops_choose_before_any_remote_call(at_repo, tmp_path, monkeypatch):
+    finished_run(tmp_path)
+    monkeypatch.setitem(grpo.GRPO, "learning_rate", 1e-5)
+    calls = Calls()
+    with pytest.raises(SystemExit, match="grpo is"):
+        grpo.run_stage("choose", calls, out=tmp_path)
+    assert calls.log == []
+
+
+def test_lfs_sha256_reads_both_listing_shapes():
+    from types import SimpleNamespace
+
+    assert grpo.lfs_sha256(SimpleNamespace(lfs={"sha256": "x"})) == "x"
+    assert grpo.lfs_sha256(SimpleNamespace(lfs=SimpleNamespace(sha256="y"))) == "y"
+    assert grpo.lfs_sha256(SimpleNamespace(lfs=None)) is None
 
 
 # ---------- the frozen test files ----------
@@ -425,9 +777,9 @@ def test_the_script_never_opens_a_frozen_test_file(at_repo, tmp_path, monkeypatc
 
     monkeypatch.setattr(builtins, "open", watching_open)
     monkeypatch.setattr(io, "open", watching_open)
-    grpo.run_stage("trial", "v2", Calls(), out=tmp_path / "trial")
-    grpo.run_stage("train", "v2", Calls(), out=tmp_path / "train")
-    grpo.run_stage("choose", "v2", Calls(), out=tmp_path / "train")
+    grpo.run_stage("trial", Calls(), out=tmp_path / "trial")
+    grpo.run_stage("train", Calls(), out=tmp_path / "train")
+    grpo.run_stage("choose", Calls(), out=tmp_path / "train")
     assert (REPO / grpo.POOL_PATH).resolve() in opened  # the watch really saw the reads
     assert not FROZEN & set(opened)
 
@@ -448,11 +800,15 @@ def test_billed_adds_up_each_app():
     assert grpo.billed(report, ["ap-a", "ap-b"]) == {"ap-a": 0.12, "ap-b": 1.0}
 
 
-def test_bill_records_the_cost_and_stops_when_rows_are_missing(tmp_path):
-    (tmp_path / "trial.meta.json").write_text(json.dumps({"modal_app_id": "ap-a", "started_at": "2026-11-04T18:00"}),
-                                              encoding="utf-8")
-    with pytest.raises(SystemExit, match="no billing rows yet"):
-        grpo.bill("trial", out=tmp_path, run_report=lambda command: "[]")
-    grpo.bill("trial", out=tmp_path, run_report=lambda command: json.dumps([{"object_id": "ap-a", "cost": "0.2"}]))
-    meta = json.loads((tmp_path / "trial.meta.json").read_text(encoding="utf-8"))
-    assert meta["billed_usd"] == {"ap-a": 0.2} and meta["billed_total_usd"] == 0.2
+def test_bill_records_each_stage_and_stops_when_rows_are_missing(tmp_path):
+    record = {"modal_app_id": "ap-a", "started_at": "2026-11-04T18:00", "choice": {"modal_app_id": "ap-b"},
+              "upload": {"modal_app_id": "ap-c"}}
+    (tmp_path / "train.meta.json").write_text(json.dumps(record), encoding="utf-8")
+    rows = [{"object_id": "ap-a", "cost": "0.2"}, {"object_id": "ap-b", "cost": "0.7"}]
+    with pytest.raises(SystemExit, match="no billing rows yet for \\['ap-c'\\]"):
+        grpo.bill("train", out=tmp_path, run_report=lambda command: json.dumps(rows))
+    rows.append({"object_id": "ap-c", "cost": "0.01"})
+    grpo.bill("train", out=tmp_path, run_report=lambda command: json.dumps(rows))
+    meta = json.loads((tmp_path / "train.meta.json").read_text(encoding="utf-8"))
+    assert meta["billed_usd"] == {"train": 0.2, "choose": 0.7, "upload": 0.01}
+    assert meta["billed_total_usd"] == 0.91
