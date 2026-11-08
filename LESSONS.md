@@ -250,3 +250,22 @@ A CPU-only Modal job meant to copy installed source files used the image without
 
 ## 2026-11-04: Mistake: a fingerprint check opened the frozen test files
 To show that nothing changed, Claude Code ran `shasum -a 256` on `data/m2/rl-pool.jsonl` and, in the same command, on both frozen test files. `shasum` reads every byte, so it opened files the prompt says never to open. Only the two fingerprints were printed (both equal to the frozen values in STATE.md); no model saw them and no text was shown. **Lesson:** "never open" includes reading a file only to fingerprint it. To show a frozen file is unchanged, use git (`git diff main --stat -- data/`), which compares what git stored without opening the file's text here.
+
+## 2026-11-08: Mistake: the training run was guarded, but not what comes after it
+Codex's M2-05 review found that the GRPO script checked the training run carefully but trusted names afterwards. Choose and upload used checkpoint folders by name, with nothing to prove the files were the ones trained and scored. A retry under the same run name could write into an old run's folders. The upload reported the repo's latest commit, not its own. The fix: a fresh folder for every run, a fingerprint for every saved adapter, and checks of those fingerprints before scoring and before upload. Choose and upload also refuse a record that is not a finished, checked run.
+**Lesson:** a safety check must follow the result to its last use. Fingerprint every file a later stage will pick up, check it at each stage, and never let a name stand in for the files behind it.
+
+## 2026-11-08: Mistake: a check that only sees the calls that reach it can be skipped
+The trial's sampling check recorded what `generate` used, but only when `generate` went through the recorded function. A path that skipped it would have left an empty record that still looked clean. It also checked a block-list of word filters, so a filter nobody listed would pass. The fix: record at five points, compare their counts after every step, and use allow-lists (no word filters; only the length limit and the end token as stop rules).
+**Lesson:** for a check on a long, costly run, count the calls at every point it should see and stop when the counts differ. An empty record must be a failure, not a pass. Use allow-lists here too (LESSONS 2026-11-01).
+
+## 2026-11-08: Lesson: "invalid" meant two things
+The scorer calls an answer invalid only when it is not JSON or has an unknown label; a missing type or reason is a separate "format error". The training reward calls both invalid. The checkpoint rule used the scorer's narrow meaning, so a checkpoint whose answers dropped required fields could have won. D-057 now uses the reward's meaning for the choice.
+**Lesson:** when one word is used by two parts of a system, check that they mean the same thing before a rule depends on it.
+
+## 2026-11-08: Mistake: tests read the real home folder through an import
+Importing a Modal script makes Modal read `~/.modal.toml` at import time, before any test's own setup runs. The fix is `tests/conftest.py`, which pytest loads before any test module. It points Modal at an empty temporary file and removes Modal and Hugging Face settings. A test collects the suite with an unreadable home config to prove it.
+**Lesson:** for tests that import code with import-time side effects, set up the isolation in `conftest.py`, not inside a test.
+
+## 2026-11-08: Mistake: a cost estimate counted the checkpoint saves twice
+The plan took the trial's average step time, which already held both checkpoint saves, applied it to every step, and then added the saves again. The estimate came out $1.08 instead of about $1.02. **Lesson:** split a trial's time into its parts (one-off start-up, plain steps, saves) before projecting, and say which parts each number holds.
