@@ -269,3 +269,13 @@ Importing a Modal script makes Modal read `~/.modal.toml` at import time, before
 
 ## 2026-11-08: Mistake: a cost estimate counted the checkpoint saves twice
 The plan took the trial's average step time, which already held both checkpoint saves, applied it to every step, and then added the saves again. The estimate came out $1.08 instead of about $1.02. **Lesson:** split a trial's time into its parts (one-off start-up, plain steps, saves) before projecting, and say which parts each number holds.
+
+## 2026-11-09: Mistake: a check moved away from the thing it guarded
+The first trial's prompt check read `input_ids` and `attention_mask` at `generate` itself. The M2-05 fixes moved the prompt check to TRL's step, before TRL builds those tensors, and kept only class names for the stop rules. Every counter still added up, but a shortened prompt or another end token would have passed. Codex's re-review found it. The fix: compare the exact tokens under the mask at `generate` with TRL's rows, and read the stop rules' values (length limit and end tokens), not only their names.
+**Lesson:** when a check moves, it must still look at the last point before the effect, here the tensors the model receives. Counting calls proves a check ran, not that it looked at the right thing.
+
+## 2026-11-09: Lesson: test the job's own logic, not a fake of the whole job
+The upload test faked the whole upload job, so its recovery branch was never run; it accepted a repo with the right weights and the wrong adapter config. The fix moved the job's logic into a plain function with the outside service passed in, and the tests now run that real logic against a fake service. The same was done for the GPU job's wrappers. **Lesson:** keep remote jobs thin: a plain function holds the decisions, and the remote wrapper only connects it to the real service, so the tests reach every branch.
+
+## 2026-11-09: Lesson: publish a result and the record of it as one unit
+Choose wrote the answer folder and then the record as two steps. A failure between them left complete, paid-for answers that a retry could not use. The fix saves the whole choice inside the answer folder before the folder gets its name, and a retry checks and reuses it. **Lesson:** when two files must agree, write them as one unit, or make the retry able to prove the first one and finish the second.
