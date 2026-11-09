@@ -319,24 +319,40 @@ def test_every_setting_unsloth_would_fill_in_is_set_here():
 GOOD_CONFIG = {"do_sample": True, "num_beams": 1, "temperature": 1.0, "top_p": 1.0, "top_k": 0, "min_p": None,
                "typical_p": 1.0, "top_h": None, "repetition_penalty": 1.0, "max_new_tokens": 256,
                "num_return_sequences": 1}  # what the trial's 20 generate calls really used
-PROMPT_A, PROMPT_B = (1, 2, 3), (4, 5, 6)
+PROMPT_A, PROMPT_B, PROMPT_C = (1, 2, 3), (4, 5, 6), (1, 2, 3, 4, 5)  # C is longer, so it pads A
+
+
+POOL_ENDS = [151643, 151645]  # <|endoftext|> and <|im_end|>, the pinned base's generation_config.json
 
 
 def new_watch():
-    return grpo.GenerationWatch(grpo.sampling_settings(), {PROMPT_A: "tr-a", PROMPT_B: "tr-b"}, 8)
+    return grpo.GenerationWatch(grpo.sampling_settings(), {PROMPT_A: "tr-a", PROMPT_B: "tr-b", PROMPT_C: "tr-c"}, 8)
+
+
+def left_padded(rows, pad=0):
+    """Rows of different lengths as TRL hands them to generate: padded on the left, with their mask."""
+    width = max(len(r) for r in rows)
+    return ([[pad] * (width - len(r)) + list(r) for r in rows],
+            [[0] * (width - len(r)) + [1] * len(r) for r in rows])
+
+
+def good_stops(width):
+    return [{"name": "MaxLengthCriteria", "max_length": width + 256},
+            {"name": "EosTokenCriteria", "eos_token_id": list(POOL_ENDS)}]
 
 
 def one_step(watch, prompts=(PROMPT_A, PROMPT_B), skip=()):
     """Feed the watch one generation the way the GPU job does; `skip` leaves out recording points."""
+    rows = [list(p) for p in prompts for _ in range(8)]
+    ids, mask = left_padded(rows)
     if "entry" not in skip:
-        watch.entry()
+        watch.entry(ids, mask)
     if "config" not in skip:
         watch.config(GOOD_CONFIG)
     if "processors" not in skip:
         watch.processors([])
     if "stopping" not in skip:
-        watch.stopping(["MaxLengthCriteria", "EosTokenCriteria"])
-    rows = [list(p) for p in prompts for _ in range(8)]
+        watch.stopping(good_stops(len(ids[0])))
     if "trainer" not in skip:
         watch.trainer_call(rows, [[9]] * len(rows))
 
@@ -364,31 +380,175 @@ def test_any_word_filter_stops():
         new_watch().processors(["NoBadWordsLogitsProcessor"])
 
 
-@pytest.mark.parametrize("names", [["MaxLengthCriteria", "StopStringCriteria"], ["EosTokenCriteria"],
-                                   ["MaxLengthCriteria", "MaxTimeCriteria"]])
-def test_other_stop_rules_stop(names):
-    with pytest.raises(grpo.GenerationCheckError, match="stop rules"):
-        new_watch().stopping(names)
+def entered(rows):
+    """A watch that has seen generate get `rows`, as the GPU job feeds it."""
+    watch = new_watch()
+    watch.entry(*left_padded(rows))
+    return watch
+
+
+@pytest.mark.parametrize("rules, message", [
+    ([{"name": "MaxLengthCriteria", "max_length": 259}, {"name": "StopStringCriteria"}], "stop rules"),
+    ([{"name": "EosTokenCriteria", "eos_token_id": POOL_ENDS}], "stop rules"),
+    ([*good_stops(3), {"name": "MaxTimeCriteria"}], "stop rules"),
+    ([{"name": "MaxLengthCriteria", "max_length": 3 + 512}, good_stops(3)[1]], "stops at 515 tokens"),
+    ([good_stops(3)[0], {"name": "EosTokenCriteria", "eos_token_id": [151645]}], "end tokens"),
+    ([good_stops(3)[0], {"name": "EosTokenCriteria", "eos_token_id": [151645, 151643, 0]}], "end tokens"),
+])
+def test_other_stop_rules_stop(rules, message):
+    with pytest.raises(grpo.GenerationCheckError, match=message):
+        entered([list(PROMPT_A)] * 8).stopping(rules)
 
 
 def test_a_group_must_be_eight_copies_of_one_pool_prompt():
     mixed = [list(PROMPT_A)] * 7 + [list(PROMPT_B)] + [list(PROMPT_B)] * 8
     with pytest.raises(grpo.GenerationCheckError, match="mixes different prompts"):
-        new_watch().trainer_call(mixed, [[9]] * 16)
+        entered(mixed).trainer_call(mixed, [[9]] * 16)
     with pytest.raises(grpo.GenerationCheckError, match="not one of the pool's"):
-        new_watch().trainer_call([[7, 7]] * 8, [[9]] * 8)
+        entered([[7, 7]] * 8).trainer_call([[7, 7]] * 8, [[9]] * 8)
     with pytest.raises(grpo.GenerationCheckError, match="whole groups"):
-        new_watch().trainer_call([list(PROMPT_A)] * 12, [[9]] * 12)
+        entered([list(PROMPT_A)] * 12).trainer_call([list(PROMPT_A)] * 12, [[9]] * 12)
     with pytest.raises(grpo.GenerationCheckError, match="got 32 answers"):
-        new_watch().trainer_call([list(PROMPT_A)] * 16, [[9]] * 32)
+        entered([list(PROMPT_A)] * 16).trainer_call([list(PROMPT_A)] * 16, [[9]] * 32)
+    with pytest.raises(grpo.GenerationCheckError, match="longer than 256"):
+        entered([list(PROMPT_A)] * 8).trainer_call([list(PROMPT_A)] * 8, [[9] * 257] * 8)
 
 
-@pytest.mark.parametrize("skip", ["entry", "config", "processors", "stopping", "trainer"])
-def test_a_call_that_skips_any_check_stops_at_the_step_end(skip):
+@pytest.mark.parametrize("given, message", [
+    ([list(PROMPT_A)[1:]] * 8, "other tokens than TRL's prompts"),  # shortened on the way to generate
+    ([list(PROMPT_A)] * 7, "other tokens than TRL's prompts"),  # a row dropped
+    ([list(PROMPT_A) + [0]] * 8, "other tokens than TRL's prompts"),  # a token added
+])
+def test_generate_must_get_exactly_trls_prompts(given, message):
+    with pytest.raises(grpo.GenerationCheckError, match=message):
+        entered(given).trainer_call([list(PROMPT_A)] * 8, [[9]] * 8)
+
+
+def test_the_mask_must_be_one_unbroken_run_per_row():
+    rows = [list(PROMPT_A)] * 8
+    ids, mask = left_padded(rows)
+    holed = [[1, 0, 1]] * 8
+    with pytest.raises(grpo.GenerationCheckError, match="unbroken"):
+        new_watch().entry(ids, holed)
+    with pytest.raises(grpo.GenerationCheckError, match="no input_ids or no attention_mask"):
+        new_watch().entry(ids, None)
     watch = new_watch()
-    one_step(watch, skip={skip})
-    with pytest.raises(grpo.GenerationCheckError, match="went unseen"):
+    watch.entry(ids, mask)
+    with pytest.raises(grpo.GenerationCheckError, match="ran again"):
+        watch.entry(ids, mask)
+
+
+@pytest.mark.parametrize("skip, message", [
+    ("entry", "prompts None wide"),
+    ("config", "went unseen"), ("processors", "went unseen"), ("stopping", "went unseen"), ("trainer", "went unseen"),
+])
+def test_a_call_that_skips_any_check_stops_at_the_step_end(skip, message):
+    watch = new_watch()
+    with pytest.raises(grpo.GenerationCheckError, match=message):
+        one_step(watch, skip={skip})
         watch.check_counts(1, rewarded=16)
+
+
+# The real wrappers (wrap_generation, wrap_trainer_turn) around fakes shaped like transformers and TRL 1.15.0.
+
+class MaxLengthCriteria:
+    def __init__(self, max_length):
+        self.max_length = max_length
+
+
+class EosTokenCriteria:
+    def __init__(self, eos_token_id):
+        self.eos_token_id = eos_token_id
+
+
+def fake_mixin(stops=None, config=None):
+    """A fresh stand-in for GenerationMixin: generate sets itself up the way transformers does, then adds one token."""
+
+    class Mixin:
+        def generate(self, inputs=None, generation_config=None, **kwargs):
+            self.width = len(kwargs["input_ids"][0])
+            settings, _ = self._prepare_generation_config(generation_config, **kwargs)
+            self._get_logits_processor(settings)
+            self._get_stopping_criteria(settings, None)
+            return [row + [9] for row in kwargs["input_ids"]]
+
+        def _prepare_generation_config(self, generation_config, **kwargs):
+            from types import SimpleNamespace
+
+            return SimpleNamespace(**(config or GOOD_CONFIG)), kwargs
+
+        def _get_logits_processor(self, generation_config, *args, **kwargs):
+            return []
+
+        def _get_stopping_criteria(self, generation_config, *args, **kwargs):
+            return stops(self.width) if stops else [MaxLengthCriteria(self.width + 256), EosTokenCriteria([151645, 151643])]
+
+    return Mixin
+
+
+class FakeTrainer:
+    """TRL 1.15.0's regular text path (grpo_trainer.py:1769-1828): left-pad, generate, cut the prompt off."""
+
+    def __init__(self, model, change=None, calls=1):
+        self.model, self.change, self.calls = model, change, calls
+
+    def _generate_single_turn(self, prompt_ids, images, multimodal_fields, num_generations):
+        rows = self.change([list(p) for p in prompt_ids]) if self.change else [list(p) for p in prompt_ids]
+        ids, mask = left_padded(rows, pad=151654)
+        for _ in range(self.calls):
+            out = self.model.generate(input_ids=ids, attention_mask=mask, generation_config=None)
+        return [row[len(ids[0]):] for row in out], None
+
+
+def run_wrapped(mixin, prompts, change=None, calls=1):
+    watch = new_watch()
+    restore = grpo.wrap_generation(mixin, watch)
+    try:
+        trainer = FakeTrainer(mixin(), change, calls)
+        grpo.wrap_trainer_turn(trainer, watch)
+        trainer._generate_single_turn([list(p) for p in prompts for _ in range(8)], None, {}, 8)
+        watch.check_counts(1, rewarded=8 * len(prompts))
+    finally:
+        restore()
+    return watch
+
+
+def test_the_real_wrappers_pass_a_correct_step_and_come_back_out():
+    mixin = fake_mixin()
+    before = {name: getattr(mixin, name) for name in ("generate", "_get_stopping_criteria")}
+    watch = run_wrapped(mixin, (PROMPT_A, PROMPT_C))  # two prompts of different lengths, so one is padded
+    assert watch.summary()["calls"] == dict.fromkeys(("entry", "config", "processors", "stopping", "trainer"), 1)
+    assert {name: getattr(mixin, name) for name in before} == before
+
+
+@pytest.mark.parametrize("make, message", [
+    (lambda: (fake_mixin(), {"change": lambda rows: [r[1:] for r in rows]}), "other tokens than TRL's prompts"),
+    (lambda: (fake_mixin(), {"change": lambda rows: rows[::-1]}), "other tokens than TRL's prompts"),
+    (lambda: (fake_mixin(), {"calls": 2}), "ran again"),
+    (lambda: (fake_mixin(stops=lambda w: [MaxLengthCriteria(w + 256), EosTokenCriteria([151645])]), {}), "end tokens"),
+    (lambda: (fake_mixin(stops=lambda w: [MaxLengthCriteria(w + 256), EosTokenCriteria(7)]), {}), "end tokens"),
+    (lambda: (fake_mixin(stops=lambda w: [MaxLengthCriteria(w + 256)]), {}), "stop rules"),
+    (lambda: (fake_mixin(stops=lambda w: [MaxLengthCriteria(w + 100), EosTokenCriteria(POOL_ENDS)]), {}), "stops at"),
+    (lambda: (fake_mixin(config={**GOOD_CONFIG, "temperature": 0.7}), {}), "other sampling"),
+])
+def test_the_real_wrappers_stop_a_changed_step(make, message):
+    mixin, options = make()
+    with pytest.raises(grpo.GenerationCheckError, match=message):
+        run_wrapped(mixin, (PROMPT_A, PROMPT_C), **options)
+
+
+def test_stop_rule_reads_tensors_lists_and_single_ids():
+    class Tensor:
+        def __init__(self, value):
+            self.value = value
+
+        def tolist(self):
+            return self.value
+
+    assert grpo.stop_rule(EosTokenCriteria(Tensor([151645, 151643]))) == {"name": "EosTokenCriteria",
+                                                                           "eos_token_id": POOL_ENDS}
+    assert grpo.stop_rule(EosTokenCriteria(Tensor(151645)))["eos_token_id"] == [151645]
+    assert grpo.stop_rule(MaxLengthCriteria(300)) == {"name": "MaxLengthCriteria", "max_length": 300}
 
 
 def test_rewarded_answers_must_equal_written_ones():
@@ -611,7 +771,7 @@ def test_choose_answers_every_candidate_and_applies_the_rule(at_repo, tmp_path):
     assert meta["choice"]["chosen"] == "step-0"  # all right answers tie, so the earliest step
     assert "step-300" in meta["choice"]["out"]
     assert any("v1's exact format" in r for r in meta["choice"]["out"]["step-250"])
-    assert len(list((tmp_path / "valid").iterdir())) == len(names) * 2 * 3
+    assert len(list((tmp_path / "valid").iterdir())) == len(names) * 2 * 3 + 1  # and choice.json
     assert not [p for p in tmp_path.iterdir() if p.name.startswith(".")]
     with pytest.raises(SystemExit, match="already holds a choice"):
         grpo.run_stage("choose", Calls(), out=tmp_path)
@@ -670,6 +830,70 @@ def test_choose_writes_nothing_when_answers_are_missing_or_from_other_files(at_r
     assert (tmp_path / "train.meta.json").read_text() == before
     assert not (tmp_path / "valid").exists()
     grpo.run_stage("choose", Calls(), out=tmp_path)  # a clean retry works
+
+
+def interrupted_choose(tmp_path, monkeypatch):
+    """A choose whose every candidate answered, stopped by a failed write of train.meta.json after valid/ was named."""
+    finished_run(tmp_path)
+    real = grpo.replace_json
+
+    def fails_once(path, data):
+        monkeypatch.setattr(grpo, "replace_json", real)
+        raise OSError("the disk said no")
+
+    monkeypatch.setattr(grpo, "replace_json", fails_once)
+    with pytest.raises(OSError):
+        grpo.run_stage("choose", Calls(answers={"step-250": label_only}), out=tmp_path)
+    assert (tmp_path / "valid" / "choice.json").is_file()
+    assert "choice" not in json.loads((tmp_path / "train.meta.json").read_text())
+
+
+def test_a_choose_stopped_after_its_answers_were_saved_finishes_without_answering_again(at_repo, tmp_path,
+                                                                                        monkeypatch):
+    interrupted_choose(tmp_path / "a", monkeypatch)
+    calls = Calls()
+    meta = grpo.run_stage("choose", calls, out=tmp_path / "a")
+    assert calls.log == []  # no candidate answered again, nothing paid twice
+    assert meta["choice"]["recovered_from"] == "valid/choice.json"
+    finished_run(tmp_path / "b")
+    clean = grpo.run_stage("choose", Calls(answers={"step-250": label_only}), out=tmp_path / "b")
+    for key in ("chosen", "out", "counts", "valid_scores", "valid_sha256", "rule"):
+        assert meta["choice"][key] == clean["choice"][key], key
+    assert any("v1's exact format" in r for r in meta["choice"]["out"]["step-250"])
+
+
+def retag(valid, **changes):
+    path = valid / "choice.json"
+    path.write_text(json.dumps({**json.loads(path.read_text()), **changes}))
+
+
+@pytest.mark.parametrize("damage, message", [
+    (lambda valid: valid.joinpath("step-50.valid_hard.as_is.jsonl").write_text("{}\n"), "changed since it was saved"),
+    (lambda valid: valid.joinpath("extra.txt").write_text("x"), "other files"),
+    (lambda valid: valid.joinpath("choice.json").unlink(), "without choice.json"),
+    (lambda valid: retag(valid, run="train-other"), "from run train-other"),
+    (lambda valid: retag(valid, items_sha256="0" * 64), "answered other items"),
+])
+def test_saved_answers_that_do_not_check_out_are_never_used_or_overwritten(at_repo, tmp_path, monkeypatch, damage,
+                                                                           message):
+    interrupted_choose(tmp_path, monkeypatch)
+    damage(tmp_path / "valid")
+    before = sorted(p.name for p in (tmp_path / "valid").iterdir())
+    calls = Calls()
+    with pytest.raises(SystemExit, match=message):
+        grpo.run_stage("choose", calls, out=tmp_path)
+    assert calls.log == [] and sorted(p.name for p in (tmp_path / "valid").iterdir()) == before
+    assert "choice" not in json.loads((tmp_path / "train.meta.json").read_text())
+
+
+def test_saved_answers_that_no_longer_give_the_saved_choice_stop(at_repo, tmp_path, monkeypatch):
+    interrupted_choose(tmp_path, monkeypatch)
+    path = tmp_path / "valid" / "choice.json"
+    note = json.loads(path.read_text())
+    note["choice"]["chosen"] = "step-314"
+    path.write_text(json.dumps(note))
+    with pytest.raises(SystemExit, match="no longer give the saved choice"):
+        grpo.run_stage("choose", Calls(), out=tmp_path)
 
 
 def test_check_outcomes_wants_each_candidate_once():
@@ -754,12 +978,171 @@ def test_a_changed_setting_stops_choose_before_any_remote_call(at_repo, tmp_path
     assert calls.log == []
 
 
-def test_lfs_sha256_reads_both_listing_shapes():
-    from types import SimpleNamespace
+# ---------- the upload job itself, with a fake Hugging Face (finding 2 of the re-review) ----------
 
-    assert grpo.lfs_sha256(SimpleNamespace(lfs={"sha256": "x"})) == "x"
-    assert grpo.lfs_sha256(SimpleNamespace(lfs=SimpleNamespace(sha256="y"))) == "y"
-    assert grpo.lfs_sha256(SimpleNamespace(lfs=None)) is None
+class FakeHub:
+    """A fake Hugging Face with one repo: a list of commits, each the whole set of files at that commit."""
+
+    def __init__(self, tmp_path):
+        self.dir = tmp_path / "hub"
+        self.dir.mkdir(parents=True)
+        self.commits = []
+        self.private = True
+        self.fail_upload = 0
+        self.drop_on_upload = None
+        self.log = []
+
+    def add_commit(self, files):
+        held = dict(self.commits[-1][1]) if self.commits else {}
+        held.update(files)
+        sha = f"c{len(self.commits)}"
+        self.commits.append((sha, held))
+        return sha
+
+    def repo_exists(self, repo):
+        self.log.append("repo_exists")
+        return bool(self.commits)
+
+    def model_info(self, repo):
+        from types import SimpleNamespace
+
+        return SimpleNamespace(sha=self.commits[-1][0], private=self.private)
+
+    def create_repo(self, repo, repo_type, private, exist_ok):
+        self.log.append("create_repo")
+        assert private and not exist_ok and not self.commits
+        self.add_commit({".gitattributes": b"*.safetensors filter=lfs\n"})
+
+    def upload_folder(self, folder_path, repo_id, repo_type, commit_message):
+        from types import SimpleNamespace
+
+        self.log.append("upload_folder")
+        if self.fail_upload:
+            self.fail_upload -= 1
+            raise ConnectionError("the connection dropped")
+        files = {p.name: p.read_bytes() for p in Path(folder_path).iterdir() if p.name != self.drop_on_upload}
+        sha = self.add_commit(files)
+        return SimpleNamespace(oid=sha, commit_url=f"https://huggingface.co/test/commit/{sha}")
+
+    def list_repo_files(self, repo, revision, repo_type):
+        return sorted(dict(self.commits)[revision])
+
+    def fetch(self, name, revision):
+        path = self.dir / f"{revision}-{name}"
+        path.write_bytes(dict(self.commits)[revision][name])
+        return path
+
+
+@pytest.fixture
+def adapter(tmp_path):
+    folder = tmp_path / "run" / "step-150"
+    folder.mkdir(parents=True)
+    (folder / "adapter_config.json").write_text('{"r": 32}')
+    (folder / "adapter_model.safetensors").write_bytes(b"weights-150")
+    (folder / "tokenizer.json").write_text("{}")
+    return folder
+
+
+META_TEXT = '{"run": "train-x", "choice": {"chosen": "step-150"}}\n'
+
+
+def send(hub, folder, note=None, **options):
+    """Run the real upload job's logic; returns (result, the note it saved last)."""
+    saved = {"note": note}
+    result = grpo.upload_checked(hub, hub.fetch, folder, "train-x", "step-150", META_TEXT, grpo.files_sha256(folder),
+                                 note, lambda data: saved.update(note=data), **options)
+    return result, saved["note"]
+
+
+def held_now(hub):
+    return {n: b for n, b in hub.commits[-1][1].items() if n != ".gitattributes"}
+
+
+def test_a_fresh_upload_reserves_the_repo_and_records_its_own_commit(adapter, tmp_path):
+    hub = FakeHub(tmp_path)
+    result, note = send(hub, adapter)
+    assert (result["commit"], result["recovered"], result["resumed"]) == ("c1", False, False)
+    assert note["first_commit"] == "c0" and note["run"] == "train-x" and note["checkpoint"] == "step-150"
+    assert held_now(hub) == {**{p.name: p.read_bytes() for p in adapter.iterdir()},
+                             "train.meta.json": META_TEXT.encode()}
+
+
+def test_an_upload_that_failed_after_making_the_repo_resumes_into_it(adapter, tmp_path):
+    hub = FakeHub(tmp_path)
+    hub.fail_upload = 1
+    saved = {}
+    with pytest.raises(ConnectionError):
+        grpo.upload_checked(hub, hub.fetch, adapter, "train-x", "step-150", META_TEXT, grpo.files_sha256(adapter),
+                            None, lambda data: saved.update(note=data))
+    assert saved["note"]["first_commit"] == "c0" and len(hub.commits) == 1  # an empty repo, reserved by this try
+    result, _ = send(hub, adapter, note=saved["note"])
+    assert (result["commit"], result["recovered"], result["resumed"]) == ("c1", False, True)
+    # Without this run's note, the same empty repo is refused: nothing proves this upload made it.
+    other = FakeHub(tmp_path / "other")
+    other.add_commit({".gitattributes": b""})
+    with pytest.raises(SystemExit, match="not an empty repo this upload made"):
+        send(other, adapter)
+    with pytest.raises(SystemExit, match="cannot prove it made it"):
+        send(other, adapter, note={**saved["note"], "first_commit": None})
+    assert "upload_folder" not in other.log
+
+
+def test_a_finished_upload_whose_local_record_was_lost_is_recovered(adapter, tmp_path):
+    hub = FakeHub(tmp_path)
+    send(hub, adapter)
+    result, _ = send(hub, adapter)  # the files and the record are proven at the newest commit, note or not
+    assert (result["commit"], result["recovered"]) == ("c1", True)
+    assert hub.log.count("upload_folder") == 1
+
+
+@pytest.mark.parametrize("change", [
+    {"adapter_config.json": b'{"r": 16}'},  # the same weights with another adapter config
+    {"train.meta.json": b'{"run": "train-y"}\n'},  # another run's or another choice's record
+    {"README.md": b"extra"},  # a file that was never checked
+])
+def test_a_repo_that_differs_in_any_file_is_refused(adapter, tmp_path, change):
+    hub = FakeHub(tmp_path)
+    send(hub, adapter)
+    hub.add_commit(change)
+    with pytest.raises(SystemExit, match="does not hold exactly this adapter and record"):
+        send(hub, adapter)
+    hub2 = FakeHub(tmp_path / "two")
+    hub2.add_commit({".gitattributes": b"", **{p.name: p.read_bytes() for p in adapter.iterdir()}, **change})
+    with pytest.raises(SystemExit, match="does not hold exactly"):
+        send(hub2, adapter)
+    assert hub.log.count("upload_folder") == 1 and "upload_folder" not in hub2.log
+
+
+def test_the_upload_refuses_a_public_repo_a_changed_copy_and_a_short_commit(adapter, tmp_path):
+    hub = FakeHub(tmp_path)
+    hub.add_commit({".gitattributes": b""})
+    hub.private = False
+    with pytest.raises(SystemExit, match="is public"):
+        send(hub, adapter)
+
+    def bad_copy(source, target, dirs_exist_ok):
+        import shutil
+
+        shutil.copytree(source, target, dirs_exist_ok=dirs_exist_ok)
+        Path(target, "adapter_model.safetensors").write_bytes(b"other weights")
+
+    fresh = FakeHub(tmp_path / "fresh")
+    with pytest.raises(SystemExit, match="copy made for the upload differs"):
+        send(fresh, adapter, copy=bad_copy)
+    assert "upload_folder" not in fresh.log
+    short = FakeHub(tmp_path / "short")
+    short.drop_on_upload = "tokenizer.json"
+    with pytest.raises(SystemExit, match="does not hold exactly the files sent"):
+        send(short, adapter)
+
+
+def test_the_upload_stops_before_hugging_face_when_the_folder_changed(adapter, tmp_path):
+    hub = FakeHub(tmp_path)
+    expected = grpo.files_sha256(adapter)
+    (adapter / "adapter_model.safetensors").write_bytes(b"changed")
+    with pytest.raises(SystemExit, match="differ from the recorded fingerprints"):
+        grpo.upload_checked(hub, hub.fetch, adapter, "train-x", "step-150", META_TEXT, expected, None, print)
+    assert hub.log == []
 
 
 # ---------- the frozen test files ----------

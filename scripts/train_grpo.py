@@ -16,9 +16,10 @@ above the group's average.
 - **Sampling matches the pool:** 8 answers a pair, temperature 1.0, top_p 1.0,
   top_k off, no min_p, 256 new tokens at most, the same chat template options.
   The GPU job watches every `generate` call and stops at the first one that
-  differs: other settings, any word filter, any stop rule but the length limit
-  and the end token, more than one answer per prompt copy, a group that is not
-  8 copies of one pool prompt, or counts that do not add up.
+  differs: other settings, any word filter, any stop rule but the 256-token
+  limit and the pool's two end tokens, prompt tokens that are not exactly TRL's
+  prompts, more than one answer per prompt copy, a group that is not 8 copies
+  of one pool prompt, or counts that do not add up.
 - **Every run gets a fresh folder** on the volume, and every saved adapter is
   fingerprinted; choose and upload check those fingerprints before they use it.
 - **Settings:** in GRPO below, each with its source in results/m2/grpo/settings.md.
@@ -126,6 +127,10 @@ LOG_KEYS = (*REQUIRED_STEP_KEYS, "reward_std", "completions/clipped_ratio", "rew
 # Allow-lists for what `generate` may add (D-052's rule: say what may pass, stop everything else).
 ALLOWED_PROCESSORS = ()  # no word filter at all: the pool sampled from the model's plain chances
 ALLOWED_STOPPING = ("MaxLengthCriteria", "EosTokenCriteria")  # the 256-token limit and the end token
+# The end tokens the pool's generate stopped on: judge.generate passes none of its own, so they are the pinned
+# base's generation_config.json ([151645, 151643]: <|im_end|>, <|endoftext|>). TRL 1.15.0 passes the model's list
+# plus the tokenizer's end token (<|im_end|>, already in it), grpo_trainer.py:398-405.
+POOL_EOS_IDS = (151643, 151645)
 BATCH_SIZE = 16  # greedy answering, as scripts/train.py
 L4_PER_SECOND = 0.000222  # https://modal.com/pricing (as in the M2 SPEC)
 
@@ -361,11 +366,46 @@ def watch_warnings(steps, watch=WATCH):
     return found
 
 
+def token_rows(x):
+    """A tensor (or a plain list) of token rows as lists of ints."""
+    return x.tolist() if hasattr(x, "tolist") else [list(row) for row in x]
+
+
+def unpadded_rows(input_ids, attention_mask):
+    """The tokens the model really attends to, row by row, and the padded width.
+
+    Each row's mask must be one unbroken run of 1s (padding on one side only), so the kept
+    tokens are exactly the prompt, in order."""
+    ids, mask = token_rows(input_ids), token_rows(attention_mask)
+    if len(ids) != len(mask) or any(len(i) != len(m) for i, m in zip(ids, mask)):
+        raise GenerationCheckError("generate's input_ids and attention_mask differ in shape")
+    rows = []
+    for row_ids, row_mask in zip(ids, mask):
+        kept = [k for k, m in enumerate(row_mask) if m == 1]
+        if any(m not in (0, 1) for m in row_mask) or not kept or kept != list(range(kept[0], kept[-1] + 1)):
+            raise GenerationCheckError("generate's attention mask is not one unbroken run per row")
+        rows.append(tuple(row_ids[k] for k in kept))
+    return rows, len(ids[0]) if ids else 0
+
+
+def stop_rule(criterion):
+    """One stop rule as plain data: its class name, and its length limit or end tokens if it has them."""
+    rule = {"name": type(criterion).__name__}
+    if hasattr(criterion, "max_length"):
+        rule["max_length"] = int(criterion.max_length)
+    if hasattr(criterion, "eos_token_id"):
+        ends = criterion.eos_token_id
+        ends = ends.tolist() if hasattr(ends, "tolist") else ends
+        rule["eos_token_id"] = sorted(ends if isinstance(ends, (list, tuple)) else [ends])
+    return rule
+
+
 class GenerationWatch:
     """Checks every answer-writing call of a GRPO run against the pool's sampling (no GPU libraries here).
 
-    The GPU job feeds it from five places: `generate` itself (`entry`), the settings `generate` ends
-    up with (`config`), the word filters and stop rules it adds (`processors`, `stopping`), and TRL's
+    The GPU job feeds it from five places (`wrap_generation`, `wrap_trainer_turn`): `generate`
+    itself with the exact tokens and mask the model gets (`entry`), the settings `generate` ends up
+    with (`config`), the word filters and stop rules it adds (`processors`, `stopping`), and TRL's
     own generation step, which sees the prompts and answers (`trainer_call`). Each check stops at
     once. `check_counts` makes sure no call went past a check unseen.
     """
@@ -378,13 +418,21 @@ class GenerationWatch:
         self.configs, self.processor_sets, self.stopping_sets = {}, {}, {}
         self.groups = {}  # pool id -> how many groups of 8 answers it got
         self.answers = 0
+        self.pending = None  # the unpadded prompt rows generate got, until TRL's step returns its answers
+        self.width = None  # their padded width, which the length limit counts from
 
     @staticmethod
     def _count(table, key):
         table[key] = table.get(key, 0) + 1
 
-    def entry(self):
+    def entry(self, input_ids, attention_mask):
+        """`generate`'s own input: the token rows and their mask, as the model gets them."""
         self.calls["entry"] += 1
+        if self.pending is not None:
+            raise GenerationCheckError("generate ran again before TRL's step returned the last answers")
+        if input_ids is None or attention_mask is None:
+            raise GenerationCheckError("generate got no input_ids or no attention_mask; its prompts cannot be checked")
+        self.pending, self.width = unpadded_rows(input_ids, attention_mask)
 
     def config(self, used):
         """`used`: the final settings of one generate call (keys of judge.generate.SAMPLING and a few more)."""
@@ -410,18 +458,34 @@ class GenerationWatch:
         if extra:
             raise GenerationCheckError(f"generate changed the word chances with {extra}")
 
-    def stopping(self, names):
+    def stopping(self, rules):
+        """`rules`: the stop rules generate added, as `stop_rule` gives them."""
         self.calls["stopping"] += 1
-        self._count(self.stopping_sets, repr(tuple(names)))
-        extra = [n for n in names if n not in ALLOWED_STOPPING]
-        if extra or "MaxLengthCriteria" not in names:
-            raise GenerationCheckError(f"generate used other stop rules than the pool: {list(names)}")
+        names = [r["name"] for r in rules]
+        self._count(self.stopping_sets, repr([(r["name"], r.get("eos_token_id")) for r in rules]))
+        if sorted(names) != sorted(ALLOWED_STOPPING):
+            raise GenerationCheckError(f"generate used other stop rules than the pool: {names}")
+        limit = next(r for r in rules if r["name"] == "MaxLengthCriteria").get("max_length")
+        if self.width is None or limit != self.width + self.asked["max_new_tokens"]:
+            raise GenerationCheckError(f"generate stops at {limit} tokens for prompts {self.width} wide, not after "
+                                       f"{self.asked['max_new_tokens']} new tokens")
+        ends = next(r for r in rules if r["name"] == "EosTokenCriteria").get("eos_token_id")
+        if sorted(ends or []) != sorted(POOL_EOS_IDS):
+            raise GenerationCheckError(f"generate stops on the end tokens {ends}, the pool on {list(POOL_EOS_IDS)}")
 
     def trainer_call(self, prompt_ids, completion_ids):
         """TRL's prompts (unpadded token ids, one row per answer) and the answers it got back."""
         self.calls["trainer"] += 1
+        given, self.pending = self.pending, None
+        if given is None:
+            raise GenerationCheckError("TRL's step returned answers without a checked generate call")
+        if given != [tuple(p) for p in prompt_ids]:
+            raise GenerationCheckError("generate got other tokens than TRL's prompts (changed, cut, reordered or "
+                                       "a different number of rows)")
         if len(completion_ids) != len(prompt_ids):
             raise GenerationCheckError(f"{len(prompt_ids)} prompt copies got {len(completion_ids)} answers")
+        if any(len(c) > self.asked["max_new_tokens"] for c in completion_ids):
+            raise GenerationCheckError(f"an answer is longer than {self.asked['max_new_tokens']} tokens")
         if not prompt_ids or len(prompt_ids) % self.group:
             raise GenerationCheckError(f"{len(prompt_ids)} prompt copies is not whole groups of {self.group}")
         for start in range(0, len(prompt_ids), self.group):
@@ -447,6 +511,59 @@ class GenerationWatch:
                 "stopping_criteria": [{"criteria": k, "calls": n} for k, n in self.stopping_sets.items()],
                 "groups_per_pool_pair": dict(sorted(self.groups.items())),
                 "distinct_pool_prompts_seen": len(self.groups)}
+
+
+def wrap_generation(mixin, watch):
+    """Put the watch into `generate` and the three steps it sets itself up with, on `mixin`
+    (transformers' GenerationMixin on the GPU, a fake in the tests). Returns a function that takes it out."""
+    import functools
+
+    names = ("generate", "_prepare_generation_config", "_get_logits_processor", "_get_stopping_criteria")
+    originals = {name: getattr(mixin, name) for name in names}
+
+    @functools.wraps(originals["generate"])
+    def checked_generate(self, *args, **kwargs):
+        ids = kwargs["input_ids"] if "input_ids" in kwargs else (args[0] if args else kwargs.get("inputs"))
+        watch.entry(ids, kwargs.get("attention_mask"))
+        return originals["generate"](self, *args, **kwargs)
+
+    def checked_prepare(self, generation_config, **kwargs):
+        config, model_kwargs = originals["_prepare_generation_config"](self, generation_config, **kwargs)
+        watch.config({k: getattr(config, k, None) for k in (
+            "do_sample", "num_beams", "temperature", "top_p", "top_k", "min_p", "typical_p", "top_h",
+            "repetition_penalty", "max_new_tokens", "num_return_sequences")})
+        return config, model_kwargs
+
+    def checked_processors(self, generation_config, *args, **kwargs):
+        processors = originals["_get_logits_processor"](self, generation_config, *args, **kwargs)
+        watch.processors([type(p).__name__ for p in processors])
+        return processors
+
+    def checked_stopping(self, generation_config, *args, **kwargs):
+        criteria = originals["_get_stopping_criteria"](self, generation_config, *args, **kwargs)
+        watch.stopping([stop_rule(c) for c in criteria])
+        return criteria
+
+    for name, function in zip(names, (checked_generate, checked_prepare, checked_processors, checked_stopping)):
+        setattr(mixin, name, function)
+
+    def restore():
+        for name, function in originals.items():
+            setattr(mixin, name, function)
+
+    return restore
+
+
+def wrap_trainer_turn(trainer, watch):
+    """Put the watch after TRL's generation step, which holds the prompts it asked for and the answers."""
+    original = trainer._generate_single_turn
+
+    def checked_turn(prompt_ids, *args, **kwargs):
+        completion_ids, logprobs = original(prompt_ids, *args, **kwargs)
+        watch.trainer_call(prompt_ids, completion_ids)
+        return completion_ids, logprobs
+
+    trainer._generate_single_turn = checked_turn
 
 
 def coverage_problems(groups, pool_ids, steps, each=None):
@@ -643,13 +760,121 @@ def check_outcomes(outcomes, expected_files, item_ids):
                              "fingerprints; nothing written")
 
 
+def split_answers(results):
+    """One candidate's answers by validation file and version: {file: {version: [{"id", "raw"}]}}."""
+    from judge.score import VERSIONS
+
+    answers = {f: {v: [] for v in VERSIONS} for f in VALID_FILES}
+    for line in results:
+        f, version, pair_id = line["id"].split("/", 2)
+        answers[f][version].append({"id": pair_id, "raw": line["raw"]})
+    return answers
+
+
+def score_choice(answers_by, valid, steps):
+    """Counts, scores and the D-056 choice from every candidate's answers."""
+    from judge.score import VERSIONS, score_versions
+
+    candidates, scores = {}, {}
+    for n, answers in answers_by.items():
+        candidates[n] = {"step": steps[n],
+                         **{f: {v: counts(valid[f], answers[f][v]) for v in VERSIONS} for f in VALID_FILES}}
+        scores[n] = {f: score_versions(valid[f], answers[f]) for f in VALID_FILES}
+    chosen, out = choose_checkpoint(candidates)
+    return {"rule": CHOICE_RULE, "chosen": chosen, "out": out, "counts": candidates, "valid_scores": scores}
+
+
+def answer_file(name, f, version):
+    return f"{name}.{f}.{version}.jsonl"
+
+
+def items_sha256(item_ids):
+    import hashlib
+
+    return hashlib.sha256("\n".join(item_ids).encode("utf-8")).hexdigest()
+
+
+def publish_choice(out, valid_dir, answers_by, choice, run, expected_files, item_ids):
+    """Write every answer file and the whole choice (choice.json) into a scratch folder, then give it the name
+    `valid/` in one move. So `valid/` either does not exist or holds a finished choice that a retry can check."""
+    import json
+    import os
+    import tempfile
+    from pathlib import Path
+
+    scratch = Path(tempfile.mkdtemp(prefix=".valid-", dir=out))
+    shas = {}
+    for n, answers in answers_by.items():
+        for f, by_version in answers.items():
+            for version, lines in by_version.items():
+                name = answer_file(n, f, version)
+                with open(scratch / name, "x", encoding="utf-8") as handle:
+                    for line in lines:
+                        handle.write(json.dumps(line, ensure_ascii=False) + "\n")
+                shas[name] = file_sha256(scratch / name)
+    write_new_json(scratch / "choice.json", {"run": run, "expected_files": expected_files,
+                                             "reward_sha256": REWARD_SHA256, "items_sha256": items_sha256(item_ids),
+                                             "answer_files": shas, "choice": choice})
+    os.rename(scratch, valid_dir)
+
+
+def saved_choice(valid_dir, run, expected_files, valid, valid_shas, item_ids, steps):
+    """The choice an earlier choose saved in `valid/`, checked again from its answer files, or a STOP.
+
+    It must be this run's, for the same checkpoint fingerprints, validation files, items and reward; every
+    answer file must keep its bytes; and the answers must still give the saved counts, scores and choice."""
+    import json
+
+    from judge.score import VERSIONS
+
+    keep = "it is never overwritten. Move it aside to answer again (that pays for the answers again)."
+    path = valid_dir / "choice.json"
+    if not path.is_file():
+        raise SystemExit(f"STOP: {valid_dir} exists without choice.json; {keep}")
+    note = json.loads(path.read_text(encoding="utf-8"))
+    choice = note.get("choice") or {}
+    wanted_files = sorted(answer_file(n, f, v) for n in expected_files for f in VALID_FILES for v in VERSIONS)
+    problems = []
+    if note.get("run") != run:
+        problems.append(f"it is from run {note.get('run')}, not {run}")
+    if note.get("expected_files") != expected_files:
+        problems.append("its checkpoint fingerprints differ from the training record's")
+    if choice.get("valid_sha256") != valid_shas:
+        problems.append("the validation files changed since it was saved")
+    if note.get("reward_sha256") != REWARD_SHA256:
+        problems.append("it was saved with another reward")
+    if note.get("items_sha256") != items_sha256(item_ids):
+        problems.append("it answered other items")
+    if sorted(note.get("answer_files") or {}) != wanted_files:
+        problems.append("it does not list one answer file per candidate, file and version")
+    if sorted(p.name for p in valid_dir.iterdir()) != sorted([*wanted_files, "choice.json"]):
+        problems.append("the folder holds other files than the ones it lists")
+    if not problems:
+        problems += [f"{name} changed since it was saved" for name, sha in note["answer_files"].items()
+                     if file_sha256(valid_dir / name) != sha]
+    if problems:
+        raise SystemExit(f"STOP: {valid_dir} does not hold a finished choice of this run; {keep}\n  "
+                         + "\n  ".join(problems))
+    answers_by = {}
+    for n in expected_files:
+        answers_by[n] = {f: {v: [json.loads(line) for line in
+                                 (valid_dir / answer_file(n, f, v)).read_text(encoding="utf-8").splitlines()]
+                             for v in VERSIONS} for f in VALID_FILES}
+        ids = [f"{f}/{v}/{a['id']}" for f in VALID_FILES for v in VERSIONS for a in answers_by[n][f][v]]
+        if sorted(ids) != sorted(item_ids):
+            raise SystemExit(f"STOP: {valid_dir} does not hold each item once for {n}; {keep}")
+    again = json.loads(json.dumps(score_choice(answers_by, valid, steps)))
+    if again != {k: choice.get(k) for k in again}:
+        raise SystemExit(f"STOP: the saved answers in {valid_dir} no longer give the saved choice; {keep}")
+    return {**choice, "recovered_from": "valid/choice.json"}
+
+
 # ---------- GPU side ----------
 
 @app.function(image=image, gpu="L4", timeout=3 * 3600, secrets=[modal.Secret.from_name("huggingface")],
               volumes={RUNS: volume})
 def train(run, rows, max_steps, save_every, each_pair_groups):
     """Load v1 as trainable, train with GRPO, save fingerprinted adapters. Returns a plain record."""
-    import functools
     import hashlib
     import os
     import time
@@ -681,35 +906,7 @@ def train(run, rows, max_steps, save_every, each_pair_groups):
 
     # 1. The answer-writing checks go in before the model loads, so Unsloth's own copy of generate is the checked one.
     watch = GenerationWatch(sampling_settings(), {}, GRPO["num_generations"])
-    originals = {name: getattr(GenerationMixin, name) for name in
-                 ("generate", "_prepare_generation_config", "_get_logits_processor", "_get_stopping_criteria")}
-
-    @functools.wraps(originals["generate"])
-    def checked_generate(self, *args, **kwargs):
-        watch.entry()
-        return originals["generate"](self, *args, **kwargs)
-
-    def checked_prepare(self, generation_config, **kwargs):
-        config, model_kwargs = originals["_prepare_generation_config"](self, generation_config, **kwargs)
-        watch.config({k: getattr(config, k, None) for k in (
-            "do_sample", "num_beams", "temperature", "top_p", "top_k", "min_p", "typical_p", "top_h",
-            "repetition_penalty", "max_new_tokens", "num_return_sequences")})
-        return config, model_kwargs
-
-    def checked_processors(self, generation_config, *args, **kwargs):
-        processors = originals["_get_logits_processor"](self, generation_config, *args, **kwargs)
-        watch.processors([type(p).__name__ for p in processors])
-        return processors
-
-    def checked_stopping(self, generation_config, *args, **kwargs):
-        criteria = originals["_get_stopping_criteria"](self, generation_config, *args, **kwargs)
-        watch.stopping([type(c).__name__ for c in criteria])
-        return criteria
-
-    GenerationMixin.generate = checked_generate
-    GenerationMixin._prepare_generation_config = checked_prepare
-    GenerationMixin._get_logits_processor = checked_processors
-    GenerationMixin._get_stopping_criteria = checked_stopping
+    restore_generation = wrap_generation(GenerationMixin, watch)
 
     # 2. The start point: the pinned base, then v1's adapter at its pinned commit, trainable,
     #    then Unsloth's own patch (the three steps Unsloth's loader runs for an adapter, with the base pinned).
@@ -808,14 +1005,7 @@ def train(run, rows, max_steps, save_every, each_pair_groups):
         train_dataset=datasets.Dataset.from_list(rows),
         callbacks=[Watch(), SaveCheckpoints()],
     )
-    original_turn = trainer._generate_single_turn
-
-    def checked_turn(prompt_ids, *args, **kwargs):
-        completion_ids, logprobs = original_turn(prompt_ids, *args, **kwargs)
-        watch.trainer_call(prompt_ids, completion_ids)
-        return completion_ids, logprobs
-
-    trainer._generate_single_turn = checked_turn
+    wrap_trainer_turn(trainer, watch)
     resolved = {k: getattr(trainer.args, k, None) for k in (
         *settings, "max_steps", "warmup_steps", "seed", "bf16", "fp16", "generation_batch_size",
         "steps_per_generation", "gradient_checkpointing", "chat_template_kwargs", "generation_kwargs", "delta",
@@ -828,8 +1018,7 @@ def train(run, rows, max_steps, save_every, each_pair_groups):
     clock["started"] = time.time()
     result = trainer.train()
     trained = time.time()
-    for name, function in originals.items():
-        setattr(GenerationMixin, name, function)
+    restore_generation()
     log_file.close()
 
     # 5. After the run: does everything add up?
@@ -925,52 +1114,116 @@ def answer(run, checkpoint, items, expected_files):
     }
 
 
-def lfs_sha256(sibling):
-    """The SHA-256 Hugging Face stores for a large file in a repo listing, or None."""
-    lfs = getattr(sibling, "lfs", None)
-    if isinstance(lfs, dict):
-        return lfs.get("sha256")
-    return getattr(lfs, "sha256", None)
+UPLOAD_ALSO_IN_REPO = (".gitattributes",)  # Hugging Face puts this file into every new repo by itself
 
 
-@app.function(image=image, timeout=900, secrets=[modal.Secret.from_name("huggingface")], volumes={RUNS: volume})
-def upload(run, checkpoint, meta_text, expected_files):
-    """Upload one checked adapter folder plus train.meta.json to a new private repo. Token from HF_TOKEN.
+def file_sha256(path):
+    import hashlib
 
-    The folder's files must match their recorded fingerprints. The repo must not exist yet, so a retry
-    can never replace another model. One case is a recovery, not a replacement: an earlier try of this
-    same upload finished on Hugging Face (same adapter file), and only the local record is missing.
+    digest = hashlib.sha256()
+    with open(path, "rb") as handle:
+        for block in iter(lambda: handle.read(1 << 20), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def upload_wanted(meta_text, expected_files):
+    """The exact files the repo must hold, by SHA-256: the checked adapter folder and the run and choice record."""
+    import hashlib
+
+    return {**expected_files, "train.meta.json": hashlib.sha256(meta_text.encode("utf-8")).hexdigest()}
+
+
+def repo_files(api, fetch, revision):
+    """{file: SHA-256} of every file in HF_REPO at one commit, but the one Hugging Face adds by itself.
+    `fetch(name, revision)` downloads one file at that commit and returns its local path."""
+    names = api.list_repo_files(HF_REPO, revision=revision, repo_type="model")
+    return {n: file_sha256(fetch(n, revision)) for n in sorted(names) if n not in UPLOAD_ALSO_IN_REPO}
+
+
+def upload_checked(api, fetch, folder_in, run, checkpoint, meta_text, expected_files, note, save_note, copy=None):
+    """What the upload job does, with Hugging Face (`api`, `fetch`) and its note on the volume passed in.
+
+    `note` is what an earlier try of this run's upload saved (or None); `save_note` saves a new one.
+    - No repo yet: save a note that this try reserves the repo, make it private, add its first commit to
+      the note, then upload a checked copy.
+    - The repo holds exactly the wanted files (adapter folder and record) at its newest commit: an earlier
+      try finished and only the local record is missing. Recorded as recovered, at that commit.
+    - The repo is empty, and the note shows this upload made it and nothing came after: an earlier try
+      stopped after making it. The upload resumes into it.
+    - Anything else stops, and nothing is uploaded.
+    After an upload, the commit it returned must hold exactly the wanted files.
     """
     import shutil
     import tempfile
     from pathlib import Path
 
-    from huggingface_hub import HfApi
-
-    volume.reload()
-    folder_in = f"{RUNS}/{run}/{checkpoint}"
     if files_sha256(folder_in) != expected_files:
         raise SystemExit(f"STOP: {run}/{checkpoint} files differ from the recorded fingerprints; nothing uploaded")
-    api = HfApi()
+    wanted = upload_wanted(meta_text, expected_files)
+    mine = {"repo": HF_REPO, "run": run, "checkpoint": checkpoint, "files": wanted}
+    resumed = False
     if api.repo_exists(HF_REPO):
-        info = api.model_info(HF_REPO, files_metadata=True)
-        there = {s.rfilename: lfs_sha256(s) for s in info.siblings}
-        if info.private and there.get("adapter_model.safetensors") == expected_files["adapter_model.safetensors"]:
-            return {"repo": HF_REPO, "commit": info.sha, "private": info.private, "files": sorted(there),
-                    "recovered": True}
-        raise SystemExit(f"STOP: {HF_REPO} already exists and does not hold this adapter; nothing uploaded")
-    api.create_repo(HF_REPO, repo_type="model", private=True, exist_ok=False)
+        info = api.model_info(HF_REPO)
+        if not info.private:
+            raise SystemExit(f"STOP: {HF_REPO} exists and is public; nothing uploaded")
+        held = repo_files(api, fetch, info.sha)
+        if held == wanted:
+            return {"repo": HF_REPO, "commit": info.sha, "private": True, "files": sorted(wanted),
+                    "recovered": True, "resumed": False}
+        if held or note != {**mine, "first_commit": info.sha}:
+            unproven = not held and note == {**mine, "first_commit": None}
+            raise SystemExit(
+                f"STOP: {HF_REPO} already exists; nothing uploaded. "
+                + ("It is empty and this run's note shows it was being made, but its first commit was never noted, "
+                   "so this script cannot prove it made it. Delete the empty repo on Hugging Face, then retry."
+                   if unproven else
+                   "It does not hold exactly this adapter and record at its newest commit, and it is not an empty "
+                   "repo this upload made."))
+        resumed = True
+    else:
+        save_note({**mine, "first_commit": None})
+        api.create_repo(HF_REPO, repo_type="model", private=True, exist_ok=False)
+        save_note({**mine, "first_commit": api.model_info(HF_REPO).sha})
     with tempfile.TemporaryDirectory() as folder:
-        shutil.copytree(folder_in, folder, dirs_exist_ok=True)
+        (copy or shutil.copytree)(folder_in, folder, dirs_exist_ok=True)
         (Path(folder) / "train.meta.json").write_text(meta_text, encoding="utf-8")
-        files = sorted(p.name for p in Path(folder).iterdir())
+        if files_sha256(folder) != wanted:
+            raise SystemExit("STOP: the copy made for the upload differs from the checked files; nothing uploaded")
         commit = api.upload_folder(folder_path=folder, repo_id=HF_REPO, repo_type="model",
                                    commit_message=f"M2 Step 5: GRPO LoRA adapter {run}/{checkpoint}")
-    info = api.model_info(HF_REPO)
-    if not info.private:
+    if repo_files(api, fetch, commit.oid) != wanted:
+        raise SystemExit(f"STOP: commit {commit.oid} of {HF_REPO} does not hold exactly the files sent")
+    if not api.model_info(HF_REPO).private:
         raise SystemExit(f"STOP: {HF_REPO} is public after the upload; make it private now")
-    return {"repo": HF_REPO, "commit": commit.oid, "commit_url": commit.commit_url, "private": info.private,
-            "files": files, "recovered": False}
+    return {"repo": HF_REPO, "commit": commit.oid, "commit_url": commit.commit_url, "private": True,
+            "files": sorted(wanted), "recovered": False, "resumed": resumed}
+
+
+@app.function(image=image, timeout=900, secrets=[modal.Secret.from_name("huggingface")], volumes={RUNS: volume})
+def upload(run, checkpoint, meta_text, expected_files):
+    """Upload one checked adapter folder plus train.meta.json to a new private repo (`upload_checked`).
+    Token from HF_TOKEN. The upload's note lives next to the run on the volume: <run>/hf-upload.json."""
+    import json
+    import tempfile
+    from pathlib import Path
+
+    from huggingface_hub import HfApi, hf_hub_download
+
+    volume.reload()
+    note_path = Path(f"{RUNS}/{run}/hf-upload.json")
+    note = json.loads(note_path.read_text(encoding="utf-8")) if note_path.exists() else None
+
+    def save_note(data):
+        replace_json(note_path, data)
+        volume.commit()
+
+    with tempfile.TemporaryDirectory() as cache:
+        def fetch(name, revision):
+            return hf_hub_download(HF_REPO, name, revision=revision, repo_type="model", cache_dir=cache)
+
+        return upload_checked(HfApi(), fetch, f"{RUNS}/{run}/{checkpoint}", run, checkpoint, meta_text,
+                              expected_files, note, save_note)
 
 
 def modal_calls():
@@ -995,14 +1248,12 @@ def read_valid():
 
 def run_stage(stage, calls, out=OUT, state_path="STATE.md", train_meta_path=TRAIN_META):
     import json
-    import os
-    import tempfile
     import time
     from datetime import datetime
     from pathlib import Path
 
     from judge.prompt import prompt_sha256
-    from judge.score import VERSIONS, format_problem, parse_answer, score_versions
+    from judge.score import format_problem, parse_answer
 
     if stage not in ("trial", "train", "choose", "upload"):
         raise SystemExit(f"unknown stage {stage!r}; choose trial, train, choose or upload")
@@ -1080,41 +1331,28 @@ def run_stage(stage, calls, out=OUT, state_path="STATE.md", train_meta_path=TRAI
         if meta.get("choice"):
             raise SystemExit("STOP: train.meta.json already holds a choice; nothing ran")
         valid_dir = out / "valid"
-        check_free([valid_dir])
         items = valid_items(valid)
+        item_ids = [i["id"] for i in items]
         names = list(expected_files)
-        start = time.time()
-        outcomes = calls.answer_many([(meta["run"], n, items, expected_files[n]) for n in names])
-        wall = round(time.time() - start, 1)
-        check_outcomes(outcomes, expected_files, [i["id"] for i in items])
         steps = {"step-0": 0, **{s["name"]: s["step"] for s in meta["saved"]}}
-        candidates, scores, runs, answers_by = {}, {}, {}, {}
-        for outcome in outcomes:
-            n = outcome["checkpoint"]
-            answers = {f: {v: [] for v in VERSIONS} for f in VALID_FILES}
-            for line in outcome.pop("results"):
-                f, version, pair_id = line["id"].split("/", 2)
-                answers[f][version].append({"id": pair_id, "raw": line["raw"]})
-            candidates[n] = {"step": steps[n],
-                             **{f: {v: counts(valid[f], answers[f][v]) for v in VERSIONS} for f in VALID_FILES}}
-            scores[n] = {f: score_versions(valid[f], answers[f]) for f in VALID_FILES}
-            runs[n] = outcome
-            answers_by[n] = answers
-        chosen, out_reasons = choose_checkpoint(candidates)
-        # Everything is checked: write the answers in a scratch folder, then give it its name in one move.
-        scratch = Path(tempfile.mkdtemp(prefix=".valid-", dir=out))
-        for n, answers in answers_by.items():
-            for f, by_version in answers.items():
-                for version, lines in by_version.items():
-                    with open(scratch / f"{n}.{f}.{version}.jsonl", "x", encoding="utf-8") as handle:
-                        for line in lines:
-                            handle.write(json.dumps(line, ensure_ascii=False) + "\n")
-        os.rename(scratch, valid_dir)
-        meta["choice"] = {"rule": CHOICE_RULE, "chosen": chosen, "out": out_reasons, "counts": candidates,
-                          "valid_scores": scores, "answer_runs": runs, "valid_sha256": valid_shas,
-                          "gpu_seconds": round(sum(r["load_seconds"] + r["answer_seconds"] for r in runs.values()), 1),
-                          "wall_seconds": wall, "modal_app_id": calls.app_id()}
+        if valid_dir.exists():
+            # An earlier choose saved every answer and its choice, then stopped before the record was written.
+            choice = saved_choice(valid_dir, meta["run"], expected_files, valid, valid_shas, item_ids, steps)
+            print("valid/ holds a finished, checked choice from an earlier try; no candidate answered again")
+        else:
+            start = time.time()
+            outcomes = calls.answer_many([(meta["run"], n, items, expected_files[n]) for n in names])
+            wall = round(time.time() - start, 1)
+            check_outcomes(outcomes, expected_files, item_ids)
+            answers_by = {o["checkpoint"]: split_answers(o.pop("results")) for o in outcomes}
+            runs = {o["checkpoint"]: o for o in outcomes}
+            choice = {**score_choice(answers_by, valid, steps), "answer_runs": runs, "valid_sha256": valid_shas,
+                      "gpu_seconds": round(sum(r["load_seconds"] + r["answer_seconds"] for r in runs.values()), 1),
+                      "wall_seconds": wall, "modal_app_id": calls.app_id()}
+            publish_choice(out, valid_dir, answers_by, choice, meta["run"], expected_files, item_ids)
+        meta["choice"] = choice
         replace_json(meta_path, meta)
+        chosen, out_reasons, scores = choice["chosen"], choice["out"], choice["valid_scores"]
         for n in names:
             cells = ", ".join(f"{f} {v} P {m['precision'] or 0:.2f} R {m['recall'] or 0:.2f} inv {m['invalid']}"
                               for f in VALID_FILES for v, m in scores[n][f].items())
@@ -1135,7 +1373,8 @@ def run_stage(stage, calls, out=OUT, state_path="STATE.md", train_meta_path=TRAI
     meta["upload"] = {"checkpoint": chosen, "run": meta["run"], "modal_app_id": calls.app_id(), **result}
     replace_json(meta_path, meta)
     print(f"uploaded {chosen} to https://huggingface.co/{result['repo']} (private: {result['private']}), "
-          f"commit {result['commit']}{' (recovered an earlier finished upload)' if result.get('recovered') else ''}")
+          f"commit {result['commit']}{' (recovered an earlier finished upload)' if result.get('recovered') else ''}"
+          f"{' (resumed into the empty repo an earlier try made)' if result.get('resumed') else ''}")
     return meta
 
 
