@@ -7439,5 +7439,11 @@
     ],
     "recovered": false,
     "resumed": false
-  }
+  },
+  "billed_usd": {
+    "train": 0.97415166,
+    "choose": 0.56574588,
+    "upload": 0.00944505
+  },
+  "billed_total_usd": 1.5493
 }

@@ -4,7 +4,7 @@ Read this first in every session.
 
 - **Phase:** 2, reinforcement learning (RL).
 - **Active milestone:** M2, judge v2 with reinforcement learning (GRPO), measured on a new hard test set (D-036). Spec: `milestones/M2-rl-judge/SPEC.md`. M1 (done 2026-10-23): `milestones/M1-contradiction-judge/SPEC.md`.
-- **Updated:** 2026-11-09 (D-057 confirmed, full run approved (D-059); full run starting)
+- **Updated:** 2026-11-09 (M2 Step 5 done: full GRPO run, step-250 chosen and uploaded; next: M2 Step 6)
 
 ## Done
 - 2026-10-21: Step 1. Repo created with control files (Claude, from Cowork).
@@ -57,8 +57,9 @@ Read this first in every session.
 - 2026-11-09: Codex's narrow review (`reviews/M2-05d-codex-review.md`, at `cfd104d`, scope D-058): CHANGES REQUIRED, one must-fix; the padding and billing fixes passed. A writer landing right after the repo is made could become the upload's parent commit. Fixed (Claude Code, branch `m2-05-grpo`, pushed, not merged; `reviews/M2-05d-fixes.md`): the upload now checks that the new repo's first commit holds nothing but `.gitattributes` before reserving it. 650 tests pass; the new test fails with the check turned off. No GPU use; no file under `src/`, no saved pool file and no saved trial result changed.
 - 2026-11-09: Codex's narrow review `reviews/M2-05e-codex-review.md` at `f8fc51c`: **ACCEPT** (one known limit: a change to `.gitattributes` alone can pass the first-look check; it overwrites nothing). Five review rounds in all; every fix held. Branch `m2-05-grpo` pushed, not merged; the full run has not started.
 - 2026-11-09: Claude in Cowork confirmed D-057 (the format gate; step 0 passes it: 0 of v1's 1,197 saved answers rejected, recounted on disk). Elias approved the full training run, about $1.02 (D-059: "yes, training run approved."). Prompt `prompts/M2-05f-record-and-run.md`.
+- 2026-11-09: **M2 Step 5 done** (Claude Code, prompt `prompts/M2-05f-record-and-run.md`, branch `m2-05-grpo`, pushed, not merged). Full GRPO run (D-059): 314 steps in 71.3 min, all run checks passed on the GPU, every pool pair exactly twice, 7 invalid of 5,024 answers, 34 unclear warnings (peak 19.4%). Choice (D-056, D-057): **step-250**; worst case on valid-hard precision 0.894 to 0.957, recall 0.872 to 0.957; on M1 valid precision 0.977 to 0.957, recall 0.913 to 0.957; step-100 out on M1 precision; no invalid answers. Uploaded to the private repo `eskora/m2-contradiction-judge-qwen3-4b-grpo-lora`, commit `0964d031`. Billed $1.55: training $0.97, choice $0.57, upload $0.01. Validation only; neither frozen test file was opened. Summary: `results/m2/grpo/full-run-summary.md`.
 ## Next single action
-Claude Code: run `--stage train` (D-059), then `choose` and `upload` (each under $1, D-019), then the bill; record each in STATE and `runs/RUNLOG.md`. If a check stops the training run, stop and report; a second try needs Elias's yes.
+Claude in Cowork: write the prompt for M2 Step 6 (score v2, step-250, once on the frozen hard test set and the M1 test set, three versions each, against D-041's done-means). Also decide whether `m2-05-grpo` merges to main first.
 
 ## Frozen files
 - `data/m1/test.jsonl`, 200 pairs, SHA-256 `6e2a08323f445477f9600e371f1074ad3e2b41ef97d7072d6734ef481f6e574b`, frozen 2026-10-22. Never edit it and never train on it.
