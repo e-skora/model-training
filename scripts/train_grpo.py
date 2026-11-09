@@ -1203,6 +1203,10 @@ def upload_checked(api, fetch, folder_in, run, checkpoint, meta_text, expected_f
         save_note({**mine, "first_commit": None})
         api.create_repo(HF_REPO, repo_type="model", private=True, exist_ok=False)
         checked = api.model_info(HF_REPO).sha
+        found = repo_files(api, fetch, checked)  # another writer may have landed before this first look
+        if found:
+            raise SystemExit(f"STOP: {HF_REPO} already held {sorted(found)} at its first look ({checked}); someone "
+                             "else wrote to it, so it is not this upload's to use. Nothing uploaded.")
         save_note({**mine, "first_commit": checked})
     with tempfile.TemporaryDirectory() as folder:
         (copy or shutil.copytree)(folder_in, folder, dirs_exist_ok=True)

@@ -1001,6 +1001,7 @@ class FakeHub:
         self.drop_on_upload = None
         self.public_on_create = False
         self.intrude = None  # another writer's files, landing just before this upload's commit
+        self.after_create = None  # another writer's files, landing right after the repo is made
         self.log = []
 
     def add_commit(self, files):
@@ -1024,6 +1025,8 @@ class FakeHub:
         assert private and not exist_ok and not self.commits
         self.add_commit({".gitattributes": b"*.safetensors filter=lfs\n"})
         self.private = not self.public_on_create
+        if self.after_create:
+            self.add_commit(self.after_create)
 
     def upload_folder(self, folder_path, repo_id, repo_type, commit_message, parent_commit=None):
         from types import SimpleNamespace
@@ -1171,6 +1174,20 @@ def test_another_writer_between_the_check_and_the_commit_is_never_overwritten(ad
     with pytest.raises(RuntimeError, match="parent commit"):
         send(late, adapter)
     assert late.commits[-1][1]["adapter_config.json"] == other["adapter_config.json"]
+
+
+def test_a_writer_right_after_the_repo_is_made_is_never_overwritten(adapter, tmp_path):
+    other = {"adapter_config.json": b'{"written": "by someone else"}'}
+    hub = FakeHub(tmp_path)
+    hub.after_create = other  # lands before this upload's first look at its new repo
+    saved = {}
+    with pytest.raises(SystemExit, match="already held \\['adapter_config.json'\\] at its first look"):
+        grpo.upload_checked(hub, hub.fetch, adapter, "train-x", "step-150", META_TEXT, grpo.files_sha256(adapter),
+                            None, lambda data: saved.update(note=data))
+    assert "upload_folder" not in hub.log and hub.commits[-1][1]["adapter_config.json"] == other["adapter_config.json"]
+    assert saved["note"]["first_commit"] is None  # never reserved, so a retry cannot resume into it either
+    with pytest.raises(SystemExit, match="already exists"):
+        send(hub, adapter, note=saved["note"])
 
 
 def test_a_repo_that_is_public_after_it_was_made_gets_nothing(adapter, tmp_path):
