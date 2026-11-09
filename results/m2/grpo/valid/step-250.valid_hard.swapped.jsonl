@@ -1,0 +1,97 @@
+{"id": "va2-001", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"The newer memory says a lighter carbon bike took over the steel one.\"}"}
+{"id": "va2-002", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both say Bulelani's home is at street level, and one adds that it has no stairs.\"}"}
+{"id": "va2-004", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Ghanim has no phone, the other that he checks train times on his own mobile.\"}"}
+{"id": "va2-005", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Tülay supports a football club and goes to every home game, the other that she has never been to a match.\"}"}
+{"id": "va2-006", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Eleven pounds is about five kilos, so both give the same weight.\"}"}
+{"id": "va2-007", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"The newer memory says Vardan stores his skis in the garage now.\"}"}
+{"id": "va2-008", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Samat can have won a bronze in judo at fifteen and one in wrestling at seventeen.\"}"}
+{"id": "va2-009", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"The newer memory says Porfirio gave his goats away to a petting farm.\"}"}
+{"id": "va2-010", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Sketching at the café and in the garden are separate habits of Viorica's.\"}"}
+{"id": "va2-011", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"One is about Fatos oiling his bicycle chain, the other about his workshop door hinges, two separate jobs.\"}"}
+{"id": "va2-012", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both say Radim keeps bonsai trees on his balcony, and one adds that it is the balcony of the flat he moved into.\"}"}
+{"id": "va2-013", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Eydís has a twin brother, the other that she is an only child.\"}"}
+{"id": "va2-014", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Bereket quit the café job at the start of university, the other that he kept it through.\"}"}
+{"id": "va2-015", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"The newer memory says Claudionor bought his own house and adopted a cat.\"}"}
+{"id": "va2-016", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"The derby match in March is one of the home matches Arivazhagan has been to.\"}"}
+{"id": "va2-017", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both describe Iosefa's sleep, and eleven to half past six is about seven and a half hours.\"}"}
+{"id": "va2-018", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Dumebi mows his own lawn every other weekend, the other that he has never mowed a lawn.\"}"}
+{"id": "va2-019", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both say Emyr went to a rugby match in the spring, and one adds that he lost his voice from shouting.\"}"}
+{"id": "va2-020", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"The newer memory says the building manager asked and Itto now keeps her bicycle in the hallway.\"}"}
+{"id": "va2-021", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"Being a bridesmaid at two weddings is a wedding Órlaith has never been to.\"}"}
+{"id": "va2-022", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"One is about Rumen's easel, the other about his armchair, both by the north window.\"}"}
+{"id": "va2-023", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Bahati has never been late to lectures, the other that his tutor has warned him about being late.\"}"}
+{"id": "va2-024", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"The newer memory says Etela gave up the allotment and grows beans in tubs on her balcony.\"}"}
+{"id": "va2-025", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Aytan drives her teammates to matches, the other that she cannot drive.\"}"}
+{"id": "va2-026", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both say Malte has a flea market stall, and one adds that it sells records and is on the first Sunday.\"}"}
+{"id": "va2-027", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"They give different desk numbers for Mwajuma in the same office.\"}"}
+{"id": "va2-028", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both are about Friederike's jam in the allotment show, and one adds that it is gooseberry jam and that she won a prize.\"}"}
+{"id": "va2-029", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"A quarter of a century is 25 years, and a silver wedding is 25 years, so both describe the same marriage.\"}"}
+{"id": "va2-030", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"One is about Nevena's lace at the show, the other about her plum jam, two separate entries.\"}"}
+{"id": "va2-031", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both say Josaia walks his dog twice a day, and one adds when.\"}"}
+{"id": "va2-032", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Yaqoub has never left his home country, the other that his passport is full of stamps from travels across continents.\"}"}
+{"id": "va2-033", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"The newer memory says Fulbert's club membership lapsed.\"}"}
+{"id": "va2-034", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"They give different years for Zakariye's architecture course.\"}"}
+{"id": "va2-035", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Elshan's flat has one bedroom, the other three.\"}"}
+{"id": "va2-036", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"They give different ages for when Tijjani moved to the house on the hill.\"}"}
+{"id": "va2-037", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"One is about Kalaivani's alarm tone, the other about her ringtone, and both can be sitars.\"}"}
+{"id": "va2-038", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"They give different distances for Mahpiya's Saturday charity walk.\"}"}
+{"id": "va2-039", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"They give different homes for Kisik, the bakery flat and the lakeside cabin.\"}"}
+{"id": "va2-040", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"They name different breakfasts as Rusli's favourite.\"}"}
+{"id": "va2-041", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"One is about Mher's climbing shoes, the other about his swimming things, both kept in a blue bag by the door.\"}"}
+{"id": "va2-042", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Illapa gave up pigeons when he moved to the city, the other that he began keeping them there.\"}"}
+{"id": "va2-043", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"They name different main sports for Nana, fencing and archery.\"}"}
+{"id": "va2-044", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Rusul spent her childhood in a fishing village, the other that she has only ever lived in one city.\"}"}
+{"id": "va2-045", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"One is about Kaiwen's Saturday vintage browsing, the other about Sunday browsing at a riverside market, two separate habits.\"}"}
+{"id": "va2-046", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"One is about Seedy's front lawn, the other about the back lawn, so both can be true.\"}"}
+{"id": "va2-047", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"The newer memory says Hasini's favourite singer is a young indie folk singer.\"}"}
+{"id": "va2-049", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Tafsut has two spaniels, the other that her only pet is a cat.\"}"}
+{"id": "va2-050", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"About 30 kilos is roughly 66 pounds, so both give the same weight.\"}"}
+{"id": "va2-051", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Randeep read the novel before the film, the other that he saw the film before reading it.\"}"}
+{"id": "va2-052", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Pegah's only harness is a blue one she bought, the other that her only one is a red hand-me-down.\"}"}
+{"id": "va2-053", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Wingyan wears a wool jumper her aunt knitted, the other that she avoids wool.\"}"}
+{"id": "va2-054", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"The newer memory says Winta rides her scooter to class these days.\"}"}
+{"id": "va2-055", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Hjördís bakes rhubarb pie at village fairs, the other that she has never baked anything.\"}"}
+{"id": "va2-056", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Suyin wears size 38, the other that she takes a size 39 in every shoe.\"}"}
+{"id": "va2-057", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both say Batsirai has one beagle dog, and one adds its age.\"}"}
+{"id": "va2-058", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"The newer memory says the bowl was replaced by a filtered tank.\"}"}
+{"id": "va2-059", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"They give different colours for Bibiana's front door, deep blue and deep green.\"}"}
+{"id": "va2-060", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both say Nirupama has been learning the tabla since January, and one adds the lesson times.\"}"}
+{"id": "va2-062", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Biret eats smoked salmon, the other that she never eats fish.\"}"}
+{"id": "va2-063", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Sketching at the railway station and in the botanical garden are separate habits of Sujan's.\"}"}
+{"id": "va2-064", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"The newer memory says Sopheap goes to bed around ten now that his job starts at six.\"}"}
+{"id": "va2-065", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Booking a cabin for her own trip and for her parents are separate facts.\"}"}
+{"id": "va2-066", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"They give different evenings for Sitsofe's one weekly pottery class.\"}"}
+{"id": "va2-067", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both say Kunsang knits her own socks, and one adds that they are wool and knitted on winter evenings.\"}"}
+{"id": "va2-068", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Ruiha can have an older brother who lives abroad, and she is an only child by birth.\"}"}
+{"id": "va2-069", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"They describe different sofas for Nyima, one red velvet and the other mustard linen.\"}"}
+{"id": "va2-070", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Hemlata's tea has milk and two sugars, the other that it is black with no sugar.\"}"}
+{"id": "va2-071", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"They give different wake-up times for Vavrinec's birdwatching.\"}"}
+{"id": "va2-072", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"They describe Heino's dog as different breeds with no change mentioned.\"}"}
+{"id": "va2-073", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Dancing tango downtown and dancing folk at a mill are separate habits of Jarmila's.\"}"}
+{"id": "va2-074", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both say Lwando lives very close to the office, and one adds that it is a two-minute walk.\"}"}
+{"id": "va2-075", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Mozah has a licence, the other that she is the only family member without one.\"}"}
+{"id": "va2-076", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"The newer memory says Leonie gets a vegetable box instead of shopping weekly.\"}"}
+{"id": "va2-077", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"They give different nights for Yatlong's weekly laundry.\"}"}
+{"id": "va2-078", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Citlalmina orders beef tacos at the stall, the other that she is vegetarian and has not eaten meat for years.\"}"}
+{"id": "va2-079", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Remedios works the daytime counter at the bakery, the other that she only works nights there.\"}"}
+{"id": "va2-080", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both describe Chizoba's car, and one adds its make and that it has been hers since university.\"}"}
+{"id": "va2-081", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Dafydd has never been to a music festival, the other that he has the wristband from one.\"}"}
+{"id": "va2-082", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Phindile has three older brothers, the other one brother.\"}"}
+{"id": "va2-083", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Harshvardhan has two daughters, the other one daughter and one son.\"}"}
+{"id": "va2-084", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Playing with colleagues on Tuesdays and with his old team on Sundays are separate floorball games.\"}"}
+{"id": "va2-085", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"They give different months for Atoq's yearly shearing.\"}"}
+{"id": "va2-086", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"They give different places where Teodora keeps her sketchbooks since the roof leak.\"}"}
+{"id": "va2-087", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"The newer memory says Kielo sold her bus pass and cycles to work.\"}"}
+{"id": "va2-088", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Metok's hair is dyed copper, the other that she has never dyed it.\"}"}
+{"id": "va2-089", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Tuesdays at the head office and Thursdays at the branch are separate workdays for Tsehay.\"}"}
+{"id": "va2-090", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Café chess on Tuesdays and online chess on Sundays are separate habits.\"}"}
+{"id": "va2-091", "raw": "{\"label\": \"non_contradiction\", \"type\": \"update\", \"reason\": \"The newer memory says Wafae sold the red car and bought a people carrier.\"}"}
+{"id": "va2-092", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Weekday porridge and Sunday pancakes are different breakfasts for Kärt.\"}"}
+{"id": "va2-093", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Vilius replaced his fridge with a bigger one, the other with a smaller one.\"}"}
+{"id": "va2-094", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Aklilu eats lunch at noon every day, the other at two in the afternoon.\"}"}
+{"id": "va2-095", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both say Kanykei boulders with friends, and one adds who and when.\"}"}
+{"id": "va2-096", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"They give different places for Essam's childhood.\"}"}
+{"id": "va2-097", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Gijs is treasurer of the chess club, the other that he is in no club.\"}"}
+{"id": "va2-098", "raw": "{\"label\": \"non_contradiction\", \"type\": \"compatible_detail\", \"reason\": \"Both say Juçara has been learning the accordion, and one adds who teaches and when.\"}"}
+{"id": "va2-099", "raw": "{\"label\": \"contradiction\", \"type\": null, \"reason\": \"One says Makafui moved into a basement flat, the other into a top-floor flat.\"}"}
+{"id": "va2-100", "raw": "{\"label\": \"non_contradiction\", \"type\": \"merely_related\", \"reason\": \"Woojin can wear a suit on Mondays and jeans on Fridays, so the two facts do not clash.\"}"}
