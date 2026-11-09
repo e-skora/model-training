@@ -55,6 +55,13 @@ Two more facts from the same file. `max_prompt_length` no longer exists in TRL 1
 - After every step, the counts at all five places must agree, and the reward must have scored every answer.
 - A full run must give every pool pair exactly 2 groups.
 
+**Tightened after Codex's re-review (2026-11-09, `reviews/M2-05b-fixes.md`):**
+- `generate` must get exactly TRL's prompt tokens, in order: each row's tokens under its attention mask must equal TRL's row. TRL 1.15.0 left-pads the prompts and passes `input_ids` and `attention_mask` by name (`trl/trainer/grpo_trainer.py` lines 1769 to 1812); Unsloth's own `generate` passes them on unchanged (`unsloth/models/llama.py` lines 2732 to 2775).
+- The length limit must be the padded prompt width plus 256 (transformers 5.17.0 sets it so, `generation/utils.py` line 1863).
+- The end tokens must be the pool's: 151645 and 151643 (`<|im_end|>`, `<|endoftext|>`). The pool's `generate` passed none of its own, so it used the pinned base's `generation_config.json` (revision `7744afa8...`). TRL builds its list from the same file and adds the tokenizer's end token, which is already in it (lines 398 to 405).
+- One `generate` call per TRL generation step, and no answer longer than 256 tokens.
+- All of this is read from the pinned source and the base's files, not yet seen on a GPU. If the real call differs, the run stops during step 1 (about $0.05).
+
 **Unsloth's other changes that matter here** (`unsloth/models/rl.py` lines 3238 to 3296, 3434 to 3491): Unsloth replaces some of TRL's defaults with its own, for example learning rate 5e-5, weight decay 0.001, warmup 0.1, `per_device_train_batch_size` 4 and `gradient_accumulation_steps` 2. With `loss_type` "dapo" it also turns `mask_truncated_completions` on by itself (lines 3474 to 3476), and sets `epsilon_high` to 0.28 when it is empty (lines 3477 to 3479). So the script sets every one of these values itself, and the record saves the values the trainer really ended with (`resolved_config`).
 
 **Found in the trial (2026-11-04):** the first script left `epsilon_high` empty, and the trial's log says "Unsloth: The DAPO paper recommends `epsilon_high = 0.28` - we will set it." So the trial ran with 0.28, which its `trial.meta.json` does not show under `grpo` (the full log is `trial-output.log`, line 36). The script now sets 0.28 itself, so the full run uses the trial's value and its record shows it. A test checks that every value Unsloth would fill in is set in the script.

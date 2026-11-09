@@ -33,7 +33,7 @@ All seconds below come from `trial.meta.json`, except the answer rate, which com
 - At Modal's L4 price ($0.000222 a second, https://modal.com/pricing): 4,255 x $0.000222 = **$0.94**.
 - Modal also bills CPU and memory. On the M2-04 pool run, the bill was about 8% above the L4 seconds alone ($0.80 against $0.74, `runs/RUNLOG.md`). With that: **about $1.02**.
 - This is an estimate from 20 steps on 40 of the 314 pairs. Longer prompts or answers make it slower; the trial's real bill was $0.18 for 10.5 L4 minutes, about 27% above the GPU seconds alone ($0.1775 against 629 s x $0.000222 = $0.14), because it also paid for a second machine starting up. So $0.95 to $1.10 is the honest range.
-- The fixes after Codex's review add a few counts and comparisons per step on the CPU. They are not measured on a GPU yet; they are too small to change these numbers. The first step checks every one of them, so a problem stops the run within about 3 minutes (about $0.05).
+- The fixes after Codex's two reviews add a few counts and comparisons per step on the CPU. They are not measured on a GPU yet; they are too small to change these numbers. When each check can stop the run, and what it would have cost by then, is in "When each check stops the run" below.
 - The trial's 40 pairs were a random draw from the pool, so the real run should be close. Longer prompts or answers would make it slower, and a run that stops early would make it cheaper.
 - The function's timeout is 3 hours, well above 75 minutes. A checkpoint is saved to the volume every 50 steps, so a crash keeps what was saved.
 - Peak memory in the trial was 7.49 GiB of the L4's 22 GiB, for 40 of the 314 pairs. That is room to spare in the trial; a longer prompt in the full run uses a little more.
@@ -44,6 +44,22 @@ All seconds below come from `trial.meta.json`, except the answer rate, which com
 - Per candidate: 124 + 247 = about 371 s. For 8: about 2,970 s, which is **50 L4 minutes**, about $0.66 before CPU and memory, **about $0.71** with them.
 - The 8 run on 8 machines at once, so the wait is about 7 minutes once GPUs are free.
 
+## When each check stops the run
+
+The costs are GPU seconds at the L4 rate, from the trial's timings (load about 67 s, first step 174 s, later steps about 12.65 s). Modal's CPU and memory add about 8%.
+
+| When | What is checked | Spent by then |
+|---|---|---|
+| Before any GPU starts (on the Mac) | pool, reward, v1 and validation fingerprints; a fresh run name | nothing |
+| At load, before step 1 | v1's adapter settings, its trainable weights by name and by value | about 1 minute, about $0.02 |
+| During step 1's answer writing, at once | the sampling settings, no word filter, the 256-token limit and the pool's two end tokens, exactly TRL's prompt tokens into `generate`, 8 copies of one pool prompt per group, one answer per copy | about 4 minutes, about $0.05 |
+| End of step 1 | every recording point saw one call; the reward scored every answer | about 4 minutes, about $0.05 |
+| End of step 2 | step 1 was logged with every watch metric | about 4.2 minutes, about $0.06 |
+| Any later step | a logged step lacks a watch metric | up to the full run |
+| After all 314 steps | every pool pair got exactly 2 groups; every step logged; every checkpoint saved | the full run, about $1.02 |
+
+A failed after-run check does not stop the GPU early: the run has already been paid. The record then says its checks failed, and choose refuses it. The coverage check cannot run earlier, because a pair's second group can come in the second epoch's last step. Reward-hacking warnings never stop the run; they are lines to read.
+
 ## What to look at in the full run's log
 
 - **The reward-hacking watch** writes a WARNING line when, over the last 20 steps, invalid answers pass 2%, one label passes 85%, or `unclear` passes 15%. In the trial, `unclear` was 14.4% over 20 steps, and 8% of the pool's right answers are `unclear`. So an `unclear` warning can come without any hacking. It means "look at the answers", not "stop".
@@ -52,4 +68,4 @@ All seconds below come from `trial.meta.json`, except the answer rate, which com
 
 ## Recommendation
 
-Run it as planned: 314 steps, about $1.02. The only way to land surely under $1 is fewer steps (about 305), just above Unsloth's 300-step minimum, for a saving of about 3 cents.
+Run it as planned: 314 steps, about $1.02. Fewer steps (about 305, just above Unsloth's 300-step minimum) would bring the estimate to about $0.99, a saving of about 3 cents. That is still an estimate, not a cap: nothing stops a run when it reaches $1, and the honest range is wider than the 3 cents. It would also leave some pool pairs with one group instead of two.
