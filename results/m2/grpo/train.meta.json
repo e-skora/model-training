@@ -7419,5 +7419,25 @@
     "gpu_seconds": 2254.1,
     "wall_seconds": 2111.3,
     "modal_app_id": "ap-BP8D3XSVMaYujR9EyLQJbt"
+  },
+  "upload": {
+    "checkpoint": "step-250",
+    "run": "train-20261109T103829Z-771d0b",
+    "modal_app_id": "ap-CMSGAfLl7V0AqTF2dJmSEQ",
+    "repo": "eskora/m2-contradiction-judge-qwen3-4b-grpo-lora",
+    "commit": "0964d031073408707397ce7438fc7df7b8a772c0",
+    "commit_url": "https://huggingface.co/eskora/m2-contradiction-judge-qwen3-4b-grpo-lora/commit/0964d031073408707397ce7438fc7df7b8a772c0",
+    "private": true,
+    "files": [
+      "README.md",
+      "adapter_config.json",
+      "adapter_model.safetensors",
+      "chat_template.jinja",
+      "tokenizer.json",
+      "tokenizer_config.json",
+      "train.meta.json"
+    ],
+    "recovered": false,
+    "resumed": false
   }
 }
