@@ -255,14 +255,20 @@ The blind review of M2 Step 3 (`reviews/M2-03-blind-review.md`) agreed with 199 
 - **If step 0 is picked,** RL did not help on validation. The hard test set is not run; the result is reported plainly (D-041) and Elias decides what next.
 - `data/m2/test-hard.jsonl` and `data/m1/test.jsonl` are never used to choose.
 
-### D-057 (2026-11-08, Default, waiting for Claude in Cowork to confirm): The checkpoint choice also needs v1's exact answer format
+### D-057 (2026-11-08, Default, confirmed by Claude in Cowork 2026-11-09): The checkpoint choice also needs v1's exact answer format
 - **Why:** Codex's M2-05 review (`reviews/M2-05-codex-review.md`, finding 4) showed that D-056's "any invalid answer" used the scorer's narrow count (not JSON, unknown label, repeated field). An answer with the right label but no `type` or `reason` is a format error there, not invalid, so it still scored. The training reward calls that same answer invalid (-2.0). A checkpoint that dropped the fields could win and break Style A (D-040: v1's answer format exactly).
 - **The rule (coded in `scripts/train_grpo.py`, `choose_checkpoint`):** a candidate is out if any answer, in either validation file and any version, is one the reward's reader `judge.reward.read_answer` rejects: invalid by the scorer, or a missing or wrong `type`, or no `reason` text. This is D-056's "out" rule read with the reward's own definition of a valid answer. The scorer's published counts (invalid, format errors) do not change (D-024).
 - **What stays as D-056 says:** the candidates, the 0.02 and 0.03 limits, worst case over three versions, and the pick order.
-- **Open:** Claude in Cowork confirms this reading before the full run, as Codex asked.
+- **Open:** Confirmed. `choose_checkpoint` counts rejected answers with the reward's own reader (`judge.reward.read_answer`), so the choice and the training reward agree on what a valid answer is. Step 0 is not knocked out by the gate: v1's saved greedy answers have 0 rejected answers in 1,197 (297 on `data/m1/valid.jsonl` in `results/m1/trained-v1/valid/epoch-2.*`, 900 in `results/m2/baseline/trained-v1/`). Claude Code recounted this on disk on 2026-11-09: 0 of 1,197.
 
 ### D-058 (2026-11-09, Elias): The next Codex review of M2-05 checks only the three M2-05c fixes
 - **Elias's words:** "Yes, do that", to "Fix all three and limit the next review to these fixes?"
 - **Why:** three Codex reviews of `m2-05-grpo` each found new must-fix problems, while every earlier fix held. Most new findings were in retry and recovery code the previous round's fixes had added. A full re-review of the whole branch each time keeps finding the next edge case in new code.
 - **What it means:** the M2-05d review (`prompts/M2-05d-codex-review.md`) checks the three fixes in `reviews/M2-05c-fixes.md`, whether they broke anything, and the test run. It does not review the rest of the branch again.
 - **Open:** the full run still needs Elias's yes to its cost (about $1.02), and D-057 still needs Claude in Cowork.
+
+### D-059 (2026-11-09, Elias): The full GRPO training run is approved
+- **The question (Claude in Cowork):** "Do you approve the full training run at about $1.02?"
+- **Elias's words:** "yes, training run approved."
+- **What it covers:** one full run of `--stage train` (about 71 L4 minutes, about $1.02, likely $0.95 to $1.10; `results/m2/grpo/full-run-plan.md`). Modal's L4 price, $0.000222 a second, was checked against https://modal.com/pricing that day. A second try after a stop is a new cost and needs a new yes.
+- **Not covered, and not needed:** choosing the checkpoint (about $0.71) and the upload (under $0.01) are each under $1, which D-019 allows without asking.

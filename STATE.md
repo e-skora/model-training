@@ -4,7 +4,7 @@ Read this first in every session.
 
 - **Phase:** 2, reinforcement learning (RL).
 - **Active milestone:** M2, judge v2 with reinforcement learning (GRPO), measured on a new hard test set (D-036). Spec: `milestones/M2-rl-judge/SPEC.md`. M1 (done 2026-10-23): `milestones/M1-contradiction-judge/SPEC.md`.
-- **Updated:** 2026-11-09 (M2-05 accepted by Codex; waiting for Cowork on D-057 and Elias's yes to the full run's cost)
+- **Updated:** 2026-11-09 (D-057 confirmed, full run approved (D-059); full run starting)
 
 ## Done
 - 2026-10-21: Step 1. Repo created with control files (Claude, from Cowork).
@@ -56,8 +56,9 @@ Read this first in every session.
 - 2026-11-09: Codex's third review (`reviews/M2-05c-codex-review.md`, at `7be1643`): CHANGES REQUIRED, three must-fix; every earlier fix held. All three fixed (Claude Code, branch `m2-05-grpo`, pushed, not merged; `reviews/M2-05c-fixes.md`): (1) prompts must be padded on the left, as in the pool; (2) the uploaded record leaves out the bill fields, so a bill recorded between two upload tries does not strand the retry; (3) the upload is sent only while the repo is private and still at the checked commit, and names that commit as its parent, so Hugging Face refuses it if anything landed in between. 649 tests pass (644 before); each of 5 new guards was broken on purpose and its test failed. Elias decided the next Codex review checks only these three fixes (D-058: "Yes, do that"). No GPU use; no file under `src/`, no saved pool file and no saved trial result changed.
 - 2026-11-09: Codex's narrow review (`reviews/M2-05d-codex-review.md`, at `cfd104d`, scope D-058): CHANGES REQUIRED, one must-fix; the padding and billing fixes passed. A writer landing right after the repo is made could become the upload's parent commit. Fixed (Claude Code, branch `m2-05-grpo`, pushed, not merged; `reviews/M2-05d-fixes.md`): the upload now checks that the new repo's first commit holds nothing but `.gitattributes` before reserving it. 650 tests pass; the new test fails with the check turned off. No GPU use; no file under `src/`, no saved pool file and no saved trial result changed.
 - 2026-11-09: Codex's narrow review `reviews/M2-05e-codex-review.md` at `f8fc51c`: **ACCEPT** (one known limit: a change to `.gitattributes` alone can pass the first-look check; it overwrites nothing). Five review rounds in all; every fix held. Branch `m2-05-grpo` pushed, not merged; the full run has not started.
+- 2026-11-09: Claude in Cowork confirmed D-057 (the format gate; step 0 passes it: 0 of v1's 1,197 saved answers rejected, recounted on disk). Elias approved the full training run, about $1.02 (D-059: "yes, training run approved."). Prompt `prompts/M2-05f-record-and-run.md`.
 ## Next single action
-Elias: paste `prompts/M2-05-cowork-confirm.md` into Claude in Cowork (project Fine Tuning and RL training, new thread). Cowork confirms or changes D-057 and asks Elias whether he approves the full run at about $1.02 (over the $1 limit, D-019). Nothing runs until his yes is quoted; Claude Code then records it and starts `--stage train`.
+Claude Code: run `--stage train` (D-059), then `choose` and `upload` (each under $1, D-019), then the bill; record each in STATE and `runs/RUNLOG.md`. If a check stops the training run, stop and report; a second try needs Elias's yes.
 
 ## Frozen files
 - `data/m1/test.jsonl`, 200 pairs, SHA-256 `6e2a08323f445477f9600e371f1074ad3e2b41ef97d7072d6734ef481f6e574b`, frozen 2026-10-22. Never edit it and never train on it.
