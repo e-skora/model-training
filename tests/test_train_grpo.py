@@ -336,6 +336,12 @@ def left_padded(rows, pad=0):
             [[0] * (width - len(r)) + [1] * len(r) for r in rows])
 
 
+def right_padded(rows, pad=0):
+    width = max(len(r) for r in rows)
+    return ([list(r) + [pad] * (width - len(r)) for r in rows],
+            [[1] * len(r) + [0] * (width - len(r)) for r in rows])
+
+
 def good_stops(width):
     return [{"name": "MaxLengthCriteria", "max_length": width + 256},
             {"name": "EosTokenCriteria", "eos_token_id": list(POOL_ENDS)}]
@@ -432,6 +438,8 @@ def test_the_mask_must_be_one_unbroken_run_per_row():
         new_watch().entry(ids, holed)
     with pytest.raises(grpo.GenerationCheckError, match="no input_ids or no attention_mask"):
         new_watch().entry(ids, None)
+    with pytest.raises(grpo.GenerationCheckError, match="padded on the right"):
+        new_watch().entry(*right_padded([list(PROMPT_A), list(PROMPT_C)]))
     watch = new_watch()
     watch.entry(ids, mask)
     with pytest.raises(grpo.GenerationCheckError, match="ran again"):
@@ -489,22 +497,22 @@ def fake_mixin(stops=None, config=None):
 class FakeTrainer:
     """TRL 1.15.0's regular text path (grpo_trainer.py:1769-1828): left-pad, generate, cut the prompt off."""
 
-    def __init__(self, model, change=None, calls=1):
-        self.model, self.change, self.calls = model, change, calls
+    def __init__(self, model, change=None, calls=1, pad=left_padded):
+        self.model, self.change, self.calls, self.pad = model, change, calls, pad
 
     def _generate_single_turn(self, prompt_ids, images, multimodal_fields, num_generations):
         rows = self.change([list(p) for p in prompt_ids]) if self.change else [list(p) for p in prompt_ids]
-        ids, mask = left_padded(rows, pad=151654)
+        ids, mask = self.pad(rows, pad=151654)
         for _ in range(self.calls):
             out = self.model.generate(input_ids=ids, attention_mask=mask, generation_config=None)
         return [row[len(ids[0]):] for row in out], None
 
 
-def run_wrapped(mixin, prompts, change=None, calls=1):
+def run_wrapped(mixin, prompts, change=None, calls=1, pad=left_padded):
     watch = new_watch()
     restore = grpo.wrap_generation(mixin, watch)
     try:
-        trainer = FakeTrainer(mixin(), change, calls)
+        trainer = FakeTrainer(mixin(), change, calls, pad)
         grpo.wrap_trainer_turn(trainer, watch)
         trainer._generate_single_turn([list(p) for p in prompts for _ in range(8)], None, {}, 8)
         watch.check_counts(1, rewarded=8 * len(prompts))
@@ -525,6 +533,7 @@ def test_the_real_wrappers_pass_a_correct_step_and_come_back_out():
     (lambda: (fake_mixin(), {"change": lambda rows: [r[1:] for r in rows]}), "other tokens than TRL's prompts"),
     (lambda: (fake_mixin(), {"change": lambda rows: rows[::-1]}), "other tokens than TRL's prompts"),
     (lambda: (fake_mixin(), {"calls": 2}), "ran again"),
+    (lambda: (fake_mixin(), {"pad": right_padded}), "padded on the right"),
     (lambda: (fake_mixin(stops=lambda w: [MaxLengthCriteria(w + 256), EosTokenCriteria([151645])]), {}), "end tokens"),
     (lambda: (fake_mixin(stops=lambda w: [MaxLengthCriteria(w + 256), EosTokenCriteria(7)]), {}), "end tokens"),
     (lambda: (fake_mixin(stops=lambda w: [MaxLengthCriteria(w + 256)]), {}), "stop rules"),
@@ -990,6 +999,8 @@ class FakeHub:
         self.private = True
         self.fail_upload = 0
         self.drop_on_upload = None
+        self.public_on_create = False
+        self.intrude = None  # another writer's files, landing just before this upload's commit
         self.log = []
 
     def add_commit(self, files):
@@ -1012,11 +1023,17 @@ class FakeHub:
         self.log.append("create_repo")
         assert private and not exist_ok and not self.commits
         self.add_commit({".gitattributes": b"*.safetensors filter=lfs\n"})
+        self.private = not self.public_on_create
 
-    def upload_folder(self, folder_path, repo_id, repo_type, commit_message):
+    def upload_folder(self, folder_path, repo_id, repo_type, commit_message, parent_commit=None):
         from types import SimpleNamespace
 
         self.log.append("upload_folder")
+        if self.intrude:
+            self.add_commit(self.intrude)
+            self.intrude = None
+        if parent_commit is not None and parent_commit != self.commits[-1][0]:
+            raise RuntimeError("412: the repo is not at the parent commit")  # what Hugging Face does (create_commit)
         if self.fail_upload:
             self.fail_upload -= 1
             raise ConnectionError("the connection dropped")
@@ -1082,7 +1099,7 @@ def test_an_upload_that_failed_after_making_the_repo_resumes_into_it(adapter, tm
     other.add_commit({".gitattributes": b""})
     with pytest.raises(SystemExit, match="not an empty repo this upload made"):
         send(other, adapter)
-    with pytest.raises(SystemExit, match="cannot prove it made it"):
+    with pytest.raises(SystemExit, match="cannot prove this repo is that one.*before deleting anything"):
         send(other, adapter, note={**saved["note"], "first_commit": None})
     assert "upload_folder" not in other.log
 
@@ -1134,6 +1151,70 @@ def test_the_upload_refuses_a_public_repo_a_changed_copy_and_a_short_commit(adap
     short.drop_on_upload = "tokenizer.json"
     with pytest.raises(SystemExit, match="does not hold exactly the files sent"):
         send(short, adapter)
+
+
+def test_another_writer_between_the_check_and_the_commit_is_never_overwritten(adapter, tmp_path):
+    other = {"adapter_config.json": b'{"written": "by someone else"}'}
+
+    def copy_while_someone_writes(source, target, dirs_exist_ok):
+        import shutil
+
+        shutil.copytree(source, target, dirs_exist_ok=dirs_exist_ok)
+        hub.add_commit(other)
+
+    hub = FakeHub(tmp_path)
+    with pytest.raises(SystemExit, match="changed after it was checked"):
+        send(hub, adapter, copy=copy_while_someone_writes)
+    assert "upload_folder" not in hub.log and hub.commits[-1][1]["adapter_config.json"] == other["adapter_config.json"]
+    late = FakeHub(tmp_path / "late")
+    late.intrude = other  # lands after the last look, just before the commit
+    with pytest.raises(RuntimeError, match="parent commit"):
+        send(late, adapter)
+    assert late.commits[-1][1]["adapter_config.json"] == other["adapter_config.json"]
+
+
+def test_a_repo_that_is_public_after_it_was_made_gets_nothing(adapter, tmp_path):
+    hub = FakeHub(tmp_path)
+    hub.public_on_create = True
+    with pytest.raises(SystemExit, match="is public; nothing uploaded"):
+        send(hub, adapter)
+    assert "upload_folder" not in hub.log
+
+
+def bill_now(out):
+    grpo.bill("train", out=out, run_report=lambda command: json.dumps([{"object_id": "ap-test", "cost": "0.5"}]))
+
+
+@pytest.mark.parametrize("first_try", ["stops after making the repo", "lands, but its receipt is lost"])
+def test_recording_the_bill_between_two_upload_tries_changes_nothing(at_repo, tmp_path, adapter, first_try):
+    out = tmp_path / "out"
+    choose_with_winner(out)
+    hub = FakeHub(tmp_path / "h")
+    note = {}
+
+    class Uploading(Calls):
+        def upload(self, run, checkpoint, meta_text, expected_files):
+            self.log.append(meta_text)
+            result = grpo.upload_checked(hub, hub.fetch, adapter, run, checkpoint, meta_text,
+                                         grpo.files_sha256(adapter), note.get("n"), lambda data: note.update(n=data))
+            if self.lose_receipt:
+                raise OSError("the local record was not written")
+            return result
+
+    first = Uploading()
+    first.lose_receipt = first_try.startswith("lands")
+    hub.fail_upload = 0 if first.lose_receipt else 1
+    with pytest.raises((ConnectionError, OSError)):
+        grpo.run_stage("upload", first, out=out)
+    bill_now(out)  # the bill is recorded between the two tries
+    assert "billed_usd" in json.loads((out / "train.meta.json").read_text())
+    retry = Uploading()
+    retry.lose_receipt = False
+    meta = grpo.run_stage("upload", retry, out=out)
+    assert retry.log == first.log  # the same record text both times
+    assert "billed_usd" not in json.loads(retry.log[0]) and json.loads(retry.log[0])["choice"]["chosen"] == "step-150"
+    assert (meta["upload"]["recovered"], meta["upload"]["resumed"]) == (first.lose_receipt, not first.lose_receipt)
+    assert hub.log.count("create_repo") == 1
 
 
 def test_the_upload_stops_before_hugging_face_when_the_folder_changed(adapter, tmp_path):

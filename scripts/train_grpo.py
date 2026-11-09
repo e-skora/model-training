@@ -374,8 +374,9 @@ def token_rows(x):
 def unpadded_rows(input_ids, attention_mask):
     """The tokens the model really attends to, row by row, and the padded width.
 
-    Each row's mask must be one unbroken run of 1s (padding on one side only), so the kept
-    tokens are exactly the prompt, in order."""
+    Each row's mask must be one unbroken run of 1s that ends at the row's last position: padding
+    only on the left, as the pool had it (judge.generate). With right padding a shorter row would
+    end on padding, and its first new token would be drawn from there."""
     ids, mask = token_rows(input_ids), token_rows(attention_mask)
     if len(ids) != len(mask) or any(len(i) != len(m) for i, m in zip(ids, mask)):
         raise GenerationCheckError("generate's input_ids and attention_mask differ in shape")
@@ -384,6 +385,8 @@ def unpadded_rows(input_ids, attention_mask):
         kept = [k for k, m in enumerate(row_mask) if m == 1]
         if any(m not in (0, 1) for m in row_mask) or not kept or kept != list(range(kept[0], kept[-1] + 1)):
             raise GenerationCheckError("generate's attention mask is not one unbroken run per row")
+        if kept[-1] != len(row_mask) - 1:
+            raise GenerationCheckError("generate's prompts are padded on the right; the pool padded on the left")
         rows.append(tuple(row_ids[k] for k in kept))
     return rows, len(ids[0]) if ids else 0
 
@@ -1127,6 +1130,17 @@ def file_sha256(path):
     return digest.hexdigest()
 
 
+BILL_KEYS = ("billed_usd", "billed_total_usd")  # what `bill` adds to a record; never part of the uploaded copy
+
+
+def upload_payload(meta):
+    """The exact record text the upload sends: the run and choice record without the bill, so recording the bill
+    between two tries of one upload does not change what the retry must find on Hugging Face."""
+    import json
+
+    return json.dumps({k: v for k, v in meta.items() if k not in BILL_KEYS}, indent=2) + "\n"
+
+
 def upload_wanted(meta_text, expected_files):
     """The exact files the repo must hold, by SHA-256: the checked adapter folder and the run and choice record."""
     import hashlib
@@ -1147,6 +1161,8 @@ def upload_checked(api, fetch, folder_in, run, checkpoint, meta_text, expected_f
     `note` is what an earlier try of this run's upload saved (or None); `save_note` saves a new one.
     - No repo yet: save a note that this try reserves the repo, make it private, add its first commit to
       the note, then upload a checked copy.
+    Every upload is sent only while the repo is private and still at the commit that was checked, and it
+    names that commit as its parent, so Hugging Face refuses it if anything else landed in between.
     - The repo holds exactly the wanted files (adapter folder and record) at its newest commit: an earlier
       try finished and only the local record is missing. Recorded as recovered, at that commit.
     - The repo is empty, and the note shows this upload made it and nothing came after: an earlier try
@@ -1175,22 +1191,31 @@ def upload_checked(api, fetch, folder_in, run, checkpoint, meta_text, expected_f
             unproven = not held and note == {**mine, "first_commit": None}
             raise SystemExit(
                 f"STOP: {HF_REPO} already exists; nothing uploaded. "
-                + ("It is empty and this run's note shows it was being made, but its first commit was never noted, "
-                   "so this script cannot prove it made it. Delete the empty repo on Hugging Face, then retry."
+                + ("It is empty and this run's note shows a repo was being made, but its first commit was never "
+                   "noted, so this script cannot prove this repo is that one. An empty repo alone proves nothing: "
+                   "check on Hugging Face who made it and what its history holds before deleting anything."
                    if unproven else
                    "It does not hold exactly this adapter and record at its newest commit, and it is not an empty "
                    "repo this upload made."))
         resumed = True
+        checked = info.sha
     else:
         save_note({**mine, "first_commit": None})
         api.create_repo(HF_REPO, repo_type="model", private=True, exist_ok=False)
-        save_note({**mine, "first_commit": api.model_info(HF_REPO).sha})
+        checked = api.model_info(HF_REPO).sha
+        save_note({**mine, "first_commit": checked})
     with tempfile.TemporaryDirectory() as folder:
         (copy or shutil.copytree)(folder_in, folder, dirs_exist_ok=True)
         (Path(folder) / "train.meta.json").write_text(meta_text, encoding="utf-8")
         if files_sha256(folder) != wanted:
             raise SystemExit("STOP: the copy made for the upload differs from the checked files; nothing uploaded")
-        commit = api.upload_folder(folder_path=folder, repo_id=HF_REPO, repo_type="model",
+        info = api.model_info(HF_REPO)
+        if not info.private:
+            raise SystemExit(f"STOP: {HF_REPO} is public; nothing uploaded")
+        if info.sha != checked:
+            raise SystemExit(f"STOP: {HF_REPO} changed after it was checked (now at {info.sha}); nothing uploaded")
+        # parent_commit: Hugging Face refuses the commit if anything landed after the checked one in the meantime.
+        commit = api.upload_folder(folder_path=folder, repo_id=HF_REPO, repo_type="model", parent_commit=checked,
                                    commit_message=f"M2 Step 5: GRPO LoRA adapter {run}/{checkpoint}")
     if repo_files(api, fetch, commit.oid) != wanted:
         raise SystemExit(f"STOP: commit {commit.oid} of {HF_REPO} does not hold exactly the files sent")
@@ -1369,7 +1394,7 @@ def run_stage(stage, calls, out=OUT, state_path="STATE.md", train_meta_path=TRAI
         raise SystemExit("STOP: the recorded counts no longer pick the recorded choice by D-056; nothing ran")
     if meta.get("upload"):
         raise SystemExit("STOP: train.meta.json already records an upload; nothing ran")
-    result = calls.upload(meta["run"], chosen, json.dumps(meta, indent=2) + "\n", expected_files[chosen])
+    result = calls.upload(meta["run"], chosen, upload_payload(meta), expected_files[chosen])
     meta["upload"] = {"checkpoint": chosen, "run": meta["run"], "modal_app_id": calls.app_id(), **result}
     replace_json(meta_path, meta)
     print(f"uploaded {chosen} to https://huggingface.co/{result['repo']} (private: {result['private']}), "
