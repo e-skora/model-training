@@ -279,3 +279,7 @@ The upload test faked the whole upload job, so its recovery branch was never run
 
 ## 2026-11-09: Lesson: publish a result and the record of it as one unit
 Choose wrote the answer folder and then the record as two steps. A failure between them left complete, paid-for answers that a retry could not use. The fix saves the whole choice inside the answer folder before the folder gets its name, and a retry checks and reuses it. **Lesson:** when two files must agree, write them as one unit, or make the retry able to prove the first one and finish the second.
+
+## 2026-11-09: Mistake: each fix added code that the next review had to check
+Three Codex reviews of the GRPO script each found new must-fix problems, while every earlier fix held. Most new findings were in retry and recovery code that the previous fixes had added. The upload's recovery path grew from one check to a note, a resume rule and a commit check, and each part opened a new edge case (a bill between tries, a second writer). Elias narrowed the next review to the latest fixes only (D-058).
+**Lesson:** when fixing a review finding, choose the smallest change that closes it. Every new branch of recovery logic is new surface the next review must cover. Prefer refusing and asking a person over automatic recovery when the step runs once and costs nothing to redo by hand.
