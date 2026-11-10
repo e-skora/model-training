@@ -1,0 +1,50 @@
+{
+  "model": "unsloth/Qwen3-4B-Instruct-2507-unsloth-bnb-4bit + eskora/m2-contradiction-judge-qwen3-4b-grpo-lora",
+  "base_model": "unsloth/Qwen3-4B-Instruct-2507-unsloth-bnb-4bit",
+  "base_revision": "7744afa8566e264af1a92a806d8d9aae00cc7c78",
+  "adapter_repo": "eskora/m2-contradiction-judge-qwen3-4b-grpo-lora",
+  "adapter_revision": "0964d031073408707397ce7438fc7df7b8a772c0",
+  "adapter_checkpoint": "step-250",
+  "data": "data/m2/test-hard.jsonl",
+  "data_sha256": "d9e8e5f3a53369981d11c835a0a4bf68b9b105ae0c8dd78b2d02df967645ff82",
+  "pairs": 300,
+  "versions": [
+    "as_is",
+    "swapped",
+    "no_dates"
+  ],
+  "prompt_sha256": "83d14d39a2115eb1f4d2d461581673090ec25d0a6f05d444cb2da8b756a2865c",
+  "wall_seconds": 1185.7,
+  "adapter_files_expected": {
+    "adapter_config.json": "84bd07b579a476f44b54ae82175622182e2f3d3ecf73793f30024bbd690d6d6c",
+    "adapter_model.safetensors": "7e69587c9d65e4337f8cbcfa8befcf8019fc0c603d1df3c4c365ce912263a1f7"
+  },
+  "reward_sha256": "769f58fe9fd3cccd062725e25111bc86dc5c8d8f449c95795a3c1ff165d025e7",
+  "reward_sha256_training": "769f58fe9fd3cccd062725e25111bc86dc5c8d8f449c95795a3c1ff165d025e7",
+  "loaded_model": "unsloth/Qwen3-4B-Instruct-2507-unsloth-bnb-4bit",
+  "load_seconds": 60.9,
+  "answer_seconds": 380.3,
+  "gpu": "NVIDIA L4",
+  "peak_vram_gib": 7.29,
+  "unsloth": "2026.10.7",
+  "transformers": "5.17.0",
+  "peft": "0.21.2",
+  "adapter_files_sha256": {
+    "adapter_config.json": "84bd07b579a476f44b54ae82175622182e2f3d3ecf73793f30024bbd690d6d6c",
+    "adapter_model.safetensors": "7e69587c9d65e4337f8cbcfa8befcf8019fc0c603d1df3c4c365ce912263a1f7"
+  },
+  "generation": {
+    "max_new_tokens": 256,
+    "do_sample": false,
+    "num_beams": 1,
+    "temperature": null,
+    "top_p": null,
+    "top_k": null
+  },
+  "chat_template_options": {
+    "tokenize": false,
+    "add_generation_prompt": true
+  },
+  "first_prompt_sha256": "400afa9ff446fe9597b1357eb7997918d0e014b12be8bebaa77bdca4aaa62417",
+  "first_prompt": null
+}
