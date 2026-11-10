@@ -84,7 +84,7 @@ What this shows, plainly:
 | Hard test set, 300 pairs x 3 | load 61 s, answer 380 s | 19.8 min (most of the rest was waiting for a GPU) | `ap-LrRGHjxLB8uYLxGbVhUf8r` |
 | M1 test set, 200 pairs x 3 | load 63 s, answer 265 s | 9.2 min | `ap-psIUmSMEKwKHKMyjzWU2B8` |
 
-Billed costs are in `runs/RUNLOG.md` once Modal reports them (it reports full hours only).
+Billed by Modal (`modal billing report`): smoke $0.02, hard set $0.11, M1 set $0.08; **$0.22 in all**. Lines in `runs/RUNLOG.md`.
 
 ## What happens next
 
