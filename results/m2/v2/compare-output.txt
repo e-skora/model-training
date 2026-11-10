@@ -1,0 +1,47 @@
+Overall: MISS
+Item 1: MISS
+  MISS  hard worst-case recall: v1 67/75 (0.893), need 277/300 (0.923), v2 23/25 (0.920)
+  PASS  hard worst-case precision: v1 67/71 (0.944), need 6629/7100 (0.934), v2 138/143 (0.965)
+Item 2: PASS
+  PASS  M1 as_is precision: v1 95/96 (0.990), need 2327/2400 (0.970), v2 96/97 (0.990)
+  PASS  M1 as_is recall: v1 19/20 (0.950), need 93/100 (0.930), v2 24/25 (0.960)
+  PASS  M1 swapped precision: v1 96/101 (0.950), need 4699/5050 (0.930), v2 98/103 (0.951)
+  PASS  M1 swapped recall: v1 24/25 (0.960), need 47/50 (0.940), v2 49/50 (0.980)
+  PASS  M1 no_dates precision: v1 45/46 (0.978), need 551/575 (0.958), v2 46/47 (0.979)
+  PASS  M1 no_dates recall: v1 9/10 (0.900), need 22/25 (0.880), v2 23/25 (0.920)
+Item 3: PASS
+  PASS  hard as_is invalid: v2 0, style_a_breaks 0
+  PASS  hard swapped invalid: v2 0, style_a_breaks 0
+  PASS  hard no_dates invalid: v2 0, style_a_breaks 0
+  PASS  m1 as_is invalid: v2 0, style_a_breaks 0
+  PASS  m1 swapped invalid: v2 0, style_a_breaks 0
+  PASS  m1 no_dates invalid: v2 0, style_a_breaks 0
+
+hard set: model version caught/said/real precision recall unclear invalid format_errors style_a_breaks
+  v1 as_is     138/144/150 0.958 0.920 12 0 0 0
+  v1 swapped   136/142/150 0.958 0.907 15 0 0 0
+  v1 no_dates  134/142/150 0.944 0.893 15 0 0 0
+  v2 as_is     141/145/150 0.972 0.940 6 0 0 0
+  v2 swapped   138/143/150 0.965 0.920 7 0 0 0
+  v2 no_dates  143/148/150 0.966 0.953 5 0 0 0
+
+m1 set: model version caught/said/real precision recall unclear invalid format_errors style_a_breaks
+  v1 as_is     95/96/100 0.990 0.950 3 0 0 0
+  v1 swapped   96/101/100 0.950 0.960 6 0 0 0
+  v1 no_dates  90/92/100 0.978 0.900 3 0 0 0
+  v2 as_is     96/97/100 0.990 0.960 2 0 0 0
+  v2 swapped   98/103/100 0.951 0.980 1 0 0 0
+  v2 no_dates  92/94/100 0.979 0.920 1 0 0 0
+
+hard set per trap, right labels (v1 as_is swapped no_dates | v2 as_is swapped no_dates):
+  explain_away (contradiction): of 40: 38 38 35 | 38 39 39
+  indirect_update (update): of 25: 25 24 23 | 25 24 24
+  near_identical (compatible_detail): of 20: 20 20 20 | 20 20 20
+  paraphrase (contradiction): of 30: 25 25 25 | 26 26 27
+  rule5_bait (merely_related): of 25: 25 23 25 | 25 24 25
+  small_difference (contradiction): of 30: 30 30 30 | 30 30 30
+  update_with_overlap (update): of 25: 25 25 25 | 25 25 25
+  change_word_contradiction (contradiction): of 25: 24 22 23 | 24 23 23
+  near_identical (merely_related): of 25: 22 21 22 | 25 24 25
+  looks_like_clash (compatible_detail): of 30: 26 28 26 | 26 28 26
+  far_apart_no_change (contradiction): of 25: 21 21 21 | 23 20 24
