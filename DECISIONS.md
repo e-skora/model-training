@@ -281,3 +281,16 @@ The blind review of M2 Step 3 (`reviews/M2-03-blind-review.md`) agreed with 199 
 - **Once:** each test set is answered once, by v2 only. No other checkpoint is ever scored on them. A miss is reported as it is (D-041).
 - **Why:** writing the rule into code before the run means the score cannot shape the rule. Per-version for M1 follows SPEC "Done means" item 2.
 
+### D-061 (2026-11-09, Elias): Publish the M2 miss, then start a second attempt
+- **The question (Claude in Cowork):** what comes after v2 missed D-041 item 1 by one pair. The recommendation was to close M2 as an honest miss and publish it.
+- **Elias's words:** "ok well we can publish the first attempt miss, and then begin the second attempt"
+- **Elias, a moment later:** "the most important thing in publishing is to show what we learned and publish something useful to show how this experiment was valuable and will make the second attempt use lessons we learned from the first attempt"
+- **What it covers:** publishing the M2 result with a lessons write-up as the main piece (`docs/m2-what-we-learned.md`), plus v2 (labelled as missing the bar), the M2 data and the code, as the M1 publish did (D-034). It also starts a second attempt at a judge that beats v1, planned from those lessons (`docs/attempt-2-inputs.md`).
+
+### D-062 (2026-11-09, Default): How the M2 miss is published
+- **No Mac version of v2** (M2 Step 7 skipped). v1 (`m1-judge:v1`) stays the model on the Mac and Aeverum's candidate.
+- **v2's card says it plainly:** an experiment that missed the bar set before scoring, by one pair; it does not say v2 is better.
+- **M2 data in a new dataset repo,** `eskora/memory-contradiction-pairs-hard`, so the M1 dataset's files stay as they are. License CC BY 4.0, as D-033.
+- **D-033 and D-035 hold:** public text does not name Aeverum, says who wrote the data, describes Elias as D-035 says, and has no em dashes.
+- **Claude Code prepares everything private; Claude in Cowork checks it and makes it public** on D-061, as on 2026-10-23 (D-034). Elias edits the LinkedIn draft and posts it himself.
+
