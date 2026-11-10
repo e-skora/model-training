@@ -1,0 +1,13 @@
+✓ Initialized. View run at 
+https://modal.com/apps/e-skora/main/ap-CMSGAfLl7V0AqTF2dJmSEQ
+✓ Created objects.
+├── ✓ Uploaded /Users/frank/code/model-training/scripts/train_grpo.py
+├── ✓ Uploaded PythonPackage:judge
+├── ✓ Created Function train.
+├── ✓ Created Function upload.
+└── ✓ Created Function answer.
+uploaded step-250 to https://huggingface.co/eskora/m2-contradiction-judge-qwen3-4b-grpo-lora (private: True), commit 0964d031073408707397ce7438fc7df7b8a772c0
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/e-skora/main/ap-CMSGAfLl7V0AqTF2dJmSEQ
+exit 0

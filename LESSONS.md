@@ -237,3 +237,57 @@ The reward fingerprint went through five Codex reviews. Each of the first four f
 - **The model's own settings can change how it samples.** Qwen3's saved generation settings (top_p 0.8, top_k 20) can replace TRL's unless something stops them; Unsloth 2026.10.7 has a patch for this (`_caller_sampling_only` in `unsloth/models/rl.py`). Read the installed source of the pinned version, and log the sampling a run really used, not only what the config asked for.
 - **Cross-project questions get a handoff file.** The Mac-cleanup project asked which model files this project needs; the answer went to `docs/handoffs/2026-10-29-mac-cleanup-models.md` and `~/.handoffs/`, so it does not live only in chat. Keep `m1-judge:v1` in Ollama; `~/models/m1-judge/` is a spare copy.
 
+## 2026-11-04: Lesson: check where a safety patch runs, not only what it does
+The M2-05 prompt said Unsloth's `_caller_sampling_only` keeps the model's own sampling defaults (Qwen3: top_p 0.8, top_k 20) out of GRPO. The installed code does that, but only when the model generates through a wrapper (PPO's case, `unsloth/models/rl.py` line 282). On our GRPO path it never runs. The sampling stayed right for another reason: transformers 5.17.0 fills in a model default only where TRL left a setting empty. Reading the code gave the right answer on paper. The trial then proved it: it recorded the settings every `generate` call really used, and checked each prompt against the pool's.
+**Lesson:** when a note says "this patch protects us", read the line that decides whether it runs. Then record what the run really did, not only what it asked for.
+
+## 2026-11-04: Mistake: a library changed a setting we had left at its default
+The script left `epsilon_high` empty, meaning TRL's default. Unsloth filled it in with 0.28, and only its log said so ("we will set it"). The trial's record did not show it. Unsloth fills in several GRPO values this way (`mask_truncated_completions`, `beta`, `loss_type`, `epsilon_high`, learning rate, batch). The fix: set each of them in the script, record the trainer's resolved values, and add a test that they are all set.
+**Lesson:** with Unsloth, never rely on a default: set every value it might fill in, and read the "Unsloth:" lines in a run's log.
+
+## 2026-11-04: Mistake: a default value captured a constant when the file loaded
+`read_pool(path=POOL_PATH, expected=POOL_SHA256)` took the fingerprint once, when the script loaded. A test that changed the constant found the check did not move with it. It is the same trap Codex found in the reward fingerprint (default values, 2026-10-29). Now the defaults are read when the function is called.
+**Lesson:** a check's expected value should be read at the moment of the check, not frozen into a default argument.
+
+## 2026-11-04: Lesson: the first GRPO step is slow, so do not project from the average
+In the trial, step 1 took 174 s and every later step 13.5 s. The average over 20 steps, 21.6 s, would have put the full run at 113 minutes instead of 75. The plan counts the first step once and the rest at the later rate.
+**Lesson:** split a trial's time into one-off start-up and the steady rate before projecting a long run.
+
+## 2026-11-04: Mistake: a tool-checking job crash-looped for ten minutes
+A CPU-only Modal job meant to copy installed source files used the image without our own code, while the script itself imported `judge`. Every container failed at start, and the local command waited silently until it timed out. It cost under a cent. **Lesson:** a scratch Modal script must use the same image as the code it imports (`judge.modal_image.image`), and a job that prints nothing for minutes should have its app logs read at once (`modal app logs <app id>`).
+
+## 2026-11-04: Mistake: a fingerprint check opened the frozen test files
+To show that nothing changed, Claude Code ran `shasum -a 256` on `data/m2/rl-pool.jsonl` and, in the same command, on both frozen test files. `shasum` reads every byte, so it opened files the prompt says never to open. Only the two fingerprints were printed (both equal to the frozen values in STATE.md); no model saw them and no text was shown. **Lesson:** "never open" includes reading a file only to fingerprint it. To show a frozen file is unchanged, use git (`git diff main --stat -- data/`), which compares what git stored without opening the file's text here.
+
+## 2026-11-08: Mistake: the training run was guarded, but not what comes after it
+Codex's M2-05 review found that the GRPO script checked the training run carefully but trusted names afterwards. Choose and upload used checkpoint folders by name, with nothing to prove the files were the ones trained and scored. A retry under the same run name could write into an old run's folders. The upload reported the repo's latest commit, not its own. The fix: a fresh folder for every run, a fingerprint for every saved adapter, and checks of those fingerprints before scoring and before upload. Choose and upload also refuse a record that is not a finished, checked run.
+**Lesson:** a safety check must follow the result to its last use. Fingerprint every file a later stage will pick up, check it at each stage, and never let a name stand in for the files behind it.
+
+## 2026-11-08: Mistake: a check that only sees the calls that reach it can be skipped
+The trial's sampling check recorded what `generate` used, but only when `generate` went through the recorded function. A path that skipped it would have left an empty record that still looked clean. It also checked a block-list of word filters, so a filter nobody listed would pass. The fix: record at five points, compare their counts after every step, and use allow-lists (no word filters; only the length limit and the end token as stop rules).
+**Lesson:** for a check on a long, costly run, count the calls at every point it should see and stop when the counts differ. An empty record must be a failure, not a pass. Use allow-lists here too (LESSONS 2026-11-01).
+
+## 2026-11-08: Lesson: "invalid" meant two things
+The scorer calls an answer invalid only when it is not JSON or has an unknown label; a missing type or reason is a separate "format error". The training reward calls both invalid. The checkpoint rule used the scorer's narrow meaning, so a checkpoint whose answers dropped required fields could have won. D-057 now uses the reward's meaning for the choice.
+**Lesson:** when one word is used by two parts of a system, check that they mean the same thing before a rule depends on it.
+
+## 2026-11-08: Mistake: tests read the real home folder through an import
+Importing a Modal script makes Modal read `~/.modal.toml` at import time, before any test's own setup runs. The fix is `tests/conftest.py`, which pytest loads before any test module. It points Modal at an empty temporary file and removes Modal and Hugging Face settings. A test collects the suite with an unreadable home config to prove it.
+**Lesson:** for tests that import code with import-time side effects, set up the isolation in `conftest.py`, not inside a test.
+
+## 2026-11-08: Mistake: a cost estimate counted the checkpoint saves twice
+The plan took the trial's average step time, which already held both checkpoint saves, applied it to every step, and then added the saves again. The estimate came out $1.08 instead of about $1.02. **Lesson:** split a trial's time into its parts (one-off start-up, plain steps, saves) before projecting, and say which parts each number holds.
+
+## 2026-11-09: Mistake: a check moved away from the thing it guarded
+The first trial's prompt check read `input_ids` and `attention_mask` at `generate` itself. The M2-05 fixes moved the prompt check to TRL's step, before TRL builds those tensors, and kept only class names for the stop rules. Every counter still added up, but a shortened prompt or another end token would have passed. Codex's re-review found it. The fix: compare the exact tokens under the mask at `generate` with TRL's rows, and read the stop rules' values (length limit and end tokens), not only their names.
+**Lesson:** when a check moves, it must still look at the last point before the effect, here the tensors the model receives. Counting calls proves a check ran, not that it looked at the right thing.
+
+## 2026-11-09: Lesson: test the job's own logic, not a fake of the whole job
+The upload test faked the whole upload job, so its recovery branch was never run; it accepted a repo with the right weights and the wrong adapter config. The fix moved the job's logic into a plain function with the outside service passed in, and the tests now run that real logic against a fake service. The same was done for the GPU job's wrappers. **Lesson:** keep remote jobs thin: a plain function holds the decisions, and the remote wrapper only connects it to the real service, so the tests reach every branch.
+
+## 2026-11-09: Lesson: publish a result and the record of it as one unit
+Choose wrote the answer folder and then the record as two steps. A failure between them left complete, paid-for answers that a retry could not use. The fix saves the whole choice inside the answer folder before the folder gets its name, and a retry checks and reuses it. **Lesson:** when two files must agree, write them as one unit, or make the retry able to prove the first one and finish the second.
+
+## 2026-11-09: Mistake: each fix added code that the next review had to check
+Three Codex reviews of the GRPO script each found new must-fix problems, while every earlier fix held. Most new findings were in retry and recovery code that the previous fixes had added. The upload's recovery path grew from one check to a note, a resume rule and a commit check, and each part opened a new edge case (a bill between tries, a second writer). Elias narrowed the next review to the latest fixes only (D-058).
+**Lesson:** when fixing a review finding, choose the smallest change that closes it. Every new branch of recovery logic is new surface the next review must cover. Prefer refusing and asking a person over automatic recovery when the step runs once and costs nothing to redo by hand.
