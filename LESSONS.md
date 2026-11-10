@@ -291,3 +291,7 @@ Choose wrote the answer folder and then the record as two steps. A failure betwe
 ## 2026-11-09: Mistake: each fix added code that the next review had to check
 Three Codex reviews of the GRPO script each found new must-fix problems, while every earlier fix held. Most new findings were in retry and recovery code that the previous fixes had added. The upload's recovery path grew from one check to a note, a resume rule and a commit check, and each part opened a new edge case (a bill between tries, a second writer). Elias narrowed the next review to the latest fixes only (D-058).
 **Lesson:** when fixing a review finding, choose the smallest change that closes it. Every new branch of recovery logic is new surface the next review must cover. Prefer refusing and asking a person over automatic recovery when the step runs once and costs nothing to redo by hand.
+
+## 2026-11-09: Lesson: a close-out commit on `main` during a branch means a merge conflict later
+The 2026-11-04 close-out was committed to `main` while Claude Code worked on `m2-05-grpo`, as that day's lesson allows. Merging the branch stopped on `STATE.md`, `LESSONS.md` and `GLOSSARY.md`. Settled by keeping both sides and putting the Done lines in date order. **Lesson:** expect this; keep both sides, never drop a dated line (R-0048), and run the tests after the merge before pushing.
+

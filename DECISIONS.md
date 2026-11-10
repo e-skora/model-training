@@ -272,3 +272,12 @@ The blind review of M2 Step 3 (`reviews/M2-03-blind-review.md`) agreed with 199 
 - **Elias's words:** "yes, training run approved."
 - **What it covers:** one full run of `--stage train` (about 71 L4 minutes, about $1.02, likely $0.95 to $1.10; `results/m2/grpo/full-run-plan.md`). Modal's L4 price, $0.000222 a second, was checked against https://modal.com/pricing that day. A second try after a stop is a new cost and needs a new yes.
 - **Not covered, and not needed:** choosing the checkpoint (about $0.71) and the upload (under $0.01) are each under $1, which D-019 allows without asking.
+
+### D-060 (2026-11-09, Default): How v2 is judged on the frozen test sets, fixed before any test score
+- **Adapter against adapter:** v2 (step-250, `eskora/m2-contradiction-judge-qwen3-4b-grpo-lora` at `0964d031`) is compared with v1's adapter, using v1's saved test answers (`results/m2/baseline/trained-v1/`, `results/m1/trained-v1/`), as STATE recorded on 2026-10-27. v1 is not run again.
+- **Hard set (D-041 item 1):** v2's worst-case recall is at least v1's + 0.03 (v1: 134/150, so at least 139/150), and v2's worst-case precision is at least v1's - 0.01 (v1: 134/142). Exact fractions.
+- **M1 set (item 2):** in each version, v2's precision and recall are each at least v1's - 0.02 in that version.
+- **Item 3:** 0 invalid answers in every version of both sets.
+- **Once:** each test set is answered once, by v2 only. No other checkpoint is ever scored on them. A miss is reported as it is (D-041).
+- **Why:** writing the rule into code before the run means the score cannot shape the rule. Per-version for M1 follows SPEC "Done means" item 2.
+

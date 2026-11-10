@@ -4,7 +4,7 @@ Read this first in every session.
 
 - **Phase:** 2, reinforcement learning (RL).
 - **Active milestone:** M2, judge v2 with reinforcement learning (GRPO), measured on a new hard test set (D-036). Spec: `milestones/M2-rl-judge/SPEC.md`. M1 (done 2026-10-23): `milestones/M1-contradiction-judge/SPEC.md`.
-- **Updated:** 2026-11-09 (M2 Step 5 done: full GRPO run, step-250 chosen and uploaded; next: M2 Step 6)
+- **Updated:** 2026-11-09 (M2 Step 5 checked and merged; next: M2 Step 6, prompt `prompts/M2-06-score-v2.md`)
 
 ## Done
 - 2026-10-21: Step 1. Repo created with control files (Claude, from Cowork).
@@ -59,8 +59,9 @@ Read this first in every session.
 - 2026-11-09: Codex's narrow review `reviews/M2-05e-codex-review.md` at `f8fc51c`: **ACCEPT** (one known limit: a change to `.gitattributes` alone can pass the first-look check; it overwrites nothing). Five review rounds in all; every fix held. Branch `m2-05-grpo` pushed, not merged; the full run has not started.
 - 2026-11-09: Claude in Cowork confirmed D-057 (the format gate; step 0 passes it: 0 of v1's 1,197 saved answers rejected, recounted on disk). Elias approved the full training run, about $1.02 (D-059: "yes, training run approved."). Prompt `prompts/M2-05f-record-and-run.md`.
 - 2026-11-09: **M2 Step 5 done** (Claude Code, prompt `prompts/M2-05f-record-and-run.md`, branch `m2-05-grpo`, pushed, not merged). Full GRPO run (D-059): 314 steps in 71.3 min, all run checks passed on the GPU, every pool pair exactly twice, 7 invalid of 5,024 answers, 34 unclear warnings (peak 19.4%). Choice (D-056, D-057): **step-250**; worst case on valid-hard precision 0.894 to 0.957, recall 0.872 to 0.957; on M1 valid precision 0.977 to 0.957, recall 0.913 to 0.957; step-100 out on M1 precision; no invalid answers. Uploaded to the private repo `eskora/m2-contradiction-judge-qwen3-4b-grpo-lora`, commit `0964d031`. Billed $1.55: training $0.97, choice $0.57, upload $0.01. Validation only; neither frozen test file was opened. Summary: `results/m2/grpo/full-run-summary.md`.
+- 2026-11-09: M2 Step 5 checked by Claude in Cowork on the Mac: the choice rescored on its own from the saved answers in `results/m2/grpo/valid/` (every count matches `choice.json`; step-250 chosen, step-100 out); step 0's labels and types equal v1's saved epoch-2 answers on M1 valid (only some reason wording differs); Hugging Face repo `eskora/m2-contradiction-judge-qwen3-4b-grpo-lora` is private; nothing under `src/` or `data/` changed; 650 tests pass. Merged to `main` at `22e4c96` (conflicts with the 2026-11-04 close-out kept both sides). Step 6 rule fixed before any test score (D-060); prompt `prompts/M2-06-score-v2.md`.
 ## Next single action
-Claude in Cowork: write the prompt for M2 Step 6 (score v2, step-250, once on the frozen hard test set and the M1 test set, three versions each, against D-041's done-means). Also decide whether `m2-05-grpo` merges to main first.
+Elias: paste `prompts/M2-06-score-v2.md` into Claude Code (desktop Code panel, new session, folder `~/code/model-training`, branch picker `main`, worktree box unchecked). It makes `m2-06-test-score`, scores v2 once on both frozen test sets, and reports whether v2 beats v1 (D-041, D-060).
 
 ## Frozen files
 - `data/m1/test.jsonl`, 200 pairs, SHA-256 `6e2a08323f445477f9600e371f1074ad3e2b41ef97d7072d6734ef481f6e574b`, frozen 2026-10-22. Never edit it and never train on it.
