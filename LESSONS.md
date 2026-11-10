@@ -295,3 +295,7 @@ Three Codex reviews of the GRPO script each found new must-fix problems, while e
 ## 2026-11-09: Lesson: a close-out commit on `main` during a branch means a merge conflict later
 The 2026-11-04 close-out was committed to `main` while Claude Code worked on `m2-05-grpo`, as that day's lesson allows. Merging the branch stopped on `STATE.md`, `LESSONS.md` and `GLOSSARY.md`. Settled by keeping both sides and putting the Done lines in date order. **Lesson:** expect this; keep both sides, never drop a dated line (R-0048), and run the tests after the merge before pushing.
 
+
+## 2026-11-09: Mistake: the rule's printout hid the counts
+`scripts/compare_v2.py` prints each score as a Python fraction, which is always shown in lowest terms. So v1's worst-case recall, 134 of 150, printed as 67/75, and v2's 138 of 150 as 23/25. The verdict was right, but a reader could not see the pair counts the rule is about. The code was left as it was, because the rule was fixed before the score; `results/m2/v2/summary.md` gives the plain counts.
+**Lesson:** when a result is judged in pairs, print the counts themselves (caught of real), not a reduced fraction. Check what a report prints on a made-up example before the real run, not only what it decides.
