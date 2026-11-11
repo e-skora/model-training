@@ -8,7 +8,9 @@ Copy everything below the line into Claude Code.
 
 Read `STATE.md` first, then `docs/m2-lessons-and-fixes.md`, `milestones/M3-rl-judge-attempt-2/SPEC.md` (Step 1), `DECISIONS.md` (D-038, D-039, D-042, D-063), `LESSONS.md`, `data/m2/README.md` and `reviews/blind-brief.md`.
 
-**Goal:** M3 Step 1. Write `data/m3/test-hard-2.jsonl` (600 pairs) and `data/m3/valid-hard-2.jsonl` (200 pairs). No GPU, no Modal, no model runs. Lessons applied: A2, A3, A5, C1, C4.
+**Goal:** M3 Step 1. Write `data/m3/test-hard-2.jsonl` (600 pairs) and `data/m3/valid-hard-2.jsonl` (200 pairs). No GPU and no Modal. The only model run is the one Ollama call in part 0. Lessons applied: A2, A3, A5, C1, C4.
+
+**0. First, the Ollama log check (M3 Step 0, Aeverum's open item, D-043).** Find where Ollama keeps its own server log on this Mac (check Ollama's current docs, and say where you checked). Note the log's size, send `m1-judge:v1` one made-up pair with a unique marker word in the memory text, the way `docs/run-judge-on-mac.md` says, then search the log for the marker. Report whether any memory text appears, and if it does, which setting stops it (from Ollama's docs) and whether that setting works when tried. Use made-up text only. Write the result to `docs/ollama-log-check.md` and add one line to STATE's open items. This is separate from the data work below.
 
 **Counts:** the test set has the same 11 traps as `data/m2/test-hard.jsonl`, each at twice M2's count: 300 contradictions, 100 each of update, compatible_detail and merely_related, 0 unclear. Same-day and change-word shares per trap as in M2's table. The validation set has the same mix at a third of that (100 contradictions, 100 others), 0 unclear. Every pair has a different person, and no person or name from any earlier file (all of `data/m1/` and `data/m2/`).
 

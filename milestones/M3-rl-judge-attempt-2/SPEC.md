@@ -12,6 +12,7 @@ Every M3 prompt starts by reading `docs/m2-lessons-and-fixes.md` and names the e
 
 | Step | What | Who | Lessons |
 |---|---|---|---|
+| 0 | Check that Ollama's own server log on the Mac holds no memory text when `m1-judge:v1` answers (Aeverum's open item since 2026-10-22, D-043) | Claude Code (in prompt M3-01) | none |
 | 1 | Write hard test set 2 (600 pairs) and hard validation set 2 (200 pairs) from a situation plan; cross-pair check; blind review with controls; freeze | Claude Code (prompt M3-01), then Claude in Cowork | A2, A3, A5, C1, C3, C4 |
 | 2 | Score v1's and v2's adapters once on both new sets: the M3 baseline | Claude Code | A4 |
 | 3 | Write new hard training pairs, weighted to the weak traps; `unclear` candidates checked by Elias | Claude Code, Elias (about 15 minutes), Claude in Cowork | B4, C1, C2, C3 |
