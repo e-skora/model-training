@@ -39,6 +39,20 @@ A near copy shares more than NEAR_COPY of its words with the other pair:
 the words of both memories, without the person's name, counted as
 shared / all different words of the two pairs together.
 
+Cross-pair check (M3, lesson C1), with `--cross-pair`: every pair of the
+file is compared with every other pair of the file and with every pair of
+every `--against` and `--distinct-from` file, and the check fails if any
+two score above CROSS_PAIR_LIMIT. The score is the cosine of two
+word-weight lists (TF-IDF): each pair's words from both memories, without
+the person's names and common little words (IDEA_STOPWORDS), with plain
+endings cut off ("drives" and "driving" both count as "driv"), plus one
+group word for words in IDEA_GROUPS ("beef" and "lamb" both add "MEAT").
+Each word weighs more the fewer pairs use it, counted over all files given.
+So two pairs that share their rare words score high even when the rest of
+their wording differs. Pairs of an `--against` file (a frozen test set) are
+named by id only, never by their text. Measure and limit were chosen on
+the M2 training pairs; see data/m3/README.md.
+
 Run from the repo folder:
     uv run python scripts/check_dataset.py data/m1/test.jsonl
     uv run python scripts/check_dataset.py data/m1/train.jsonl --against data/m1/test.jsonl --distinct-from data/m1/valid.jsonl
@@ -48,6 +62,7 @@ Run from the repo folder:
 
 import argparse
 import json
+import math
 import re
 import sys
 from collections import Counter
@@ -86,6 +101,35 @@ HARD_TAGS = {
     "rule5_bait": {("non_contradiction", "merely_related")},
     "true_unclear": {("unclear", None)},
 }
+# Cross-pair check (M3): limit on the TF-IDF cosine of two pairs, chosen on
+# the M2 training pairs (data/m3/README.md).
+CROSS_PAIR_LIMIT = 0.44
+IDEA_STOPWORDS = frozenset("""
+a an the and or but of to in on at by for with from as is are was were be been being has have had do does did
+not no nor his her hers him he she they them their its it this that these those there here who whom which what
+when where why how all any both each every few more most other some such only own same so than too very can will
+just into over under about after before up down out off again once i you we my your our s t one two three also
+still yet ever never always""".split())
+IDEA_GROUPS = {
+    "MEAT": "meat beef pork lamb mutton chicken sausage sausages bacon ham steak veal goat mince kebab burger burgers "
+            "chops chop ribs brisket turkey duck salami",
+    "SIBLING": "brother brothers sister sisters sibling siblings twin twins",
+    "CHILD": "son sons daughter daughters child children kid kids",
+    "PARENT": "mother father mum dad mom parents parent",
+    "VEHICLE": "car cars hatchback van truck jeep pickup sedan saloon minivan suv motorbike scooter",
+    "DRIVE": "drive drives driving drove driven licence license",
+    "PET": "dog dogs cat cats puppy kitten rabbit parrot hamster tortoise budgie goldfish",
+    "NIGHT": "night nights overnight evening evenings",
+    "DAYTIME": "daytime morning mornings afternoon afternoons",
+    "COLOUR": "red blue green yellow white black grey gray brown orange purple pink",
+    "WEEKDAY": "monday mondays tuesday tuesdays wednesday wednesdays thursday thursdays friday fridays saturday "
+               "saturdays sunday sundays",
+    "HAND": "left right lefty",
+    "WEIGHT": "kilo kilos kilograms pounds stone grams",
+    "DISTANCE": "kilometre kilometres km mile miles metres meters",
+}
+IDEA_GROUP_OF = {word: name for name, members in IDEA_GROUPS.items() for word in members.split()}
+IDEA_ENDINGS = ("ings", "ing", "edly", "ed", "es", "s")
 # Where a row came from and who labelled it (D-043), with the allowed values.
 PROVENANCE = {"source": ("synthetic",), "label_by": ("claude-code",)}
 
@@ -282,11 +326,85 @@ def check_near_copies(pairs, other_pairs, other_path):
                 fail(line_no, f"pair is a near copy ({shared:.0%} shared words) of {other_pair['id']} of {other_path}")
 
 
+def idea_stem(word):
+    for ending in IDEA_ENDINGS:
+        if len(word) > len(ending) + 3 and word.endswith(ending):
+            return word[: -len(ending)]
+    return word
+
+
+def idea_words(pair):
+    """The set of words the cross-pair check compares: both memories, no names or little words, endings cut, group words added."""
+    names = set(WORD.findall(pair["person"]))
+    found = set()
+    for which in ("a", "b"):
+        for w in WORD.findall(pair[which]["text"]):
+            if w in names:
+                continue
+            w = w.lower()
+            if w in IDEA_GROUP_OF:
+                found.add(IDEA_GROUP_OF[w])
+            if w not in IDEA_STOPWORDS:
+                found.add(idea_stem(w))
+    return found
+
+
+def cross_pair_scores(pairs, others, limit=CROSS_PAIR_LIMIT):
+    """Every pair of the file against every later pair of the file and every pair of the other files.
+
+    `pairs` is [(line_no, pair)]; `others` is [(path, [pair], frozen)]. Word weights (IDF) are counted over
+    all of them. Returns [(score, line_no, pair_id, path or None, other_id, frozen)] for scores above `limit`,
+    highest first; path None means the other pair is in the checked file itself.
+    """
+    rows = [(line_no, pair["id"], None, False, idea_words(pair), True) for line_no, pair in pairs]
+    for path, other_pairs, frozen in others:
+        rows += [(None, pair["id"], path, frozen, idea_words(pair), False) for pair in other_pairs]
+    total = len(rows)
+    df = Counter(w for row in rows for w in row[4])
+    idf = {w: math.log((total + 1) / (count + 1)) + 1 for w, count in df.items()}
+    vectors = []
+    for row in rows:
+        norm = math.sqrt(sum(idf[w] ** 2 for w in row[4])) or 1.0
+        vectors.append({w: idf[w] / norm for w in row[4]})
+    by_word = {}
+    for index, vector in enumerate(vectors):
+        for w in vector:
+            by_word.setdefault(w, []).append(index)
+    found = []
+    for i, row in enumerate(rows):
+        if not row[5]:
+            continue
+        candidates = {j for w in vectors[i] for j in by_word[w] if j > i or not rows[j][5]}
+        candidates.discard(i)
+        for j in candidates:
+            score = sum(weight * vectors[j].get(w, 0.0) for w, weight in vectors[i].items())
+            if score > limit:
+                other = rows[j]
+                found.append((score, row[0], row[1], other[2], other[1], other[3]))
+    found.sort(key=lambda f: (-f[0], f[1], f[4]))
+    return found
+
+
+def check_cross_pairs(pairs, others, path):
+    """Fail if any pair of the file is too alike another pair of the file or of the other files. Returns how many pairs were compared."""
+    found = cross_pair_scores(pairs, others)
+    for score, line_no, pair_id, other_path, other_id, frozen in found:
+        where = f"{other_id} of {other_path}" if other_path else f"{other_id} of this file"
+        print(f"TOO ALIKE {score:.2f}: line {line_no} ({pair_id}) and {where}", file=sys.stderr)
+        if not frozen:
+            print(f"    {pair_id}: {next(p for n, p in pairs if n == line_no)['a']['text']} | ...", file=sys.stderr)
+    if found:
+        fail(None, f"{len(found)} pairs of pairs score above the cross-pair limit {CROSS_PAIR_LIMIT} (list above)")
+    return len(pairs) + sum(len(other_pairs) for _, other_pairs, _ in others)
+
+
 def main():
     parser = argparse.ArgumentParser(description="Check a memory-pair dataset file (JSONL).")
     parser.add_argument("path")
     parser.add_argument("--against", action="append", default=[], help="a frozen test set: no shared names, no near copies")
     parser.add_argument("--distinct-from", action="append", default=[], help="another set: no repeated or near-copied pairs")
+    parser.add_argument("--cross-pair", action="store_true",
+                        help=f"also fail on any two pairs, in this file or across all files given, scoring above {CROSS_PAIR_LIMIT}")
     args = parser.parse_args()
     path = args.path
     try:
@@ -347,6 +465,12 @@ def main():
             walls.append(f"no names of the {names} name words in {other_path}, no repeated or near-copied pairs")
         else:
             walls.append(f"no repeated or near-copied pairs from {other_path}")
+
+    if args.cross_pair:
+        others = [(p, [pair for _, pair in read_pairs(p)], True) for p in args.against]
+        others += [(p, [pair for _, pair in read_pairs(p)], False) for p in args.distinct_from]
+        compared = check_cross_pairs(pairs, others, path)
+        walls.append(f"cross-pair check: no two of the {compared} pairs in all files given score above {CROSS_PAIR_LIMIT}")
 
     total = sum(labels.values())
     print(f"File: {path}")
