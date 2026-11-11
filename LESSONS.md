@@ -299,3 +299,13 @@ The 2026-11-04 close-out was committed to `main` while Claude Code worked on `m2
 ## 2026-11-09: Mistake: the rule's printout hid the counts
 `scripts/compare_v2.py` prints each score as a Python fraction, which is always shown in lowest terms. So v1's worst-case recall, 134 of 150, printed as 67/75, and v2's 138 of 150 as 23/25. The verdict was right, but a reader could not see the pair counts the rule is about. The code was left as it was, because the rule was fixed before the score; `results/m2/v2/summary.md` gives the plain counts.
 **Lesson:** when a result is judged in pairs, print the counts themselves (caught of real), not a reduced fraction. Check what a report prints on a made-up example before the real run, not only what it decides.
+
+## 2026-11-11: M2 "what RL changed" note (Claude Code, M2-08, SPEC Step 8)
+- **What RL changed.** v2 caught more contradictions than v1 in every version of both test sets (hard set without dates: 134 to 143 of 150), raised fewer false alarms on the hard set (4, 5, 5 against 6, 6, 8), and said `unclear` 18 times on the hard set against 42. The `unclear` dodge was v1's main miss, and the reward priced it at -0.5, so this is the change the reward aimed at. It kept v1's exact answer format, with 0 invalid answers.
+- **What it did not change.** `looks_like_clash` did not move (4 of 30 wrong as is and without dates), and far-apart pairs got one worse when swapped (21 to 20 of 25), which decided the miss by one pair. The pool went stale: the share of pairs whose 8 answers all scored the same rose from 0.45 to about 0.8, and steps 250, 300 and 314 tied.
+- **Why it matters.** RL moves what the reward prices and the pool still holds. It does little for traps the pool has few of, or once the pool is all "always right".
+- Public write-up: `docs/m2-what-we-learned.md`. Every lesson with its fix and where attempt 2 applies it: `docs/m2-lessons-and-fixes.md`.
+
+## 2026-11-11: Mistake (caught before running): a publish check assumed every repo stays private
+`scripts/prepublish_check.py` failed any Hugging Face repo that was not private. That was right for M1's first run, but M1's three repos were made public on D-034, so the next run would have failed on them for no reason. The check now reads a table of which repos must be private (M2's two) and which must be public (M1's three). Separately, the M2-08 prompt put M2's cost at about $3.50 to $4; adding up `runs/RUNLOG.md` gives $2.79 billed plus $0.42 to $0.93 estimated, so the write-up says about $3.21 to $3.72.
+**Lesson:** a check written for one moment must say what it expects, not assume today's state forever. A number in a prompt is a guess until it is added up from the records.

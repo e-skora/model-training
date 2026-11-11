@@ -166,3 +166,8 @@ Plain meanings. Add a term the first time it shows up.
 - **Logits processor:** a small step inside `generate` that changes the model's word chances before a word is picked, for example by applying top_k. With the pool's settings there are none, so words are picked from the model's plain chances.
 - **Step 0:** v1 itself, before any RL. It is one of the candidates when the checkpoint is chosen (D-056), so RL must beat it to be picked.
 - **Billed cost:** what Modal really charges for a run, read from `modal billing report`. It includes CPU and memory as well as the GPU, and is reported for full hours only.
+- **Benchmark:** a fixed test that anyone can run, so different models can be compared on the same pairs. The M2 hard test set is published as a small one in `eskora/memory-contradiction-pairs-hard`.
+- **Paired count:** comparing two models pair by pair instead of by totals: how many contradictions one caught that the other missed, and the reverse. On the hard set swapped, v2 caught 4 that v1 missed and missed 2 that v1 caught.
+- **Pass mark (the bar):** the score a new model must reach to be called better, fixed in code before any test score. M2's is D-041, coded in `scripts/compare_v2.py`.
+- **KL penalty (beta):** a cost for drifting away from the starting model during RL. M2 set it to 0.0, so there was none; the clipping limits each step instead.
+- **Subset (Hugging Face dataset):** one named part of a dataset repo that loads on its own, set in the card's `configs`. The hard dataset has three: `benchmark`, `training` and `rl_pool`.
