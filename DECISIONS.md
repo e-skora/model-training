@@ -301,3 +301,8 @@ The blind review of M2 Step 3 (`reviews/M2-03-blind-review.md`) agreed with 199 
 - **Defaults (Claude in Cowork):** M3 starts from v2 and is still judged against v1; hard test set 2 has 600 pairs (300 contradictions) so the +0.03 bar is 9 pairs; validation set 2 has 200 pairs; training runs in two rounds with a fresh pool between and an early stop; M2's accepted training script is reused with the smallest changes.
 - **The public M2 write-up** includes the lessons-and-fixes table and sections Elias writes himself; the pre-publish check fails while those sections are empty.
 - **Replaces:** `docs/attempt-2-inputs.md`, named in D-061, is not made; `docs/m2-lessons-and-fixes.md` does that job.
+
+### D-064 (2026-11-11, Elias): Claude writes Elias's two sections of the M2 write-up
+- **Elias's words:** "I dont have time for this", about writing the "why I ran this" and "my takeaway" sections himself.
+- **What changes:** Claude Code writes both, in his voice, only from his recorded words (D-035, D-061, D-063). The pre-publish check no longer waits for him. This replaces the Elias-written sections in D-063 and in `docs/m2-lessons-and-fixes.md` G3.
+

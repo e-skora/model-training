@@ -143,6 +143,6 @@ Every attempt ends with this file updated: one entry per lesson, each with a fix
 **G2. A one-word approval must be quoted with its scope at once. (Keep)**
 - Fix: every approval goes into DECISIONS with the question and Elias's exact words.
 
-**G3. Elias wants to shape what is published.**
-- Fix: the public write-up has sections written by Elias. The pre-publish check fails while they are empty, so nothing goes public without his words.
+**G3. Elias wants the publish to show what we learned (D-061).**
+- Fix: the lessons table is the core of the write-up. Claude writes the personal sections in Elias's voice from his recorded words only (D-064), so publishing does not wait on his time.
 - In M2-08 and in attempt 2's Step 9.

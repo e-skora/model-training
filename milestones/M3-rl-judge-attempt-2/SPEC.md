@@ -20,7 +20,7 @@ Every M3 prompt starts by reading `docs/m2-lessons-and-fixes.md` and names the e
 | 6 | Fix the choice rule and the pass rule in code before any result | Claude in Cowork, then Claude Code | A1, A6, D4 |
 | 7 | Full run (Elias approves the cost first), choose the checkpoint on validation set 2 | Claude Code | A5, F2 |
 | 8 | Score the chosen model once on test set 2 and on the M1 test set | Claude Code, then Claude in Cowork rescores | A1, A2, A4, A6 |
-| 9 | Publish what M3 taught us, with Elias's own sections; update the lessons file | Claude Code, Elias, Claude in Cowork | G3 |
+| 9 | Publish what M3 taught us; update the lessons file | Claude Code, Claude in Cowork | G3 |
 
 ## Step 1: the new sets (A2, A5, C1, C4)
 - **Hard test set 2:** 600 pairs, 600 different people, 300 contradictions. The same 11 trap groups as M2, each with twice M2's count, so the two sets can be compared. No `unclear` pairs, as in M2.
@@ -55,7 +55,6 @@ Every M3 prompt starts by reading `docs/m2-lessons-and-fixes.md` and names the e
 ## Elias's part
 - Step 3: the `unclear` sheet, about 15 minutes.
 - Step 7: yes or no to the full run's cost, if it is over $1 (D-019).
-- Step 9: his own sections of the write-up.
 
 ## Cost (Claude's estimate from M2's bills)
 - Baselines: about $0.50. Pool sampling, two rounds: about $1.50 to $2.50. Trial: about $0.20. Training, two rounds: about $1.50 to $2.50. Choice: about $0.80. Final scoring: about $0.30.
