@@ -49,5 +49,47 @@
         "sha256": "1fabb86e04b888a16a3b26af6c10860273456d793aeb775feb7253320c028dce"
       }
     }
+  },
+  {
+    "when_utc": "2026-11-11T21:52:31Z",
+    "repo": "eskora/memory-contradiction-pairs-hard",
+    "repo_type": "dataset",
+    "private": true,
+    "commit": "1d2bb9739c5ace918248ad593abd2b2289e7d6cb",
+    "files": {
+      "test-hard.jsonl": {
+        "from": "data/m2/test-hard.jsonl",
+        "sha256": "d9e8e5f3a53369981d11c835a0a4bf68b9b105ae0c8dd78b2d02df967645ff82"
+      },
+      "train-hard.jsonl": {
+        "from": "data/m2/train-hard.jsonl",
+        "sha256": "8c2abddb93b21a0850c000c2919ee0bb11277ecf3b9e272d55cf9703110ca856"
+      },
+      "valid-hard.jsonl": {
+        "from": "data/m2/valid-hard.jsonl",
+        "sha256": "dd29c90d5343c5e7b59208de90f0334a7b63b2849c7941f990bf38d18320b384"
+      },
+      "rl-pool.jsonl": {
+        "from": "data/m2/rl-pool.jsonl",
+        "sha256": "2c5c3bf2591c8376b72f15e0a34d223ec24fc366e45b781e4706dcaebdac4e77"
+      },
+      "README.md": {
+        "from": "hf/memory-contradiction-pairs-hard/README.md",
+        "sha256": "f44e2f3fe12ee86780f780302592aaa87c6625bc5e51ed1e0f77309729055fa3"
+      }
+    }
+  },
+  {
+    "when_utc": "2026-11-11T21:52:33Z",
+    "repo": "eskora/m2-contradiction-judge-qwen3-4b-grpo-lora",
+    "repo_type": "model",
+    "private": true,
+    "commit": "7c9f402aa8e137de06ebc958d5a2185c1d2beed7",
+    "files": {
+      "README.md": {
+        "from": "hf/m2-contradiction-judge-qwen3-4b-grpo-lora/README.md",
+        "sha256": "f5d1cf3470c20100f12d7bbf68fc53779b18978360889eeb2d040f784c915dfb"
+      }
+    }
   }
 ]

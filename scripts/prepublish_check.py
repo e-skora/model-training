@@ -4,7 +4,10 @@
     uv run python scripts/prepublish_check.py --local     (skip the Hugging Face repos)
 
 What it checks, at git HEAD (and, for secrets and model files, all of git history)
-and in the three private Hugging Face repos:
+and in the five Hugging Face repos (M1's three, public since D-034; M2's two, which must
+be private until Claude in Cowork's check, D-062). M2-08 added the M2 write-up
+`docs/m2-what-we-learned.md`, the two M2 cards and the M2 data; the frozen hard test
+file is read only through `judge.frozen`.
 1. No secrets: no tokens or keys in any file, no `.env` or key files.
 2. No model files in git.
 3. No em dashes in public text: every README in git, the cards in `hf/`, the post drafts,
@@ -30,14 +33,16 @@ import re
 import subprocess
 import sys
 import tempfile
-from decimal import ROUND_HALF_UP, Decimal
+from decimal import ROUND_CEILING, ROUND_HALF_UP, Decimal
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO / "src"))
 
+from judge.frozen import frozen_entries, load_frozen  # noqa: E402
 from judge.prompt import SYSTEM_MESSAGE, prompt_sha256  # noqa: E402
-from judge.score import VERSIONS, load_jsonl, score  # noqa: E402
+from judge.reward import REWARD  # noqa: E402
+from judge.score import VERSIONS, load_jsonl, score, trap_key  # noqa: E402
 
 EM_DASH = "—"
 CARDS = {
@@ -74,6 +79,83 @@ TRACED = [
 ]
 L4_PRICE = ("0.000222", "results/m1/trained-v1/summary.md", "L4 $0.000222 a second")
 
+# ---------- M2 (M2-08): the write-up, the two new repos ----------
+# Hugging Face repos and whether each must be private. M1's were made public on D-034;
+# the M2 repos stay private until Claude in Cowork checks them (D-062).
+VISIBILITY = {
+    "eskora/memory-contradiction-pairs": False,
+    "eskora/m1-contradiction-judge-qwen3-4b-gguf": False,
+    "eskora/m1-contradiction-judge-qwen3-4b-lora": False,
+    "eskora/memory-contradiction-pairs-hard": True,
+    "eskora/m2-contradiction-judge-qwen3-4b-grpo-lora": True,
+}
+CARDS_M2 = {
+    "eskora/memory-contradiction-pairs-hard": ("dataset", "hf/memory-contradiction-pairs-hard/README.md"),
+    "eskora/m2-contradiction-judge-qwen3-4b-grpo-lora": ("model", "hf/m2-contradiction-judge-qwen3-4b-grpo-lora/README.md"),
+}
+WRITE_UP = "docs/m2-what-we-learned.md"
+DATA_FILES_M2 = {"test-hard.jsonl": "data/m2/test-hard.jsonl", "train-hard.jsonl": "data/m2/train-hard.jsonl",
+                 "valid-hard.jsonl": "data/m2/valid-hard.jsonl", "rl-pool.jsonl": "data/m2/rl-pool.jsonl"}
+FROZEN_M2 = "data/m2/test-hard.jsonl"  # read only through judge.frozen.load_frozen
+# Texts whose numbers must trace to M2's records.
+NUMBERED_TEXT_M2 = [WRITE_UP] + [card for _, card in CARDS_M2.values()]
+# Saved answers behind each (model, test set) row of an M2 score table.
+M2_SOURCES = {
+    ("v1", "hard"): "results/m2/baseline/trained-v1/qwen3-4b-trained-v1",
+    ("v2", "hard"): "results/m2/v2/hard/qwen3-4b-grpo-v2",
+    ("v1", "m1"): "results/m1/trained-v1/qwen3-4b-trained-v1",
+    ("v2", "m1"): "results/m2/v2/m1/qwen3-4b-grpo-v2",
+}
+M2_TESTS = {"hard": FROZEN_M2, "m1": "data/m1/test.jsonl"}
+M2_COLUMNS = {"caught / said": "caught_said", "precision": "precision", "recall": "recall",
+              "unclear answers": "unclear", "invalid answers": "invalid"}
+# RUNLOG rows of the write-up's cost table, each a sum of these RUNLOG lines (matched by text).
+M2_COST_GROUPS = {
+    "smoke": ["Smoke test, v1 adapter, 8 validation pairs", "Smoke test, untrained Qwen3-4B-Instruct-2507 and Qwen3-8B"],
+    "hard baselines": ["Untrained Qwen3-8B on the frozen hard test set", "v1 adapter on the frozen hard test set",
+                       "Untrained Qwen3-4B-Instruct-2507 on the frozen hard test set"],
+    "v2 scoring": ["Smoke run of v2", "v2 answers the frozen hard test set once", "v2 answers the frozen M1 test set once"],
+}
+POOL_SMOKE_BILLS = "the two smoke runs above $0.02 and $0.03"
+# Numbers in the M2 texts that come from prose records: (number, file, phrase it must contain).
+TRACED_M2 = [
+    ("8", "LESSONS.md", "8 \"vegetarian orders meat\" pairs"),
+    ("7", "LESSONS.md", "7 \"never owned a car, drives one\""),
+    ("11", "LESSONS.md", "Eleven helper agents wrote the M2 training pairs"),
+    ("33", "reviews/M2-03-blind-review.md", "the 33 `unclear` pairs"),
+    ("32", "reviews/M2-03-blind-review.md", "The 32 disputed `unclear` pairs are dropped"),
+    ("296", "reviews/M2-01-blind-review.md", "same as the file on 296 of 300"),
+    ("330", "reviews/M2-03-blind-review.md", "Blind judging of 330 pairs"),
+    ("199", "reviews/M2-03-blind-review.md", "| Training, not `unclear` | 200 | 199 |"),
+    ("96", "reviews/M2-03-blind-review.md", "| Validation, not `unclear` | 97 | 96 |"),
+    ("14", "results/m2/baseline/summary.md", "14 of those are `unclear` answers"),
+    ("16", "results/m2/baseline/summary.md", "At its worst the adapter misses 16 contradictions"),
+    ("60", "docs/m2-lessons-and-fixes.md", "The last 60 or so steps taught almost nothing"),
+    ("0.45", "results/m2/grpo/full-run-summary.md", "rose from 0.45 in the first 40 steps to about 0.8"),
+    ("0.8", "results/m2/grpo/full-run-summary.md", "rose from 0.45 in the first 40 steps to about 0.8"),
+    ("40", "results/m2/grpo/full-run-summary.md", "rose from 0.45 in the first 40 steps to about 0.8"),
+    ("0.7", "milestones/M3-rl-judge-attempt-2/SPEC.md", "stays above 0.7 for 40 steps"),
+    ("0.02", "docs/m2-lessons-and-fixes.md", "one false alarm moves precision by about 0.02"),
+    ("0.03", "milestones/M2-rl-judge/SPEC.md", "at least 0.03 (5 pairs)"),
+    ("0.01", "milestones/M2-rl-judge/SPEC.md", "no more than 0.01 lower"),
+    ("600", "milestones/M3-rl-judge-attempt-2/SPEC.md", "600 pairs, 600 different people, 300 contradictions"),
+    ("300", "milestones/M3-rl-judge-attempt-2/SPEC.md", "600 pairs, 600 different people, 300 contradictions"),
+    ("200", "milestones/M3-rl-judge-attempt-2/SPEC.md", "200 pairs, 100 contradictions"),
+    ("100", "milestones/M3-rl-judge-attempt-2/SPEC.md", "200 pairs, 100 contradictions"),
+    ("45", "milestones/M3-rl-judge-attempt-2/SPEC.md", "writes 45 candidates"),
+    ("15", "milestones/M3-rl-judge-attempt-2/SPEC.md", "about 15 minutes"),
+    ("1,018", "results/m2/pool/summary.md", "1,018"),
+    ("1.02", "results/m2/grpo/full-run-summary.md", "estimate $1.02"),
+    ("0.71", "results/m2/grpo/full-run-summary.md", "estimate $0.71"),
+    ("71.3", "results/m2/grpo/full-run-summary.md", "314 steps in 71.3 minutes"),
+    ("250", "results/m2/grpo/full-run-summary.md", "Steps 250, 300 and 314 tie on every count"),
+    ("50", "results/m2/grpo/full-run-summary.md", "the checkpoints at 50, 100, 150"),
+    ("262", "results/m2/pool/summary.md", "262"),
+    ("52", "results/m2/pool/summary.md", "52"),
+    ("2", "milestones/M2-rl-judge/SPEC.md", "About $2 to $8 for all of M2"),
+    ("8", "milestones/M2-rl-judge/SPEC.md", "About $2 to $8 for all of M2"),
+]
+
 SECRET_PATTERNS = {
     "Hugging Face token": r"\bhf_[A-Za-z0-9]{30,}",
     "Modal token": r"\b(?:ak|as)-[A-Za-z0-9]{20,}",
@@ -97,6 +179,7 @@ NAME_PATTERNS = [
     r"https?://\S+", r"\]\([^)]*\)", r"\b\d{4}-\d{2}-\d{2}\b", r"Qwen3-\d+B(?:-Instruct-\d+)?", r"SHA-256",
     r"\b\d+-bit\b", r"\b4 bits\b", r"\b4 billion\b", r"\bM4 Pro\b", r"\bL4\b", r"\b(?:t|tr|v)-\d+\b",
     r"127\.0\.0\.1:\d+", r"Apache 2\.0", r"CC BY 4\.0", r"\bM\d\b", r"^\s*\d+\.\s", r"shasum -a 256",
+    r"\bD-\d{3}\b",
 ]
 SPECIAL_NUMBERS = r"\d+e-\d+|\d+\.\d+\.\d+"  # 2e-4, version numbers such as 0.24.0
 
@@ -401,6 +484,265 @@ def all_facts(root=REPO):
     return facts
 
 
+# ---------- M2 facts ----------
+
+def three_places(top, bottom):
+    return str((Decimal(top) / Decimal(bottom)).quantize(Decimal("0.001"), rounding=ROUND_HALF_UP))
+
+
+def m2_test_pairs(root=REPO):
+    """{test set: pairs}. Both frozen files are read only through judge.frozen."""
+    root = Path(root)
+    return {name: load_frozen(root / path, root / "STATE.md") for name, path in M2_TESTS.items()}
+
+
+def m2_rows(root=REPO, tests=None):
+    """{(model, test set, version): scored rows}, from the saved answers."""
+    root = Path(root)
+    tests = tests or m2_test_pairs(root)
+    return {(model, test, version): score(tests[test], load_jsonl(root / f"{prefix}.{version}.jsonl"))[1]
+            for (model, test), prefix in M2_SOURCES.items() for version in VERSIONS}
+
+
+def m2_score_facts(rows):
+    """{(model, test set, version): {column: text}} for the M2 score tables."""
+    facts = {}
+    for key, scored in rows.items():
+        said = sum(r["label"] == "contradiction" for r in scored)
+        real = sum(r["gold_label"] == "contradiction" for r in scored)
+        caught = sum(r["label"] == "contradiction" and r["gold_label"] == "contradiction" for r in scored)
+        facts[key] = {"caught": caught, "said": said, "real": real,
+                      "caught_said": f"{caught} / {said}",
+                      "precision": three_places(caught, said), "recall": three_places(caught, real),
+                      "unclear": str(sum(r["label"] == "unclear" for r in scored)),
+                      "invalid": str(sum(bool(r["problem"]) for r in scored))}
+    return facts
+
+
+def m2_trap_facts(rows):
+    """{(trap, model): "as is / swapped / no dates" right labels} on the hard set, plus {(trap, "pairs"): n}."""
+    facts = {}
+    for model in ("v1", "v2"):
+        right = {}
+        for version in VERSIONS:
+            for r in rows[(model, "hard", version)]:
+                key = trap_key({"hard": r["hard"], "type": r["gold_type"], "label": r["gold_label"]})
+                right.setdefault(key, {v: 0 for v in VERSIONS})[version] += r["label"] == r["gold_label"]
+        for key, counts in right.items():
+            facts[(key, model)] = " / ".join(str(counts[v]) for v in VERSIONS)
+    for r in rows[("v1", "hard", VERSIONS[0])]:
+        key = (trap_key({"hard": r["hard"], "type": r["gold_type"], "label": r["gold_label"]}), "pairs")
+        facts[key] = facts.get(key, 0) + 1
+    return facts
+
+
+def check_m2_score_tables(text, scores):
+    """Problems in tables with Model, Test set and Version columns. `scores` is m2_score_facts()."""
+    problems = []
+    versions = {"as is": "as_is", "swapped": "swapped", "no dates": "no_dates"}
+    for header, rows in table_rows(text):
+        lower = [h.lower() for h in header]
+        if not {"model", "test set", "version"} <= set(lower):
+            continue
+        for row in rows:
+            key = (row[lower.index("model")], row[lower.index("test set")].lower(), versions.get(row[lower.index("version")]))
+            if key not in scores:
+                problems.append(f"row not traced to saved answers: {' | '.join(row)}")
+                continue
+            for col, name in enumerate(lower):
+                column = M2_COLUMNS.get(name)
+                if column and row[col] != scores[key][column]:
+                    problems.append(f"{' '.join(row[:3])}, {header[col]}: text says {row[col]}, answers say {scores[key][column]}")
+    return problems
+
+
+def check_m2_trap_tables(text, traps):
+    """Problems in per-trap tables: "Trap (right answer) | Pairs | v1 | v2"."""
+    problems = []
+    for header, rows in table_rows(text):
+        lower = [h.lower() for h in header]
+        if not lower or lower[0] != "trap (right answer)":
+            continue
+        for row in rows:
+            for col, name in enumerate(lower[1:], 1):
+                want = traps.get((row[0], name))
+                if want is None or row[col] != str(want):
+                    problems.append(f"trap {row[0]}, {header[col]}: text says {row[col]}, answers say {want}")
+    return problems
+
+
+def m2_data(root=REPO):
+    """{file name: rows} of the four M2 data files (the frozen one through judge.frozen)."""
+    root = Path(root)
+    return {name: (load_frozen(root / path, root / "STATE.md") if path == FROZEN_M2 else load_jsonl(root / path))
+            for name, path in DATA_FILES_M2.items()}
+
+
+def m2_fingerprints(root=REPO):
+    """{file name: SHA-256}: the frozen file's from STATE.md (checked by load_frozen in m2_data), the rest computed."""
+    root = Path(root)
+    frozen = frozen_entries(root / "STATE.md")
+    return {name: frozen[path] if path == FROZEN_M2 else hashlib.sha256((root / path).read_bytes()).hexdigest()
+            for name, path in DATA_FILES_M2.items()}
+
+
+def check_m2_dataset_tables(text, data, fingerprints):
+    """The dataset card's file table (pairs, SHA-256) and trap table (pairs per trap and right answer)."""
+    problems = []
+    test = data["test-hard.jsonl"]
+    for header, rows in table_rows(text):
+        lower = [h.lower() for h in header]
+        if lower[:1] == ["file"] and "pairs" in lower:
+            for row in rows:
+                name = row[0].strip("`")
+                if name not in data:
+                    problems.append(f"file table row not an M2 data file: {row[0]}")
+                    continue
+                if row[lower.index("pairs")].replace(",", "") != str(len(data[name])):
+                    problems.append(f"{name} pairs: card says {row[lower.index('pairs')]}, file has {len(data[name])}")
+                if "sha-256" in lower and row[lower.index("sha-256")].strip("`") != fingerprints[name]:
+                    problems.append(f"{name} SHA-256 differs from the file")
+        if lower[:1] == ["trap"] and "right answer" in lower and "pairs" in lower:
+            for row in rows:
+                trap, answer = row[0].strip("`"), row[lower.index("right answer")]
+                n = sum(p["hard"] == trap and (p["type"] or p["label"]) == answer for p in test)
+                if row[lower.index("pairs")] != str(n):
+                    problems.append(f"trap {trap} ({answer}): card says {row[lower.index('pairs')]}, test file has {n}")
+    return problems
+
+
+def runlog_m2_lines(root=REPO):
+    return [line for line in (Path(root) / "runs/RUNLOG.md").read_text().splitlines()
+            if line.startswith("| 20") and "| M2-" in line]
+
+
+def m2_costs(root=REPO):
+    """Numbers of the write-up's cost section, worked out from runs/RUNLOG.md."""
+    lines = runlog_m2_lines(root)
+    facts = set()
+    for line in lines:  # every number written in an M2 line (minutes, costs)
+        facts |= {n.replace(",", "") for n in re.findall(r"(?<![\w.])\d[\d,]*(?:\.\d+)?(?!\w)", line)}
+
+    def find(phrase):
+        found = [line for line in lines if phrase in line]
+        if len(found) != 1:
+            raise SystemExit(f"STOP: RUNLOG line '{phrase}' found {len(found)} times")
+        return found[0]
+
+    def money(line):
+        return [Decimal(x) for x in re.findall(r"\$(\d+\.\d+)", line.split("|")[-2])]
+
+    def minutes(line):
+        return Decimal(re.search(r"(\d+\.\d+) inside the function", line.split("|")[-3]).group(1))
+
+    estimated_low = estimated_high = Decimal(0)
+    for group, phrases in M2_COST_GROUPS.items():
+        picked = [find(p) for p in phrases]
+        if group == "v2 scoring":
+            facts.add(str(sum(money(l)[0] for l in picked)))
+            facts.add(str(sum(minutes(l) for l in picked)))
+        else:
+            low, high = sum(money(l)[0] for l in picked), sum(money(l)[1] for l in picked)
+            estimated_low += low
+            estimated_high += high
+            facts |= {str(low), str(high)}
+    billed = [money(line)[0] for line in lines if "billed" in line.split("|")[-2]]
+    pool_smoke = [Decimal(x) for x in re.findall(r"\$(\d+\.\d+)", POOL_SMOKE_BILLS)]
+    if not any(POOL_SMOKE_BILLS in line for line in lines):
+        raise SystemExit("STOP: the pool smoke bills are no longer in RUNLOG")
+    facts.add(str(sum(pool_smoke)))
+    total_billed = (sum(billed) + sum(pool_smoke)).quantize(Decimal("0.01"))
+    facts |= {str(total_billed), str(total_billed + estimated_low), str(total_billed + estimated_high)}
+    return facts
+
+
+def m2_facts(root=REPO, rows=None, data=None):
+    """Every number the M2 texts may state, each worked out from a file in the repo."""
+    root = Path(root)
+    rows = rows or m2_rows(root)
+    data = data or m2_data(root)
+    facts = set()
+    scores = m2_score_facts(rows)
+    for (model, test, version), s in scores.items():
+        facts |= {str(s["caught"]), str(s["said"]), str(s["real"]), s["precision"], s["recall"], s["unclear"],
+                  s["invalid"], str(s["said"] - s["caught"]), str(len(rows[(model, test, version)]))}
+    for model in ("v1", "v2"):
+        for test in M2_TESTS:
+            facts.add(str(sum(int(scores[(model, test, v)]["unclear"]) for v in VERSIONS)))
+    # The bar (D-060): v1's worst-case recall + 0.03 of the real contradictions, rounded up; precision - 0.01.
+    v1_hard = [scores[("v1", "hard", v)] for v in VERSIONS]
+    worst = min(v1_hard, key=lambda s: Decimal(s["caught"]) / s["real"])
+    bar = (Decimal(worst["caught"]) + Decimal("0.03") * worst["real"]).quantize(Decimal(1), rounding=ROUND_CEILING)
+    worst_p = min(Decimal(s["caught"]) / s["said"] for s in v1_hard)
+    facts |= {str(bar), str((worst_p - Decimal("0.01")).quantize(Decimal("0.001"), rounding=ROUND_HALF_UP))}
+    # Pair by pair: contradictions one model caught and the other missed, per version.
+    for test in M2_TESTS:
+        for v in VERSIONS:
+            one = {r["id"]: r for r in rows[("v1", test, v)]}
+            two = {r["id"]: r for r in rows[("v2", test, v)]}
+            real = [i for i in one if one[i]["gold_label"] == "contradiction"]
+            facts.add(str(sum(one[i]["label"] != "contradiction" and two[i]["label"] == "contradiction" for i in real)))
+            facts.add(str(sum(one[i]["label"] == "contradiction" and two[i]["label"] != "contradiction" for i in real)))
+    traps = m2_trap_facts(rows)
+    facts |= {str(v) for k, v in traps.items() if k[1] == "pairs"}
+    facts |= {part for k, v in traps.items() if k[1] != "pairs" for part in str(v).split(" / ")}
+    facts.add(str(len({k[0].split(" (")[0] for k in traps if k[1] == "pairs"}) + 1))  # 11 traps (near_identical has two)
+    for rows_ in data.values():
+        facts |= {str(len(rows_)), str(len({p["person"] for p in rows_}))}
+        tally = {}
+        for p in rows_:
+            for key in ((p["label"], p["type"]), p.get("hard"), p.get("outcome")):
+                tally[key] = tally.get(key, 0) + 1
+        facts |= {str(n) for n in tally.values()}
+    facts |= m2_costs(root)
+    meta = json.loads((root / "results/m2/grpo/train.meta.json").read_text())
+    grpo = meta["grpo"]
+    facts |= {str(meta["planned_steps"]), str(grpo["num_generations"]), rounded(meta["wall_seconds"] / 60, 1),
+              f"{grpo['learning_rate']:.0e}".replace("e-0", "e-"), str(grpo["epsilon"]), str(grpo["epsilon_high"]),
+              str(grpo["beta"]), str(grpo["temperature"]), str(grpo["max_completion_length"]),
+              meta["versions"]["trl"], meta["versions"]["unsloth"]}
+    facts |= {str(abs(value)) for value in REWARD.values()}  # the card states them with their sign in words
+    for number, path, phrase in TRACED_M2:
+        if phrase in (root / path).read_text():
+            facts.add(number)
+    return facts
+
+
+def known_hex_m2(root=REPO):
+    """Fingerprints and commits the M2 texts may name."""
+    root = Path(root)
+    meta = json.loads((root / "results/m2/grpo/train.meta.json").read_text())
+    return set(m2_fingerprints(root).values()) | {meta["prompt_sha256"], meta["reward_sha256"], meta["base_revision"],
+                                                   meta["adapter_revision"], meta["upload"]["commit"]}
+
+
+def check_numbers_m2(report, texts, root=REPO, where="git"):
+    """The M2 texts: score and trap tables recomputed from the saved answers, dataset tables from the
+    files, and every other number traced to a record."""
+    root = Path(root)
+    rows, data = m2_rows(root), m2_data(root)
+    facts, scores, traps = m2_facts(root, rows, data), m2_score_facts(rows), m2_trap_facts(rows)
+    fingerprints, hexes = m2_fingerprints(root), known_hex_m2(root)
+    tests = m2_test_pairs(root)
+    data_lines = [p for rows_ in data.values() for p in rows_] + list(tests["m1"])
+    answers = {a["raw"] for prefix in M2_SOURCES.values() for v in VERSIONS for a in load_jsonl(root / f"{prefix}.{v}.jsonl")}
+    failures = 0
+    for name, text in texts.items():
+        problems = check_m2_score_tables(text, scores) + check_m2_trap_tables(text, traps)
+        problems += check_m2_dataset_tables(text, data, fingerprints)
+        problems += check_examples(text, answers, data_lines, list(tests["m1"]) + list(tests["hard"]))
+        problems += [f"fingerprint not in any record: {h}" for h in sorted(set(HEX.findall(text)) - hexes)]
+        loose = untraced_numbers(split_card(text)[0], facts)
+        if loose:
+            problems.append(f"numbers not traced to a results file: {loose}")
+        for problem in problems:
+            report.add("FAIL", f"{name} ({where}): {problem}")
+        failures += len(problems)
+    if not failures:
+        report.add("PASS", f"every number, table, fingerprint and example in the M2 write-up and cards traces to "
+                           f"the saved answers, data and records ({where}): {len(texts)} files")
+
+
 # ---------- the checks ----------
 
 def check_git(report, root=REPO):
@@ -427,14 +769,14 @@ def check_git(report, root=REPO):
 def public_texts(files, root=REPO):
     """{path: text} of the public prose at HEAD: every README, the hf/ cards and the post drafts."""
     paths = [p for p in files if p.endswith("README.md") or (p.startswith("hf/") and p.endswith(".md"))
-             or p.startswith("docs/posts/")]
+             or p.startswith("docs/posts/") or p == WRITE_UP]
     return {p: head_text(p, root) for p in sorted(paths)}
 
 
 def public_facing(name):
     """The cards, the GitHub front page and the posts: these must not name Aeverum or Mara
     Lindqvist at all. Other files that do are listed in the notes."""
-    return name in NUMBERED_TEXT or name.startswith(("hf/", "huggingface:", "docs/posts/"))
+    return name in NUMBERED_TEXT or name in NUMBERED_TEXT_M2 or name.startswith(("hf/", "huggingface:", "docs/posts/"))
 
 
 def check_texts(report, texts, where="git"):
@@ -457,8 +799,10 @@ def check_texts(report, texts, where="git"):
 
 def check_data(report, root=REPO):
     problems = []
-    for path in DATA_FILES.values():
-        text = (Path(root) / path).read_text()
+    texts = {path: (Path(root) / path).read_text() for path in DATA_FILES.values()}
+    for name, rows in m2_data(root).items():  # the frozen M2 file through judge.frozen
+        texts[DATA_FILES_M2[name]] = "\n".join(json.dumps(r, ensure_ascii=False) for r in rows)
+    for path, text in texts.items():
         if BANNED_NAMES.search(text):
             problems.append(f"{path}: Mara or Lindqvist")
         if "aeverum" in text.lower():
@@ -472,9 +816,9 @@ def check_data(report, root=REPO):
                            "(the people are made up; no check can prove a made-up name is not also a real one)")
 
 
-def check_numbers(report, texts, root=REPO, where="git"):
+def check_numbers(report, texts, root=REPO, where="git", extra_facts=frozenset()):
     root = Path(root)
-    facts, scores, counts, hexes = all_facts(root), score_facts(root), data_counts(root), known_hex(root)
+    facts, scores, counts, hexes = all_facts(root) | set(extra_facts), score_facts(root), data_counts(root), known_hex(root)
     test_pairs = load_jsonl(root / DATA_FILES["test.jsonl"])
     data_lines = [p for path in DATA_FILES.values() for p in load_jsonl(root / path)]
     answers = {a["raw"] for source in ("gguf", "adapter") for v in VERSIONS
@@ -502,8 +846,10 @@ def check_hugging_face(report, root=REPO):
 
     api = HfApi()
     texts = {}
+    frozen = frozen_entries(Path(root) / "STATE.md")
+    m2_data(root)  # stops here if the frozen hard test file changed (judge.frozen)
     with tempfile.TemporaryDirectory() as tmp:
-        for repo_id, (repo_type, card) in CARDS.items():
+        for repo_id, (repo_type, card) in {**CARDS, **CARDS_M2}.items():
             info = api.repo_info(repo_id, repo_type=repo_type, files_metadata=True)
 
             def download(filename):
@@ -519,11 +865,12 @@ def check_hugging_face(report, root=REPO):
             small = [s.rfilename for s in info.siblings
                      if s.size is not None and s.size <= BIG_FILE_BYTES and not s.rfilename.endswith(MODEL_EXTENSIONS)]
             problems += [f"secret in {n} ({kind})" for n in small for kind in find_secrets(download(n).read_text(errors="replace"))]
-            if repo_type == "dataset":
+            if repo_id == "eskora/memory-contradiction-pairs":
                 problems += [f"{name} differs from {path}" for name, path in DATA_FILES.items()
                              if download(name).read_bytes() != (Path(root) / path).read_bytes()]
-            if not info.private:
-                problems.append("NOT PRIVATE")
+            if repo_id in CARDS_M2 and repo_type == "dataset":
+                problems += m2_dataset_problems(names, download, frozen, root)
+            problems += visibility_problems(repo_id, info.private)
             for problem in problems:
                 report.add("FAIL", f"{repo_id}: {problem}")
             big = [n for n in names if n not in small]
@@ -531,7 +878,37 @@ def check_hugging_face(report, root=REPO):
                        f"{repo_id}: private={info.private}, commit {info.sha}, {len(names)} files, "
                        f"{len(small)} scanned for secrets" + (f" (not scanned, too big or model files: {big})" if big else ""))
     check_texts(report, texts, where="Hugging Face")
-    check_numbers(report, texts, root, where="Hugging Face")
+    check_numbers(report, {k: v for k, v in texts.items() if k.removeprefix("huggingface:") in CARDS}, root,
+                  where="Hugging Face")
+    check_numbers_m2(report, {k: v for k, v in texts.items() if k.removeprefix("huggingface:") in CARDS_M2}, root,
+                     where="Hugging Face")
+
+
+def visibility_problems(repo_id, private):
+    """A repo must be as VISIBILITY says: the M2 repos private until Claude in Cowork's check,
+    the M1 repos public since D-034."""
+    want = VISIBILITY[repo_id]
+    if want and not private:
+        return ["NOT PRIVATE"]
+    if not want and private:
+        return ["private, but it was made public on D-034"]
+    return []
+
+
+def m2_dataset_problems(names, download, frozen, root=REPO):
+    """The M2 dataset repo must hold the four data files: the frozen one equal to its STATE.md
+    fingerprint (the local copy is checked by judge.frozen), the others byte for byte the repo's."""
+    problems = [f"{name} missing" for name in DATA_FILES_M2 if name not in names]
+    for name, path in DATA_FILES_M2.items():
+        if name not in names:
+            continue
+        remote = download(name).read_bytes()
+        if path == FROZEN_M2:
+            if hashlib.sha256(remote).hexdigest() != frozen[path]:
+                problems.append(f"{name} is not the frozen file (SHA-256 differs from STATE.md)")
+        elif remote != (Path(root) / path).read_bytes():
+            problems.append(f"{name} differs from {path}")
+    return problems
 
 
 def notes(report, files, root=REPO):
@@ -559,7 +936,10 @@ def main(argv):
     texts = public_texts(files)
     check_texts(report, texts)
     check_data(report)
-    check_numbers(report, {name: texts[name] for name in NUMBERED_TEXT if name in texts})
+    check_numbers(report, {name: texts[name] for name in NUMBERED_TEXT if name in texts and name != "README.md"})
+    # The README carries M1 and M2 numbers.
+    check_numbers(report, {"README.md": texts["README.md"]}, extra_facts=m2_facts())
+    check_numbers_m2(report, {name: texts[name] for name in NUMBERED_TEXT_M2 if name in texts})
     if "--local" in argv:
         report.add("NOTE", "Hugging Face repos not checked (--local)")
     else:

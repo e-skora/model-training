@@ -1,18 +1,23 @@
 # model-training
 
-I am learning to fine-tune and train open language models hands-on, and publishing every model I make, with its data, code and honest scores.
+I experiment with fine-tuning different types of open language models, and publish every model I make, with its data, code and honest scores.
+
+**New: [What I learned from training a small judge model with reinforcement learning](docs/m2-what-we-learned.md).** The second model missed the bar I set before scoring, by one pair. The write-up shows what reinforcement learning changed, what it did not, and the thirteen lessons the second attempt is built on.
 
 ## Models
 
 | Model | What it does | Status |
 |---|---|---|
-| Memory contradiction judge v1 (Qwen3-4B) | Reads two memories about a person and says whether they contradict each other, with a one-line reason | Done 2026-10-23: trained, tested, runs on a Mac with Ollama |
+| Memory contradiction judge v1 (Qwen3-4B) | Reads two memories about a person and says whether they contradict each other, with a one-line reason | Done 2026-10-23: trained, tested, runs on a Mac with Ollama. **The recommended model** |
+| Memory contradiction judge v2 (Qwen3-4B, GRPO) | The same job, trained further with reinforcement learning | Experiment, 2026-11-09: missed its bar by one pair, so not called better than v1 |
 
 On Hugging Face:
 
 - [eskora/m1-contradiction-judge-qwen3-4b-gguf](https://huggingface.co/eskora/m1-contradiction-judge-qwen3-4b-gguf): the ready-to-run file for Ollama (start here)
 - [eskora/m1-contradiction-judge-qwen3-4b-lora](https://huggingface.co/eskora/m1-contradiction-judge-qwen3-4b-lora): the training add-on (LoRA adapter), for GPUs
 - [eskora/memory-contradiction-pairs](https://huggingface.co/datasets/eskora/memory-contradiction-pairs): the made-up training and test data
+- [eskora/m2-contradiction-judge-qwen3-4b-grpo-lora](https://huggingface.co/eskora/m2-contradiction-judge-qwen3-4b-grpo-lora): v2, the reinforcement learning experiment that missed its bar
+- [eskora/memory-contradiction-pairs-hard](https://huggingface.co/datasets/eskora/memory-contradiction-pairs-hard): the hard pairs, with a 300-pair test file that works as a small benchmark of 11 traps
 
 How to set it up on a Mac and call it from a program: [docs/run-judge-on-mac.md](docs/run-judge-on-mac.md).
 
@@ -32,6 +37,17 @@ The untrained rows show the version where they did worst: with the newer memory 
 
 The main limit: all the data, the test set included, was written by Claude, a language model, in one style. Scores on memories written by real people will likely be lower.
 
+## M2: reinforcement learning, a miss by one pair
+
+v2 is v1 trained further with GRPO. On the hard test set it caught 138 of 150 real contradictions in its weakest version; the bar, fixed in code before any score, was 139. It caught more in every version of both test sets and said `unclear` less than half as often, but by the rule it is not better, and v1 stays the one to use. Every number: [results/m2/v2/summary.md](results/m2/v2/summary.md).
+
+Parts you can reuse:
+
+- **The reward function** for a label-and-reason judge, with its tests: [src/judge/reward.py](src/judge/reward.py).
+- **The checkpoint-choice rule**, fixed before training: `choose_checkpoint` in [scripts/train_grpo.py](scripts/train_grpo.py).
+- **The pass rule**, committed before the first test answer: [scripts/compare_v2.py](scripts/compare_v2.py).
+- **The run checks** in [scripts/train_grpo.py](scripts/train_grpo.py): they prove on the GPU that sampling, prompts, stop rules and answer counts are what the plan says, and stop the run if not.
+
 ## How it is built
 
 - Fine-tuning with [Unsloth](https://github.com/unslothai/unsloth) (QLoRA), on rented GPUs from [Modal](https://modal.com).
@@ -43,14 +59,14 @@ The main limit: all the data, the test set included, was written by Claude, a la
 
 | Folder or file | What is in it |
 |---|---|
-| `data/m1/` | The train, validation and test pairs (JSONL), and how they were made |
+| `data/m1/`, `data/m2/` | The train, validation and test pairs (JSONL) for each milestone, and how they were made |
 | `src/judge/` | Shared code: the one prompt, scoring, data formatting, model loading |
 | `scripts/` | Things you run: baseline, training, export to GGUF, Ollama runs, checks, upload |
 | `tests/` | Tests (`uv run pytest`). They use fake data and temporary folders only |
-| `results/m1/` | Every model's raw answers, settings and a plain-language summary per run |
+| `results/m1/`, `results/m2/` | Every model's raw answers, settings and a plain-language summary per run |
 | `ollama/Modelfile` | The recipe Ollama uses to run the GGUF file |
 | `hf/` | The Hugging Face cards, and a record of each upload |
-| `docs/` | How to run jobs, how to run the judge on a Mac, post drafts |
+| `docs/` | The M2 write-up, how to run jobs, how to run the judge on a Mac, post drafts |
 | `milestones/` | What each milestone must do (the spec) |
 | `prompts/`, `reviews/` | The task prompts each step was built from, and the code reviews |
 | `runs/RUNLOG.md` | One line per GPU run: what ran, how long, what it cost |
@@ -61,7 +77,8 @@ The main limit: all the data, the test set included, was written by Claude, a la
 | Milestone | What | Tools | Status |
 |---|---|---|---|
 | M1 | Memory contradiction judge, fine-tuned (supervised) | Unsloth on Modal, Hugging Face | v1 done |
-| M2 | Same judge, improved with reinforcement learning (GRPO) | Unsloth on Modal | Next |
+| M2 | Same judge, improved with reinforcement learning (GRPO) | Unsloth on Modal | Done: missed its bar by one pair ([write-up](docs/m2-what-we-learned.md)) |
+| M3 | Second attempt at M2, built on its lessons | Unsloth on Modal | Next ([plan](milestones/M3-rl-judge-attempt-2/SPEC.md)) |
 | Later | Managed fine-tuning, the way companies buy it | Together AI | Order not set |
 | Later | Reinforcement learning practice | Tinker (Thinking Machines) | Order not set |
 
