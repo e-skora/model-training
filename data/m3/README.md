@@ -2,11 +2,11 @@
 
 `test-hard-2.jsonl` (600 pairs) is the test set for M3, the second attempt at beating v1 with reinforcement learning. `valid-hard-2.jsonl` (200 pairs) is its validation set: it only helps choose a checkpoint during training. Each pair is two memories about one made-up person, built around a trap: a way a judge could get it wrong by reading the surface instead of the meaning. **Neither file is ever used for training**, and no model has been run on either.
 
-**Status:** written and checked by Claude Code on 2026-11-11 (prompt M3-01). **Not frozen yet.** Claude in Cowork runs the blind review with control pairs (lesson C3) and then freezes both files.
+**Status:** written and checked by Claude Code on 2026-11-11 (prompt M3-01). Blind-reviewed by Claude in Cowork on 2026-11-13 with control pairs (`reviews/M3-01-blind-review.md`): 593 of 600 test labels agreed, all 60 validation and 40 control pairs agreed; 3 test pairs had a time word fixed (h2-136, h2-522, h2-559). **Both files frozen 2026-11-13.**
 
-SHA-256 as written (not frozen):
-- `test-hard-2.jsonl`: `a57843b66844c5934f58852b3cbdd9b87fc1726169e44566c0ba1e7b720d3b63`
-- `valid-hard-2.jsonl`: `f819f98758fa70f59759ec15c20f2049366b05f886e2dc77ff3a72aa84cc18f6`
+SHA-256, frozen 2026-11-13:
+- `test-hard-2.jsonl`: `4bf37d6af7dd8cca037862b06425410a381f6075a4403de4c55361729f03a71d` (as first written: `a57843b6...720d3b63`)
+- `valid-hard-2.jsonl`: `f819f98758fa70f59759ec15c20f2049366b05f886e2dc77ff3a72aa84cc18f6` (unchanged by the review)
 - `situation-plan.jsonl`: `1164c03a843b912687dee0937237585b9d555add3a28fa1e114c621573536de3`
 
 ## Why these sizes

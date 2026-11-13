@@ -82,8 +82,10 @@ Every attempt ends with this file updated: one entry per lesson, each with a fix
 - Fix: keep, for the test set, the validation set and a sample of the training pairs. The reviewer never sees the writing brief.
 - In attempt 2: Steps 1 and 3.
 
-**C4. Dates drawn by a program must fit the time words in the text. (Keep the check)**
+**C4. Dates drawn by a program must fit the time words in the text. (Keep the check, and widen it)**
 - In attempt 2: Step 1 (the checker rule from M2 stays).
+- **Found again in M3's blind review (2026-11-13):** 3 of 600 test contradictions ("never had a passport" against "last month he flew abroad") had a relative time word in memory b that, counted back from b's date, could fall after memory a. They read as updates. Fixed before freezing (`reviews/M3-01-blind-review.md`).
+- **Widened fix:** in a "never X" contradiction, the event must be dated before memory a, by an absolute time word or by b's date. For Step 3, the checker flags "last week", "last weekend", "last month" and "recently" in memory b of a contradiction when b's date minus that span falls after memory a's date.
 
 ## D. Safety checks and reviews
 
