@@ -4,7 +4,7 @@ His LinkedIn has no earlier posts about this work, so this is a first post that 
 
 ---
 
-For the past three weeks I have been experimenting with fine-tuning small open AI models, and before I start the second attempt I would like advice from people who have done this, so this post covers both attempts so far.
+For the past three weeks I have been experimenting with fine-tuning small open AI models, and since I have not written about it here before, this post covers both attempts so far.
 
 The project is a small judge for a personal memory app. It reads two memories about a person and decides whether they contradict each other, which matters because an app that remembers things for you has to notice when it is told two things that cannot both be true.
 
@@ -16,7 +16,7 @@ The miss was still worth publishing, because each thing it taught me became a fi
 
 The code, the data and both models are public, and the whole project has cost about $5 of rented GPU time.
 
-If you have trained with GRPO or something like it, how did you decide when to rebuild the practice pool? My plan is two rounds with a fresh pool between them, and I would rather hear what worked for you before I spend the GPU time.
+If you have trained small models with reinforcement learning, I would be glad to compare notes, especially on keeping the practice set from going stale.
 
 Write-up, with every number linked to the file that shows it: https://github.com/e-skora/model-training/blob/main/docs/m2-what-we-learned.md
 Code: https://github.com/e-skora/model-training
