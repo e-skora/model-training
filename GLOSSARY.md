@@ -171,3 +171,7 @@ Plain meanings. Add a term the first time it shows up.
 - **Pass mark (the bar):** the score a new model must reach to be called better, fixed in code before any test score. M2's is D-041, coded in `scripts/compare_v2.py`.
 - **KL penalty (beta):** a cost for drifting away from the starting model during RL. M2 set it to 0.0, so there was none; the clipping limits each step instead.
 - **Subset (Hugging Face dataset):** one named part of a dataset repo that loads on its own, set in the card's `configs`. The hard dataset has three: `benchmark`, `training` and `rl_pool`.
+- **Situation plan:** one list, written before any data, that gives every pair its person, topic and the one idea it carries (the clash or the change). Each writer gets only its own slice, so two writers cannot reach for the same idea (lesson C1). M3's is `data/m3/situation-plan.jsonl`.
+- **Cross-pair check:** `scripts/check_dataset.py --cross-pair` compares every pair with every other pair, in the file and in all earlier files, and fails if two are too alike. It scores shared rare words (TF-IDF cosine), with a limit of 0.44 chosen on M2's training pairs.
+- **TF-IDF cosine:** a way to score how alike two texts are. Each word gets a weight: the fewer texts use it, the more it weighs. The score is 0 when two texts share no words and 1 when they use the same words.
+- **Server log (Ollama):** the file where the Ollama program writes what it does while it runs. On this Mac it is `/opt/homebrew/var/log/ollama.log`; at the normal level it holds no memory text (`docs/ollama-log-check.md`).

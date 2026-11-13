@@ -202,3 +202,83 @@ def test_against_takes_several_test_sets_and_walls_off_each(tmp_path):
                  write(tmp_path, "test-hard.jsonl", [pair("h-1", "Nim Rask", "Nim grows chillies.", "Nim hates chillies.")]))
     assert result.returncode == 0, result.stdout + result.stderr
     assert result.stdout.count("Wall: no names of the 2 name words in") == 2
+
+
+# Cross-pair check (M3, lesson C1): repeated ideas across all files given.
+# The same idea in other words, as in M2's "vegetarian eats meat" pairs; under the near-copy limit (46% shared words).
+VEG_A = pair("c-1", "Oro Tamsi", "Oro is a strict vegetarian.", "Oro grills lamb chops for his supper.")
+VEG_B = pair("c-2", "Ivo Penner", "Ivo is a strict vegetarian.", "Ivo eats pork sausages for supper.")
+OTHERS = [
+    pair("c-3", "Ula Brekk", "Ula keeps her canoe in the boathouse.", "Ula paddles across the bay at dawn."),
+    pair("c-4", "Eno Valt", "Eno repairs old radios in his shed.", "Eno sells the radios at the flea market."),
+    pair("c-5", "Asa Mirro", "Asa learned to weave baskets from reeds.", "Asa's baskets hang above the kitchen window."),
+]
+
+
+def load_checker():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("check_dataset_under_test", SCRIPT)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_cross_pair_passes_when_ideas_differ(tmp_path):
+    result = run(write(tmp_path, "new.jsonl", [VEG_A] + OTHERS), "--cross-pair")
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "cross-pair check: no two of the 4 pairs in all files given score above 0.44" in result.stdout
+
+
+def test_cross_pair_fails_on_the_same_idea_in_other_words_in_one_file(tmp_path):
+    result = run(write(tmp_path, "new.jsonl", [VEG_A, VEG_B] + OTHERS), "--cross-pair")
+    assert result.returncode != 0
+    assert "TOO ALIKE" in result.stderr and "(c-1) and c-2 of this file" in result.stderr
+    assert "1 pairs of pairs score above the cross-pair limit 0.44" in result.stderr
+
+
+def test_without_the_option_the_same_file_still_passes(tmp_path):
+    result = run(write(tmp_path, "new.jsonl", [VEG_A, VEG_B] + OTHERS))
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "cross-pair" not in result.stdout
+
+
+def test_cross_pair_covers_distinct_from_files_and_shows_their_text(tmp_path):
+    other = write(tmp_path, "old-train.jsonl", [VEG_B])
+    result = run(write(tmp_path, "new.jsonl", [VEG_A] + OTHERS), "--cross-pair", "--distinct-from", other)
+    assert result.returncode != 0
+    assert f"(c-1) and c-2 of {other}" in result.stderr
+    assert "Oro is a strict vegetarian." in result.stderr
+
+
+def test_cross_pair_names_a_frozen_test_pair_by_id_only(tmp_path):
+    frozen = write(tmp_path, "test.jsonl", [VEG_B])
+    result = run(write(tmp_path, "new.jsonl", [VEG_A] + OTHERS), "--cross-pair", "--against", frozen)
+    assert result.returncode != 0
+    assert f"(c-1) and c-2 of {frozen}" in result.stderr
+    assert "pork" not in result.stderr and "Ivo" not in result.stderr and "pork" not in result.stdout
+
+
+def test_cross_pair_does_not_compare_two_other_files_with_each_other(tmp_path):
+    first = write(tmp_path, "old-1.jsonl", [VEG_A])
+    second = write(tmp_path, "old-2.jsonl", [VEG_B])
+    result = run(write(tmp_path, "new.jsonl", OTHERS), "--cross-pair", "--distinct-from", first, "--distinct-from", second)
+    assert result.returncode == 0, result.stdout + result.stderr
+
+
+def test_idea_words_drop_names_and_little_words_cut_endings_and_add_group_words():
+    checker = load_checker()
+    words = checker.idea_words(VEG_A)
+    assert "Oro" not in words and "oro" not in words and "is" not in words and "for" not in words
+    assert "MEAT" in words and "NIGHT" not in words and "WEEKDAY" not in words
+    assert "grill" in words and "chop" in words and "supper" in words
+    assert "MEAT" in checker.idea_words(VEG_B) and "MEAT" not in checker.idea_words(OTHERS[0])
+
+
+def test_group_words_raise_the_score_of_the_same_idea_in_other_words():
+    checker = load_checker()
+    rows = [(1, VEG_A), (2, VEG_B)] + [(n, p) for n, p in enumerate(OTHERS, start=3)]
+    with_groups = checker.cross_pair_scores(rows, [], limit=0.0)
+    checker.IDEA_GROUP_OF.clear()
+    without_groups = checker.cross_pair_scores(rows, [], limit=0.0)
+    score = lambda found: next(s for s, _, a, _, b, _ in found if {a, b} == {"c-1", "c-2"})
+    assert score(with_groups) > checker.CROSS_PAIR_LIMIT > score(without_groups)
