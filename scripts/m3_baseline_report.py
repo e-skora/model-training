@@ -148,7 +148,7 @@ def build(sets=SETS, root=ROOT, m2_compare=M2_COMPARE, state_path=None):
         "bar": bar(c["v1"]["test"]),
         "traps": test_traps,
         "paired": paired(pairs["test"], answers["v1"]["test"], answers["v2"]["test"]),
-        "m2": {"counts": m2["counts"]["hard"], "traps": m2["traps"]},
+        "m2": {"counts": {m: m2["counts"][m]["hard"] for m in NAMES}, "traps": m2["traps"]},
         "shares": {"m3": shares(test_traps), "m2": shares(m2["traps"])},
     }
 

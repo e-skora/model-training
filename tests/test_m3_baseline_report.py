@@ -62,7 +62,7 @@ def write_setup(tmp_path, v1=V1, v2=V2):
                     "".join(json.dumps(a) + "\n" for a in ans), encoding="utf-8")
     m2 = tmp_path / "compare.json"
     row = {"pairs": 30, **{f"{m} {v}": 25 for m in ("v1", "v2") for v in VERSIONS}}
-    m2.write_text(json.dumps({"counts": {"hard": {}}, "traps": {"paraphrase (contradiction)": row}}),
+    m2.write_text(json.dumps({"counts": {"v1": {"hard": {"as_is": 1}}, "v2": {"hard": {}}}, "traps": {"paraphrase (contradiction)": row}}),
                   encoding="utf-8")
     return dict(sets=sets, root=str(root), m2_compare=str(m2), state_path=str(state))
 
@@ -117,6 +117,7 @@ def test_traps_and_shares(tmp_path):
     assert row["pairs"] == 10 and row["v1 as_is"] == 8 and row["v2 as_is"] == 9 and row["v1 as_is unclear"] == 1
     assert result["shares"]["m3"]["paraphrase (contradiction)"] == {"v1": (24, 30), "v2": (27, 30)}
     assert result["shares"]["m2"]["paraphrase (contradiction)"] == {"v1": (75, 90), "v2": (75, 90)}
+    assert result["m2"]["counts"] == {"v1": {"as_is": 1}, "v2": {}}  # compare.json: counts[model][set]
     text = rep.report(result)
     assert "75/90 (0.833) -> 24/30 (0.800)" in text
     assert "looks_like_clash (compatible_detail): - -> " in text  # not in the made-up M2 table
