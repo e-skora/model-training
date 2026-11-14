@@ -1,0 +1,50 @@
+test set 2: model version  caught/said (precision)  caught/real (recall)  unclear invalid format_breaks
+  v1 as_is       273/283 (0.965)   273/300 (0.910)  21 0 0
+  v1 swapped     269/279 (0.964)   269/300 (0.897)  28 0 0
+  v1 no_dates    268/280 (0.957)   268/300 (0.893)  25 0 0
+  v2 as_is       290/299 (0.970)   290/300 (0.967)  2 0 0
+  v2 swapped     286/294 (0.973)   286/300 (0.953)  7 0 0
+  v2 no_dates    286/293 (0.976)   286/300 (0.953)  3 0 0
+
+valid set 2: model version  caught/said (precision)  caught/real (recall)  unclear invalid format_breaks
+  v1 as_is         95/99 (0.960)    95/100 (0.950)  4 0 0
+  v1 swapped       93/96 (0.969)    93/100 (0.930)  6 0 0
+  v1 no_dates      92/95 (0.968)    92/100 (0.920)  6 0 0
+  v2 as_is        98/102 (0.961)    98/100 (0.980)  0 0 0
+  v2 swapped       97/99 (0.980)    97/100 (0.970)  2 0 0
+  v2 no_dates     97/101 (0.960)    97/100 (0.970)  0 0 0
+
+M3 bar (record only; coded in Step 6), from v1 on test set 2:
+  worst-case recall: v1 268/300 (no_dates); need at least 277/300 (9 more caught)
+  worst-case precision: v1 268/280 (no_dates); need at least 663/700 (0.9471); at 277 caught that allows at most 292 said, 15 false alarms
+
+test set 2 per trap, right labels (v1 as_is swapped no_dates | v2 as_is swapped no_dates) [unclear, all 3 versions: v1 | v2]:
+  change_word_contradiction (contradiction): of 50: 47 45 45 | 46 45 45 [0 | 0]
+  rule5_bait (merely_related): of 50: 50 50 50 | 50 50 50 [0 | 0]
+  small_difference (contradiction): of 60: 57 55 57 | 57 57 56 [5 | 1]
+  looks_like_clash (compatible_detail): of 60: 53 54 56 | 52 55 56 [2 | 0]
+  near_identical (compatible_detail): of 40: 40 39 40 | 40 39 40 [0 | 0]
+  paraphrase (contradiction): of 60: 48 49 46 | 58 56 56 [35 | 8]
+  update_with_overlap (update): of 50: 50 49 49 | 50 50 49 [0 | 0]
+  indirect_update (update): of 50: 48 49 43 | 50 50 49 [1 | 0]
+  far_apart_no_change (contradiction): of 50: 50 48 48 | 50 49 49 [3 | 1]
+  explain_away (contradiction): of 80: 71 72 72 | 79 79 80 [25 | 2]
+  near_identical (merely_related): of 50: 49 45 48 | 49 48 49 [3 | 0]
+
+test set 2 pair by pair: v1 wrong and v2 right / v1 right and v2 wrong (contradictions only in brackets):
+  as_is     21 / 3 [19 / 2]
+  swapped   23 / 0 [17 / 0]
+  no_dates  26 / 1 [19 / 1]
+
+per-trap share right over all 3 versions, M2 hard set -> M3 test set 2 (v1; v2):
+  change_word_contradiction (contradiction): 69/75 (0.920) -> 137/150 (0.913); 70/75 (0.933) -> 136/150 (0.907)
+  rule5_bait (merely_related): 73/75 (0.973) -> 150/150 (1.000); 74/75 (0.987) -> 150/150 (1.000)
+  small_difference (contradiction): 90/90 (1.000) -> 169/180 (0.939); 90/90 (1.000) -> 170/180 (0.944)
+  looks_like_clash (compatible_detail): 80/90 (0.889) -> 163/180 (0.906); 80/90 (0.889) -> 163/180 (0.906)
+  near_identical (compatible_detail): 60/60 (1.000) -> 119/120 (0.992); 60/60 (1.000) -> 119/120 (0.992)
+  paraphrase (contradiction): 75/90 (0.833) -> 143/180 (0.794); 79/90 (0.878) -> 170/180 (0.944)
+  update_with_overlap (update): 75/75 (1.000) -> 148/150 (0.987); 75/75 (1.000) -> 149/150 (0.993)
+  indirect_update (update): 72/75 (0.960) -> 140/150 (0.933); 73/75 (0.973) -> 149/150 (0.993)
+  far_apart_no_change (contradiction): 63/75 (0.840) -> 146/150 (0.973); 67/75 (0.893) -> 148/150 (0.987)
+  explain_away (contradiction): 111/120 (0.925) -> 215/240 (0.896); 116/120 (0.967) -> 238/240 (0.992)
+  near_identical (merely_related): 65/75 (0.867) -> 142/150 (0.947); 74/75 (0.987) -> 146/150 (0.973)
