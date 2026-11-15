@@ -1,0 +1,878 @@
+{
+  "counts": {
+    "v1": {
+      "test": {
+        "as_is": {
+          "pairs": 600,
+          "caught": 273,
+          "said": 283,
+          "real": 300,
+          "right": 563,
+          "unclear": 21,
+          "invalid": 0,
+          "format_breaks": 0
+        },
+        "swapped": {
+          "pairs": 600,
+          "caught": 269,
+          "said": 279,
+          "real": 300,
+          "right": 555,
+          "unclear": 28,
+          "invalid": 0,
+          "format_breaks": 0
+        },
+        "no_dates": {
+          "pairs": 600,
+          "caught": 268,
+          "said": 280,
+          "real": 300,
+          "right": 554,
+          "unclear": 25,
+          "invalid": 0,
+          "format_breaks": 0
+        }
+      },
+      "valid": {
+        "as_is": {
+          "pairs": 200,
+          "caught": 95,
+          "said": 99,
+          "real": 100,
+          "right": 191,
+          "unclear": 4,
+          "invalid": 0,
+          "format_breaks": 0
+        },
+        "swapped": {
+          "pairs": 200,
+          "caught": 93,
+          "said": 96,
+          "real": 100,
+          "right": 190,
+          "unclear": 6,
+          "invalid": 0,
+          "format_breaks": 0
+        },
+        "no_dates": {
+          "pairs": 200,
+          "caught": 92,
+          "said": 95,
+          "real": 100,
+          "right": 188,
+          "unclear": 6,
+          "invalid": 0,
+          "format_breaks": 0
+        }
+      }
+    },
+    "v2": {
+      "test": {
+        "as_is": {
+          "pairs": 600,
+          "caught": 290,
+          "said": 299,
+          "real": 300,
+          "right": 581,
+          "unclear": 2,
+          "invalid": 0,
+          "format_breaks": 0
+        },
+        "swapped": {
+          "pairs": 600,
+          "caught": 286,
+          "said": 294,
+          "real": 300,
+          "right": 578,
+          "unclear": 7,
+          "invalid": 0,
+          "format_breaks": 0
+        },
+        "no_dates": {
+          "pairs": 600,
+          "caught": 286,
+          "said": 293,
+          "real": 300,
+          "right": 579,
+          "unclear": 3,
+          "invalid": 0,
+          "format_breaks": 0
+        }
+      },
+      "valid": {
+        "as_is": {
+          "pairs": 200,
+          "caught": 98,
+          "said": 102,
+          "real": 100,
+          "right": 194,
+          "unclear": 0,
+          "invalid": 0,
+          "format_breaks": 0
+        },
+        "swapped": {
+          "pairs": 200,
+          "caught": 97,
+          "said": 99,
+          "real": 100,
+          "right": 195,
+          "unclear": 2,
+          "invalid": 0,
+          "format_breaks": 0
+        },
+        "no_dates": {
+          "pairs": 200,
+          "caught": 97,
+          "said": 101,
+          "real": 100,
+          "right": 193,
+          "unclear": 0,
+          "invalid": 0,
+          "format_breaks": 0
+        }
+      }
+    }
+  },
+  "bar": {
+    "recall": {
+      "v1_version": "no_dates",
+      "v1_caught": 268,
+      "real": 300,
+      "need_caught": 277,
+      "more_than_v1": 9
+    },
+    "precision": {
+      "v1_version": "no_dates",
+      "v1_caught": 268,
+      "v1_said": 280,
+      "need": "663/700",
+      "need_decimal": 0.9471428571428572,
+      "at_need_caught_max_said": 292,
+      "at_need_caught_max_false_alarms": 15
+    }
+  },
+  "traps": {
+    "change_word_contradiction (contradiction)": {
+      "pairs": 50,
+      "v1 as_is": 47,
+      "v1 as_is unclear": 0,
+      "v1 swapped": 45,
+      "v1 swapped unclear": 0,
+      "v1 no_dates": 45,
+      "v1 no_dates unclear": 0,
+      "v2 as_is": 46,
+      "v2 as_is unclear": 0,
+      "v2 swapped": 45,
+      "v2 swapped unclear": 0,
+      "v2 no_dates": 45,
+      "v2 no_dates unclear": 0
+    },
+    "rule5_bait (merely_related)": {
+      "pairs": 50,
+      "v1 as_is": 50,
+      "v1 as_is unclear": 0,
+      "v1 swapped": 50,
+      "v1 swapped unclear": 0,
+      "v1 no_dates": 50,
+      "v1 no_dates unclear": 0,
+      "v2 as_is": 50,
+      "v2 as_is unclear": 0,
+      "v2 swapped": 50,
+      "v2 swapped unclear": 0,
+      "v2 no_dates": 50,
+      "v2 no_dates unclear": 0
+    },
+    "small_difference (contradiction)": {
+      "pairs": 60,
+      "v1 as_is": 57,
+      "v1 as_is unclear": 1,
+      "v1 swapped": 55,
+      "v1 swapped unclear": 3,
+      "v1 no_dates": 57,
+      "v1 no_dates unclear": 1,
+      "v2 as_is": 57,
+      "v2 as_is unclear": 0,
+      "v2 swapped": 57,
+      "v2 swapped unclear": 1,
+      "v2 no_dates": 56,
+      "v2 no_dates unclear": 0
+    },
+    "looks_like_clash (compatible_detail)": {
+      "pairs": 60,
+      "v1 as_is": 53,
+      "v1 as_is unclear": 0,
+      "v1 swapped": 54,
+      "v1 swapped unclear": 1,
+      "v1 no_dates": 56,
+      "v1 no_dates unclear": 1,
+      "v2 as_is": 52,
+      "v2 as_is unclear": 0,
+      "v2 swapped": 55,
+      "v2 swapped unclear": 0,
+      "v2 no_dates": 56,
+      "v2 no_dates unclear": 0
+    },
+    "near_identical (compatible_detail)": {
+      "pairs": 40,
+      "v1 as_is": 40,
+      "v1 as_is unclear": 0,
+      "v1 swapped": 39,
+      "v1 swapped unclear": 0,
+      "v1 no_dates": 40,
+      "v1 no_dates unclear": 0,
+      "v2 as_is": 40,
+      "v2 as_is unclear": 0,
+      "v2 swapped": 39,
+      "v2 swapped unclear": 0,
+      "v2 no_dates": 40,
+      "v2 no_dates unclear": 0
+    },
+    "paraphrase (contradiction)": {
+      "pairs": 60,
+      "v1 as_is": 48,
+      "v1 as_is unclear": 11,
+      "v1 swapped": 49,
+      "v1 swapped unclear": 11,
+      "v1 no_dates": 46,
+      "v1 no_dates unclear": 13,
+      "v2 as_is": 58,
+      "v2 as_is unclear": 1,
+      "v2 swapped": 56,
+      "v2 swapped unclear": 4,
+      "v2 no_dates": 56,
+      "v2 no_dates unclear": 3
+    },
+    "update_with_overlap (update)": {
+      "pairs": 50,
+      "v1 as_is": 50,
+      "v1 as_is unclear": 0,
+      "v1 swapped": 49,
+      "v1 swapped unclear": 0,
+      "v1 no_dates": 49,
+      "v1 no_dates unclear": 0,
+      "v2 as_is": 50,
+      "v2 as_is unclear": 0,
+      "v2 swapped": 50,
+      "v2 swapped unclear": 0,
+      "v2 no_dates": 49,
+      "v2 no_dates unclear": 0
+    },
+    "indirect_update (update)": {
+      "pairs": 50,
+      "v1 as_is": 48,
+      "v1 as_is unclear": 0,
+      "v1 swapped": 49,
+      "v1 swapped unclear": 1,
+      "v1 no_dates": 43,
+      "v1 no_dates unclear": 0,
+      "v2 as_is": 50,
+      "v2 as_is unclear": 0,
+      "v2 swapped": 50,
+      "v2 swapped unclear": 0,
+      "v2 no_dates": 49,
+      "v2 no_dates unclear": 0
+    },
+    "far_apart_no_change (contradiction)": {
+      "pairs": 50,
+      "v1 as_is": 50,
+      "v1 as_is unclear": 0,
+      "v1 swapped": 48,
+      "v1 swapped unclear": 2,
+      "v1 no_dates": 48,
+      "v1 no_dates unclear": 1,
+      "v2 as_is": 50,
+      "v2 as_is unclear": 0,
+      "v2 swapped": 49,
+      "v2 swapped unclear": 1,
+      "v2 no_dates": 49,
+      "v2 no_dates unclear": 0
+    },
+    "explain_away (contradiction)": {
+      "pairs": 80,
+      "v1 as_is": 71,
+      "v1 as_is unclear": 9,
+      "v1 swapped": 72,
+      "v1 swapped unclear": 8,
+      "v1 no_dates": 72,
+      "v1 no_dates unclear": 8,
+      "v2 as_is": 79,
+      "v2 as_is unclear": 1,
+      "v2 swapped": 79,
+      "v2 swapped unclear": 1,
+      "v2 no_dates": 80,
+      "v2 no_dates unclear": 0
+    },
+    "near_identical (merely_related)": {
+      "pairs": 50,
+      "v1 as_is": 49,
+      "v1 as_is unclear": 0,
+      "v1 swapped": 45,
+      "v1 swapped unclear": 2,
+      "v1 no_dates": 48,
+      "v1 no_dates unclear": 1,
+      "v2 as_is": 49,
+      "v2 as_is unclear": 0,
+      "v2 swapped": 48,
+      "v2 swapped unclear": 0,
+      "v2 no_dates": 49,
+      "v2 no_dates unclear": 0
+    }
+  },
+  "paired": {
+    "as_is": {
+      "v1_wrong_v2_right": [
+        "h2-052",
+        "h2-055",
+        "h2-064",
+        "h2-102",
+        "h2-109",
+        "h2-174",
+        "h2-199",
+        "h2-211",
+        "h2-242",
+        "h2-286",
+        "h2-326",
+        "h2-338",
+        "h2-361",
+        "h2-464",
+        "h2-474",
+        "h2-487",
+        "h2-499",
+        "h2-503",
+        "h2-506",
+        "h2-514",
+        "h2-569"
+      ],
+      "v1_right_v2_wrong": [
+        "h2-001",
+        "h2-270",
+        "h2-321"
+      ],
+      "contradictions_v1_misses_v2_catches": [
+        "h2-052",
+        "h2-055",
+        "h2-064",
+        "h2-102",
+        "h2-109",
+        "h2-174",
+        "h2-199",
+        "h2-211",
+        "h2-242",
+        "h2-286",
+        "h2-338",
+        "h2-361",
+        "h2-464",
+        "h2-487",
+        "h2-499",
+        "h2-503",
+        "h2-506",
+        "h2-514",
+        "h2-569"
+      ],
+      "contradictions_v2_misses_v1_catches": [
+        "h2-001",
+        "h2-270"
+      ]
+    },
+    "swapped": {
+      "v1_wrong_v2_right": [
+        "h2-021",
+        "h2-046",
+        "h2-102",
+        "h2-136",
+        "h2-142",
+        "h2-199",
+        "h2-211",
+        "h2-242",
+        "h2-268",
+        "h2-320",
+        "h2-328",
+        "h2-341",
+        "h2-359",
+        "h2-396",
+        "h2-401",
+        "h2-411",
+        "h2-487",
+        "h2-499",
+        "h2-506",
+        "h2-510",
+        "h2-522",
+        "h2-555",
+        "h2-595"
+      ],
+      "v1_right_v2_wrong": [],
+      "contradictions_v1_misses_v2_catches": [
+        "h2-102",
+        "h2-136",
+        "h2-142",
+        "h2-199",
+        "h2-211",
+        "h2-242",
+        "h2-320",
+        "h2-328",
+        "h2-359",
+        "h2-396",
+        "h2-401",
+        "h2-411",
+        "h2-487",
+        "h2-499",
+        "h2-506",
+        "h2-510",
+        "h2-522"
+      ],
+      "contradictions_v2_misses_v1_catches": []
+    },
+    "no_dates": {
+      "v1_wrong_v2_right": [
+        "h2-052",
+        "h2-055",
+        "h2-064",
+        "h2-091",
+        "h2-109",
+        "h2-119",
+        "h2-128",
+        "h2-178",
+        "h2-199",
+        "h2-211",
+        "h2-242",
+        "h2-286",
+        "h2-326",
+        "h2-338",
+        "h2-339",
+        "h2-411",
+        "h2-426",
+        "h2-474",
+        "h2-483",
+        "h2-487",
+        "h2-499",
+        "h2-502",
+        "h2-514",
+        "h2-522",
+        "h2-569",
+        "h2-586"
+      ],
+      "v1_right_v2_wrong": [
+        "h2-166"
+      ],
+      "contradictions_v1_misses_v2_catches": [
+        "h2-052",
+        "h2-055",
+        "h2-064",
+        "h2-091",
+        "h2-109",
+        "h2-178",
+        "h2-199",
+        "h2-211",
+        "h2-242",
+        "h2-286",
+        "h2-338",
+        "h2-339",
+        "h2-411",
+        "h2-487",
+        "h2-499",
+        "h2-514",
+        "h2-522",
+        "h2-569",
+        "h2-586"
+      ],
+      "contradictions_v2_misses_v1_catches": [
+        "h2-166"
+      ]
+    }
+  },
+  "m2": {
+    "counts": {
+      "v1": {
+        "as_is": {
+          "pairs": 300,
+          "caught": 138,
+          "said": 144,
+          "real": 150,
+          "unclear": 12,
+          "invalid": 0,
+          "format_errors": 0,
+          "style_a_breaks": 0
+        },
+        "swapped": {
+          "pairs": 300,
+          "caught": 136,
+          "said": 142,
+          "real": 150,
+          "unclear": 15,
+          "invalid": 0,
+          "format_errors": 0,
+          "style_a_breaks": 0
+        },
+        "no_dates": {
+          "pairs": 300,
+          "caught": 134,
+          "said": 142,
+          "real": 150,
+          "unclear": 15,
+          "invalid": 0,
+          "format_errors": 0,
+          "style_a_breaks": 0
+        }
+      },
+      "v2": {
+        "as_is": {
+          "pairs": 300,
+          "caught": 141,
+          "said": 145,
+          "real": 150,
+          "unclear": 6,
+          "invalid": 0,
+          "format_errors": 0,
+          "style_a_breaks": 0
+        },
+        "swapped": {
+          "pairs": 300,
+          "caught": 138,
+          "said": 143,
+          "real": 150,
+          "unclear": 7,
+          "invalid": 0,
+          "format_errors": 0,
+          "style_a_breaks": 0
+        },
+        "no_dates": {
+          "pairs": 300,
+          "caught": 143,
+          "said": 148,
+          "real": 150,
+          "unclear": 5,
+          "invalid": 0,
+          "format_errors": 0,
+          "style_a_breaks": 0
+        }
+      }
+    },
+    "traps": {
+      "explain_away (contradiction)": {
+        "pairs": 40,
+        "v1 as_is": 38,
+        "v1 swapped": 38,
+        "v1 no_dates": 35,
+        "v2 as_is": 38,
+        "v2 swapped": 39,
+        "v2 no_dates": 39
+      },
+      "indirect_update (update)": {
+        "pairs": 25,
+        "v1 as_is": 25,
+        "v1 swapped": 24,
+        "v1 no_dates": 23,
+        "v2 as_is": 25,
+        "v2 swapped": 24,
+        "v2 no_dates": 24
+      },
+      "near_identical (compatible_detail)": {
+        "pairs": 20,
+        "v1 as_is": 20,
+        "v1 swapped": 20,
+        "v1 no_dates": 20,
+        "v2 as_is": 20,
+        "v2 swapped": 20,
+        "v2 no_dates": 20
+      },
+      "paraphrase (contradiction)": {
+        "pairs": 30,
+        "v1 as_is": 25,
+        "v1 swapped": 25,
+        "v1 no_dates": 25,
+        "v2 as_is": 26,
+        "v2 swapped": 26,
+        "v2 no_dates": 27
+      },
+      "rule5_bait (merely_related)": {
+        "pairs": 25,
+        "v1 as_is": 25,
+        "v1 swapped": 23,
+        "v1 no_dates": 25,
+        "v2 as_is": 25,
+        "v2 swapped": 24,
+        "v2 no_dates": 25
+      },
+      "small_difference (contradiction)": {
+        "pairs": 30,
+        "v1 as_is": 30,
+        "v1 swapped": 30,
+        "v1 no_dates": 30,
+        "v2 as_is": 30,
+        "v2 swapped": 30,
+        "v2 no_dates": 30
+      },
+      "update_with_overlap (update)": {
+        "pairs": 25,
+        "v1 as_is": 25,
+        "v1 swapped": 25,
+        "v1 no_dates": 25,
+        "v2 as_is": 25,
+        "v2 swapped": 25,
+        "v2 no_dates": 25
+      },
+      "change_word_contradiction (contradiction)": {
+        "pairs": 25,
+        "v1 as_is": 24,
+        "v1 swapped": 22,
+        "v1 no_dates": 23,
+        "v2 as_is": 24,
+        "v2 swapped": 23,
+        "v2 no_dates": 23
+      },
+      "near_identical (merely_related)": {
+        "pairs": 25,
+        "v1 as_is": 22,
+        "v1 swapped": 21,
+        "v1 no_dates": 22,
+        "v2 as_is": 25,
+        "v2 swapped": 24,
+        "v2 no_dates": 25
+      },
+      "looks_like_clash (compatible_detail)": {
+        "pairs": 30,
+        "v1 as_is": 26,
+        "v1 swapped": 28,
+        "v1 no_dates": 26,
+        "v2 as_is": 26,
+        "v2 swapped": 28,
+        "v2 no_dates": 26
+      },
+      "far_apart_no_change (contradiction)": {
+        "pairs": 25,
+        "v1 as_is": 21,
+        "v1 swapped": 21,
+        "v1 no_dates": 21,
+        "v2 as_is": 23,
+        "v2 swapped": 20,
+        "v2 no_dates": 24
+      }
+    }
+  },
+  "shares": {
+    "m3": {
+      "change_word_contradiction (contradiction)": {
+        "v1": [
+          137,
+          150
+        ],
+        "v2": [
+          136,
+          150
+        ]
+      },
+      "rule5_bait (merely_related)": {
+        "v1": [
+          150,
+          150
+        ],
+        "v2": [
+          150,
+          150
+        ]
+      },
+      "small_difference (contradiction)": {
+        "v1": [
+          169,
+          180
+        ],
+        "v2": [
+          170,
+          180
+        ]
+      },
+      "looks_like_clash (compatible_detail)": {
+        "v1": [
+          163,
+          180
+        ],
+        "v2": [
+          163,
+          180
+        ]
+      },
+      "near_identical (compatible_detail)": {
+        "v1": [
+          119,
+          120
+        ],
+        "v2": [
+          119,
+          120
+        ]
+      },
+      "paraphrase (contradiction)": {
+        "v1": [
+          143,
+          180
+        ],
+        "v2": [
+          170,
+          180
+        ]
+      },
+      "update_with_overlap (update)": {
+        "v1": [
+          148,
+          150
+        ],
+        "v2": [
+          149,
+          150
+        ]
+      },
+      "indirect_update (update)": {
+        "v1": [
+          140,
+          150
+        ],
+        "v2": [
+          149,
+          150
+        ]
+      },
+      "far_apart_no_change (contradiction)": {
+        "v1": [
+          146,
+          150
+        ],
+        "v2": [
+          148,
+          150
+        ]
+      },
+      "explain_away (contradiction)": {
+        "v1": [
+          215,
+          240
+        ],
+        "v2": [
+          238,
+          240
+        ]
+      },
+      "near_identical (merely_related)": {
+        "v1": [
+          142,
+          150
+        ],
+        "v2": [
+          146,
+          150
+        ]
+      }
+    },
+    "m2": {
+      "explain_away (contradiction)": {
+        "v1": [
+          111,
+          120
+        ],
+        "v2": [
+          116,
+          120
+        ]
+      },
+      "indirect_update (update)": {
+        "v1": [
+          72,
+          75
+        ],
+        "v2": [
+          73,
+          75
+        ]
+      },
+      "near_identical (compatible_detail)": {
+        "v1": [
+          60,
+          60
+        ],
+        "v2": [
+          60,
+          60
+        ]
+      },
+      "paraphrase (contradiction)": {
+        "v1": [
+          75,
+          90
+        ],
+        "v2": [
+          79,
+          90
+        ]
+      },
+      "rule5_bait (merely_related)": {
+        "v1": [
+          73,
+          75
+        ],
+        "v2": [
+          74,
+          75
+        ]
+      },
+      "small_difference (contradiction)": {
+        "v1": [
+          90,
+          90
+        ],
+        "v2": [
+          90,
+          90
+        ]
+      },
+      "update_with_overlap (update)": {
+        "v1": [
+          75,
+          75
+        ],
+        "v2": [
+          75,
+          75
+        ]
+      },
+      "change_word_contradiction (contradiction)": {
+        "v1": [
+          69,
+          75
+        ],
+        "v2": [
+          70,
+          75
+        ]
+      },
+      "near_identical (merely_related)": {
+        "v1": [
+          65,
+          75
+        ],
+        "v2": [
+          74,
+          75
+        ]
+      },
+      "looks_like_clash (compatible_detail)": {
+        "v1": [
+          80,
+          90
+        ],
+        "v2": [
+          80,
+          90
+        ]
+      },
+      "far_apart_no_change (contradiction)": {
+        "v1": [
+          63,
+          75
+        ],
+        "v2": [
+          67,
+          75
+        ]
+      }
+    }
+  }
+}
